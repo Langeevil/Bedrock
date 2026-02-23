@@ -2,42 +2,38 @@ import { useEffect, useState } from "react";
 import ProfileModal from "../components/ProfileModal";
 import { getMe } from "../services/userService";
 import { SidebarSimple } from "../components/sidebar-simple";
+import { getDashboardStats } from "../services/dashboardService";
 
 export default function DashBoardScreen() {
   const [showModal, setShowModal] = useState(false);
-
   const [stats, setStats] = useState({
     totalStudents: 0,
     activeCourses: 0,
     graduationRate: 0,
   });
+  const [error, setError] = useState<string | null>(null);
 
-  // 🔎 Verifica perfil
-useEffect(() => {
-  async function loadUser() {
-    try {
-      const user = await getMe();
-      if (!user.role) setShowModal(true);
-    } catch {
-      // para teste, mostra modal se houver erro
-      setShowModal(true);
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await getMe();
+        if (!user.role) setShowModal(true);
+      } catch {
+        setShowModal(true);
+      }
     }
-  }
 
-  loadUser();
-}, []);
+    loadUser();
+  }, []);
 
-  // 📊 Buscar estatísticas (sem token)
   useEffect(() => {
     async function loadStats() {
       try {
-        const res = await fetch("http://localhost:4000/api/dashboard/stats");
-        if (!res.ok) throw new Error("Erro ao buscar stats");
-
-        const data = await res.json();
+        const data = await getDashboardStats();
         setStats(data);
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "Nao foi possivel carregar estatisticas.");
       }
     }
 
@@ -48,32 +44,34 @@ useEffect(() => {
     <div className="flex h-screen">
       <SidebarSimple />
 
-      {/* MODAL */}
       {showModal && <ProfileModal onClose={() => setShowModal(false)} />}
 
-      <div className="flex-grow p-8 overflow-y-auto bg-base-100">
-        <h1 className="text-3xl font-semibold text-base-content mb-8">
-          Dashboard Overview
-        </h1>
+      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
+        <h1 className="text-3xl font-semibold text-slate-800 mb-8">Dashboard Overview</h1>
 
-        {/* Stats Section */}
-        <div className="stats stats-vertical lg:stats-horizontal shadow mb-8">
+        {error && (
+          <div className="alert alert-warning mb-6 bg-amber-100 border-amber-300 text-amber-900">
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="stats stats-vertical lg:stats-horizontal shadow mb-8 bg-white">
           <div className="stat">
-            <div className="stat-title">Total Students</div>
+            <div className="stat-title text-slate-500">Total Students</div>
             <div className="stat-value text-primary">{stats.totalStudents}</div>
-            <div className="stat-desc">↗︎ 20% increase this month</div>
+            <div className="stat-desc text-slate-500">Dados atuais de alunos com perfil.</div>
           </div>
 
           <div className="stat">
-            <div className="stat-title">Active Courses</div>
+            <div className="stat-title text-slate-500">Active Courses</div>
             <div className="stat-value text-secondary">{stats.activeCourses}</div>
-            <div className="stat-desc">↗︎ 5 new courses added</div>
+            <div className="stat-desc text-slate-500">Disciplinas cadastradas por voce.</div>
           </div>
 
           <div className="stat">
-            <div className="stat-title">Graduation Rate</div>
+            <div className="stat-title text-slate-500">Profile Completion</div>
             <div className="stat-value text-accent">{stats.graduationRate}%</div>
-            <div className="stat-desc">↗︎ 2% from last year</div>
+            <div className="stat-desc text-slate-500">Usuarios com perfil completo.</div>
           </div>
         </div>
       </div>

@@ -3,6 +3,36 @@
 @tailwind utilities;
 @plugin "daisyui";
 
-body{
+html,
+body {
+  color-scheme: light;
   background-color: #18396F;
+  color: #0f172a;
+}
+
+.input,
+.select,
+.textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #64748b !important;
+}
+
+.btn:not(.btn-outline):not(.btn-ghost):not(.btn-link) {
+  color: #ffffff !important;
+}
+
+.btn-outline {
+  color: #1e293b !important;
+  border-color: #94a3b8 !important;
+}
+
+.card,
+.modal-box {
+  color: #0f172a;
 }

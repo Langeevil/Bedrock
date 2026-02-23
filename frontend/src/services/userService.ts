@@ -1,4 +1,5 @@
 // src/services/userService.ts
+import { getAuthHeaders, parseJsonOrThrow } from "./http";
 
 export interface User {
   id: number;
@@ -9,40 +10,24 @@ export interface User {
 
 const API_URL = "http://localhost:4000/api/auth";
 
-// 🔹 Buscar usuário logado (sem token)
 export async function getMe(): Promise<User> {
-  try {
-    const res = await fetch(`${API_URL}/me`);
-    if (!res.ok) throw new Error("Erro ao buscar usuário");
+  const res = await fetch(`${API_URL}/eu`, {
+    headers: getAuthHeaders(false),
+  });
 
-    const data = await res.json();
-    return data as User;
-  } catch (err) {
-    console.error("Erro ao buscar usuário:", err);
-    // Para teste, retorna um usuário fictício
-    return {
-      id: 1,
-      nome: "Usuário Teste",
-      email: "teste@teste.com",
-    };
-  }
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao buscar usuario");
+
+  return data as User;
 }
 
-// 🔹 Completar perfil (sem token)
 export async function completeProfile(role: string): Promise<void> {
-  try {
-    const res = await fetch(`${API_URL}/complete-profile`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ role }),
-    });
+  const res = await fetch(`${API_URL}/atualizar-perfil`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ role }),
+  });
 
-    if (!res.ok) {
-      throw new Error("Erro ao atualizar perfil");
-    }
-  } catch (err) {
-    console.error("Erro ao completar perfil:", err);
-  }
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao atualizar perfil");
 }

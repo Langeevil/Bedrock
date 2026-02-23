@@ -30,8 +30,8 @@ export default function ProfileModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-4">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border border-blue-100">
+        <h2 className="text-2xl font-semibold text-slate-900 text-center mb-4">
           Complete seu perfil
         </h2>
 
@@ -41,7 +41,9 @@ export default function ProfileModal({ onClose }: Props) {
               key={item}
               onClick={() => setRole(item)}
               className={`btn w-full ${
-                role === item ? "btn-primary" : "btn-outline"
+                role === item
+                  ? "btn-primary text-white"
+                  : "btn-outline border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
               {item.charAt(0).toUpperCase() + item.slice(1)}

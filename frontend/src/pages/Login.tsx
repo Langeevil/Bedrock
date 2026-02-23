@@ -30,6 +30,7 @@ export default function LoginScreen() {
       // Aqui você pode salvar o usuário no localStorage ou context, se quiser
       localStorage.setItem("user_email", data.user.email);
       localStorage.setItem("user_nome", data.user.nome);
+      if (data.token) localStorage.setItem("auth_token", data.token);
 
       navigate("/dashboard"); // redireciona para a página principal
     } catch (err: any) {

@@ -1,133 +1,145 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { SidebarSimple } from "../components/sidebar-simple";
-
-interface Discipline {
-  id: number;
-  name: string;
-  code: string;
-  professor: string;
-}
+import {
+  createDiscipline,
+  listDisciplines,
+  removeDiscipline,
+  updateDiscipline,
+  type Discipline,
+} from "../services/disciplinesService";
 
 export default function DisciplinesScreen() {
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDiscipline, setEditingDiscipline] = useState<Discipline | null>(null);
-  const [formData, setFormData] = useState({ name: '', code: '', professor: '' });
+  const [formData, setFormData] = useState({ name: "", code: "", professor: "" });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulação de chamada para o backend Express para disciplinas
-    fetch('/api/disciplines')
-      .then(response => response.json())
-      .then(data => setDisciplines(data))
-      .catch(error => console.error('Erro ao buscar disciplinas:', error));
+    async function loadDisciplines() {
+      try {
+        setLoading(true);
+        const data = await listDisciplines();
+        setDisciplines(data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "Erro ao buscar disciplinas.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDisciplines();
   }, []);
 
-  const filteredDisciplines = disciplines.filter(discipline =>
-    discipline.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    discipline.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    discipline.professor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDisciplines = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return disciplines.filter(
+      (discipline) =>
+        discipline.name.toLowerCase().includes(term) ||
+        discipline.code.toLowerCase().includes(term) ||
+        discipline.professor.toLowerCase().includes(term)
+    );
+  }, [disciplines, searchTerm]);
 
   const handleAddDiscipline = () => {
     setEditingDiscipline(null);
-    setFormData({ name: '', code: '', professor: '' });
+    setFormData({ name: "", code: "", professor: "" });
     setIsModalOpen(true);
   };
 
   const handleEditDiscipline = (discipline: Discipline) => {
     setEditingDiscipline(discipline);
-    setFormData({ name: discipline.name, code: discipline.code, professor: discipline.professor });
+    setFormData({
+      name: discipline.name,
+      code: discipline.code,
+      professor: discipline.professor,
+    });
     setIsModalOpen(true);
   };
 
   const handleDeleteDiscipline = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir esta disciplina?')) {
-      try {
-        await fetch(`/api/disciplines/${id}`, { method: 'DELETE' });
-        setDisciplines(disciplines.filter(d => d.id !== id));
-      } catch (error) {
-        console.error('Erro ao excluir disciplina:', error);
-      }
+    if (!confirm("Tem certeza que deseja excluir esta disciplina?")) return;
+
+    try {
+      await removeDiscipline(id);
+      setDisciplines((prev) => prev.filter((d) => d.id !== id));
+    } catch (err: any) {
+      alert(err.message || "Erro ao excluir disciplina.");
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     try {
-      const method = editingDiscipline ? 'PUT' : 'POST';
-      const url = editingDiscipline ? `/api/disciplines/${editingDiscipline.id}` : '/api/disciplines';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const newDiscipline = await response.json();
+      const payload = {
+        name: formData.name.trim(),
+        code: formData.code.trim(),
+        professor: formData.professor.trim(),
+      };
+
       if (editingDiscipline) {
-        setDisciplines(disciplines.map(d => d.id === editingDiscipline.id ? newDiscipline : d));
+        const updated = await updateDiscipline(editingDiscipline.id, payload);
+        setDisciplines((prev) => prev.map((d) => (d.id === editingDiscipline.id ? updated : d)));
       } else {
-        setDisciplines([...disciplines, newDiscipline]);
+        const created = await createDiscipline(payload);
+        setDisciplines((prev) => [created, ...prev]);
       }
+
       setIsModalOpen(false);
-    } catch (error) {
-      console.error('Erro ao salvar disciplina:', error);
+      setEditingDiscipline(null);
+      setFormData({ name: "", code: "", professor: "" });
+    } catch (err: any) {
+      alert(err.message || "Erro ao salvar disciplina.");
     }
   };
 
   return (
     <div className="flex h-screen">
-      
-      <SidebarSimple>
-      </SidebarSimple>
+      <SidebarSimple />
 
-      <div className="flex-grow p-8 overflow-y-auto bg-base-100">
+      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-base-content">Disciplinas</h1>
+          <h1 className="text-4xl font-bold text-slate-800">Disciplinas</h1>
           <button className="btn btn-primary btn-lg" onClick={handleAddDiscipline}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
-            </svg>
             Adicionar Disciplina
           </button>
         </div>
-        
-        {/* Search Bar */}
+
         <div className="mb-8">
           <input
             type="text"
             placeholder="Buscar disciplinas..."
-            className="input input-bordered input-lg w-full max-w-md"
+            className="input input-bordered input-lg w-full max-w-md bg-white text-slate-800"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        {/* Disciplines Grid */}
+
+        {error && <div className="alert alert-error mb-6"><span>{error}</span></div>}
+        {loading && <div className="loading loading-spinner loading-lg text-primary" />}
+
+        {!loading && filteredDisciplines.length === 0 && (
+          <div className="card bg-white shadow p-6 text-slate-700">
+            Nenhuma disciplina cadastrada ainda.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredDisciplines.map(discipline => (
-            <div key={discipline.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <figure className="px-6 pt-6">
-                <img
-                  src={`https://picsum.photos/200/150?random=${discipline.id}`}
-                  alt={`Imagem da disciplina ${discipline.name}`}
-                  className="rounded-xl mask mask-squircle"
-                />
-              </figure>
+          {filteredDisciplines.map((discipline) => (
+            <div key={discipline.id} className="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
               <div className="card-body">
-                <h2 className="card-title text-base-content">{discipline.name}</h2>
-                <p className="text-base-content opacity-70">Código: {discipline.code}</p>
-                <p className="text-base-content opacity-70">Professor: {discipline.professor}</p>
+                <h2 className="card-title text-slate-900">{discipline.name}</h2>
+                <p className="text-slate-600">Codigo: {discipline.code}</p>
+                <p className="text-slate-600">Professor: {discipline.professor}</p>
                 <div className="card-actions justify-end mt-4">
                   <button className="btn btn-outline btn-sm" onClick={() => handleEditDiscipline(discipline)}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
                     Editar
                   </button>
                   <button className="btn btn-outline btn-error btn-sm" onClick={() => handleDeleteDiscipline(discipline.id)}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
                     Excluir
                   </button>
                 </div>
@@ -136,64 +148,74 @@ export default function DisciplinesScreen() {
           ))}
         </div>
 
-        {/* Modal for Add/Edit Discipline */}
-        <input type="checkbox" id="discipline-modal" className="modal-toggle" checked={isModalOpen} onChange={() => setIsModalOpen(!isModalOpen)} />
-        <div className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">{editingDiscipline ? 'Editar Disciplina' : 'Adicionar Nova Disciplina'}</h3>
-            <form onSubmit={handleSubmit} className="py-4">
-              <div className="form-control mb-4">
-                <label htmlFor="discipline-name" className="label">
-                  <span className="label-text">Nome</span>
-                </label>
-                <input
-                  id="discipline-name"
-                  type="text"
-                  placeholder="Nome da Disciplina"
-                  className="input input-bordered"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-control mb-4">
-                <label htmlFor="discipline-code" className="label">
-                  <span className="label-text">Código</span>
-                </label>
-                <input
-                  id="discipline-code"
-                  type="text"
-                  placeholder="Código da Disciplina"
-                  className="input input-bordered"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-control mb-4">
-                <label htmlFor="discipline-professor" className="label">
-                  <span className="label-text">Professor</span>
-                </label>
-                <input
-                  id="discipline-professor"
-                  type="text"
-                  placeholder="Nome do Professor"
-                  className="input input-bordered"
-                  value={formData.professor}
-                  onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="modal-action">
-                <label htmlFor="discipline-modal" className="btn">Cancelar</label>
-                <button type="submit" className="btn btn-primary">{editingDiscipline ? 'Atualizar' : 'Adicionar'}</button>
-              </div>
-            </form>
-          </div>
-          <label className="modal-backdrop" htmlFor="discipline-modal">a</label>
-        </div>
-      </div>
+        {isModalOpen && (
+          <div className="modal modal-open">
+            <div className="modal-box bg-white text-slate-800">
+              <h3 className="font-bold text-lg">
+                {editingDiscipline ? "Editar Disciplina" : "Adicionar Nova Disciplina"}
+              </h3>
 
+              <form onSubmit={handleSubmit} className="py-4">
+                <div className="form-control mb-4">
+                  <label htmlFor="discipline-name" className="label">
+                    <span className="label-text text-slate-700">Nome</span>
+                  </label>
+                  <input
+                    id="discipline-name"
+                    type="text"
+                    placeholder="Nome da Disciplina"
+                    className="input input-bordered bg-white"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-control mb-4">
+                  <label htmlFor="discipline-code" className="label">
+                    <span className="label-text text-slate-700">Codigo</span>
+                  </label>
+                  <input
+                    id="discipline-code"
+                    type="text"
+                    placeholder="Codigo da Disciplina"
+                    className="input input-bordered bg-white"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-control mb-4">
+                  <label htmlFor="discipline-professor" className="label">
+                    <span className="label-text text-slate-700">Professor</span>
+                  </label>
+                  <input
+                    id="discipline-professor"
+                    type="text"
+                    placeholder="Nome do Professor"
+                    className="input input-bordered bg-white"
+                    value={formData.professor}
+                    onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="modal-action">
+                  <button type="button" className="btn" onClick={() => setIsModalOpen(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editingDiscipline ? "Atualizar" : "Adicionar"}
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div className="modal-backdrop" onClick={() => setIsModalOpen(false)} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
