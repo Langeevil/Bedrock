@@ -29,8 +29,23 @@ export async function ensureAppSchema() {
       )
     `);
 
+    // if the table already existed but lacked user_id (older schema), add it
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_disciplines_user_id ON disciplines(user_id)
+      ALTER TABLE disciplines
+      ADD COLUMN IF NOT EXISTS user_id INTEGER
+    `);
+
+    // create index only if the column exists to avoid errors on legacy DBs
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name='disciplines' AND column_name='user_id'
+        ) THEN
+          CREATE INDEX IF NOT EXISTS idx_disciplines_user_id ON disciplines(user_id);
+        END IF;
+      END $$;
     `);
   } catch (err) {
     console.error("Erro ao garantir schema:", err);

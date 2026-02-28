@@ -1,40 +1,30 @@
 // src/services/api.ts
 const API_URL = "http://localhost:4000/api/auth";
-
-interface User {
-  id: number;
-  nome: string;
-  email: string;
-}
+// backend routes use Portuguese verbs: /cadastrar and /entrar
 
 interface RegisterResponse {
   message: string;
-  user?: User;
+  usuario?: {
+    id: number;
+    nome: string;
+    email: string;
+  };
 }
 
+// ✅ Corrigido para bater com o que o backend retorna
 export interface LoginResponse {
   message: string;
-  token?: string;
-  user: User;
+  token: string;
+  usuario: {
+    id: number;
+    nome: string;
+    email: string;
+    role: string;
+  };
 }
 
 interface ApiError {
   error: string;
-}
-
-async function parseApiResponse(res: Response): Promise<any> {
-  const contentType = res.headers.get("content-type") || "";
-
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  const text = await res.text();
-  throw new Error(
-    text?.trim()
-      ? `Resposta invalida do servidor: ${text.slice(0, 120)}`
-      : "Resposta invalida do servidor (nao-JSON)."
-  );
 }
 
 export async function registerUser(
@@ -48,16 +38,13 @@ export async function registerUser(
     body: JSON.stringify({ nome, email, senha }),
   });
 
-  const data = await parseApiResponse(res);
+  const data: RegisterResponse | ApiError = await res.json();
 
   if (!res.ok) {
     throw new Error((data as ApiError).error || "Erro ao cadastrar");
   }
 
-  return {
-    message: data.message,
-    user: data.usuario,
-  };
+  return data as RegisterResponse;
 }
 
 export async function loginUser(email: string, senha: string): Promise<LoginResponse> {
@@ -67,15 +54,9 @@ export async function loginUser(email: string, senha: string): Promise<LoginResp
     body: JSON.stringify({ email, senha }),
   });
 
-  const data = await parseApiResponse(res);
+  const data: LoginResponse | ApiError = await res.json();
 
-  if (!res.ok) {
-    throw new Error((data as ApiError).error || "Erro ao entrar");
-  }
+  if (!res.ok) throw new Error((data as ApiError).error || "Erro ao entrar");
 
-  return {
-    message: data.message,
-    token: data.token,
-    user: data.usuario,
-  };
+  return data as LoginResponse;
 }

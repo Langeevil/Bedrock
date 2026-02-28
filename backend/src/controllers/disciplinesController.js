@@ -1,97 +1,132 @@
+// controllers/disciplinesController.js
 import pool from "../db.js";
 
-function parseDisciplinePayload(body) {
-  const name = String(body?.name || "").trim();
-  const code = String(body?.code || "").trim();
-  const professor = String(body?.professor || "").trim();
-  return { name, code, professor };
-}
-
-export async function listDisciplines(req, res) {
+// =====================
+// LISTAR DISCIPLINAS COM PAGINAÇÃO (GET)
+// =====================
+export async function listarDisciplinas(req, res) {
   try {
-    const result = await pool.query(
-      "SELECT id, name, code, professor, created_at FROM disciplines WHERE user_id = $1 ORDER BY created_at DESC",
-      [req.userId]
-    );
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 12);
+    const offset = (page - 1) * limit;
 
-    return res.json(result.rows);
+    const [resultado, total] = await Promise.all([
+      pool.query(
+        "SELECT * FROM disciplines ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+        [limit, offset]
+      ),
+      pool.query("SELECT COUNT(*) FROM disciplines"),
+    ]);
+
+    const totalItems = parseInt(total.rows[0].count);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.json({
+      data: resultado.rows,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
   } catch (err) {
     console.error("Erro ao listar disciplinas:", err);
-    return res.status(500).json({ error: "Erro ao listar disciplinas." });
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 }
 
-export async function createDiscipline(req, res) {
+// =====================
+// BUSCAR UMA DISCIPLINA (GET /:id)
+// =====================
+export async function buscarDisciplina(req, res) {
   try {
-    const { name, code, professor } = parseDisciplinePayload(req.body);
+    const { id } = req.params;
+    const resultado = await pool.query("SELECT * FROM disciplines WHERE id = $1", [id]);
 
-    if (!name || !code || !professor) {
-      return res.status(400).json({ error: "Preencha nome, codigo e professor." });
-    }
+    if (resultado.rows.length === 0)
+      return res.status(404).json({ error: "Disciplina não encontrada." });
 
-    const result = await pool.query(
-      "INSERT INTO disciplines (user_id, name, code, professor) VALUES ($1, $2, $3, $4) RETURNING id, name, code, professor, created_at",
-      [req.userId, name, code, professor]
+    res.json(resultado.rows[0]);
+  } catch (err) {
+    console.error("Erro ao buscar disciplina:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
+}
+
+// =====================
+// CRIAR DISCIPLINA (POST)
+// =====================
+export async function criarDisciplina(req, res) {
+  try {
+    const { name, code, professor } = req.body;
+
+    if (!name || !code || !professor)
+      return res.status(400).json({ error: "Preencha todos os campos." });
+
+    const existente = await pool.query("SELECT * FROM disciplines WHERE code = $1", [code]);
+
+    if (existente.rows.length > 0)
+      return res.status(409).json({ error: "Já existe uma disciplina com esse código." });
+
+    const resultado = await pool.query(
+      "INSERT INTO disciplines (name, code, professor) VALUES ($1, $2, $3) RETURNING *",
+      [name, code, professor]
     );
 
-    return res.status(201).json(result.rows[0]);
+    res.status(201).json(resultado.rows[0]);
   } catch (err) {
     console.error("Erro ao criar disciplina:", err);
-    return res.status(500).json({ error: "Erro ao criar disciplina." });
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 }
 
-export async function updateDiscipline(req, res) {
+// =====================
+// ATUALIZAR DISCIPLINA (PUT /:id)
+// =====================
+export async function atualizarDisciplina(req, res) {
   try {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ error: "ID invalido." });
-    }
+    const { id } = req.params;
+    const { name, code, professor } = req.body;
 
-    const { name, code, professor } = parseDisciplinePayload(req.body);
+    if (!name || !code || !professor)
+      return res.status(400).json({ error: "Preencha todos os campos." });
 
-    if (!name || !code || !professor) {
-      return res.status(400).json({ error: "Preencha nome, codigo e professor." });
-    }
-
-    const result = await pool.query(
-      `UPDATE disciplines
-       SET name = $1, code = $2, professor = $3
-       WHERE id = $4 AND user_id = $5
-       RETURNING id, name, code, professor, created_at`,
-      [name, code, professor, id, req.userId]
+    const resultado = await pool.query(
+      "UPDATE disciplines SET name = $1, code = $2, professor = $3 WHERE id = $4 RETURNING *",
+      [name, code, professor, id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Disciplina nao encontrada." });
-    }
+    if (resultado.rows.length === 0)
+      return res.status(404).json({ error: "Disciplina não encontrada." });
 
-    return res.json(result.rows[0]);
+    res.json(resultado.rows[0]);
   } catch (err) {
     console.error("Erro ao atualizar disciplina:", err);
-    return res.status(500).json({ error: "Erro ao atualizar disciplina." });
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 }
 
-export async function deleteDiscipline(req, res) {
+// =====================
+// DELETAR DISCIPLINA (DELETE /:id)
+// =====================
+export async function deletarDisciplina(req, res) {
   try {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ error: "ID invalido." });
-    }
+    const { id } = req.params;
 
-    const result = await pool.query(
-      "DELETE FROM disciplines WHERE id = $1 AND user_id = $2 RETURNING id",
-      [id, req.userId]
+    const resultado = await pool.query(
+      "DELETE FROM disciplines WHERE id = $1 RETURNING id",
+      [id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Disciplina nao encontrada." });
-    }
+    if (resultado.rows.length === 0)
+      return res.status(404).json({ error: "Disciplina não encontrada." });
 
-    return res.json({ message: "Disciplina removida com sucesso." });
+    res.json({ message: "Disciplina deletada com sucesso!" });
   } catch (err) {
-    console.error("Erro ao remover disciplina:", err);
-    return res.status(500).json({ error: "Erro ao remover disciplina." });
+    console.error("Erro ao deletar disciplina:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 }

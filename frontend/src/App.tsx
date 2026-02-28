@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Hero from "./components/Hero";
 import Navbar from "./components/Navbar";
@@ -20,12 +21,13 @@ import ChatScreen from "./pages/ChatScreen";
 import BibliotecaScreen from "./pages/BibliotecaScreen";
 import EstatisticaScreen from "./pages/EstatisticaScreen";
 import SettingsScreen from "./pages/SettingsScreen";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Página inicial */}
+        {/* Página inicial pública */}
         <Route
           path="/"
           element={
@@ -43,20 +45,20 @@ function App() {
           }
         />
 
-        {/* Página de login */}
+        {/* Páginas públicas */}
         <Route path="/login" element={<Login />} />
-
-        {/* Etapas de cadastro */}
         <Route path="/CadastrarNomeScreen" element={<CadastrarNomeScreen />} />
         <Route path="/CadastrarEmailScreen" element={<CadastrarEmailScreen />} />
         <Route path="/CadastrarSenhaScreen" element={<CadastrarSenhaScreen />} />
-        <Route path="/dashboard" element={<DashBoardScreen />} />
-        <Route path="/projetos" element={<ProjetosScreen />} />
-        <Route path="/disciplinas" element={<DisciplinasScreen />} />
-        <Route path="/chat" element={<ChatScreen />} />
-        <Route path="/biblioteca" element={<BibliotecaScreen />} />
-        <Route path="/estatistica" element={<EstatisticaScreen />} />
-        <Route path="/settings" element={<SettingsScreen />} />
+
+        {/* Páginas privadas — exigem login */}
+        <Route path="/dashboard"    element={<PrivateRoute><DashBoardScreen /></PrivateRoute>} />
+        <Route path="/projetos"     element={<PrivateRoute><ProjetosScreen /></PrivateRoute>} />
+        <Route path="/disciplinas"  element={<PrivateRoute><DisciplinasScreen /></PrivateRoute>} />
+        <Route path="/chat"         element={<PrivateRoute><ChatScreen /></PrivateRoute>} />
+        <Route path="/biblioteca"   element={<PrivateRoute><BibliotecaScreen /></PrivateRoute>} />
+        <Route path="/estatistica"  element={<PrivateRoute><EstatisticaScreen /></PrivateRoute>} />
+        <Route path="/settings"     element={<PrivateRoute><SettingsScreen /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

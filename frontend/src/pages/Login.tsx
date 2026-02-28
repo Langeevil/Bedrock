@@ -1,11 +1,9 @@
-// src/screens/LoginScreen.tsx
+// src/pages/Login.tsx
 import React, { useState, useEffect } from "react";
 import fundo from "../assets/degrade-fundo-azul.jpg";
-import { loginUser, } from "../services/api";
+import { loginUser } from "../services/api";
 import type { LoginResponse } from "../services/api";
-
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -16,6 +14,10 @@ export default function LoginScreen() {
 
   useEffect(() => {
     document.title = "Entrar - Bedrock";
+
+    // Se já estiver logado, redireciona direto
+    const token = localStorage.getItem("auth_token");
+    if (token) navigate("/dashboard", { replace: true });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,14 +27,14 @@ export default function LoginScreen() {
 
     try {
       const data: LoginResponse = await loginUser(email, senha);
-      alert(`Bem-vindo, ${data.user.nome}!`);
-      
-      // Aqui você pode salvar o usuário no localStorage ou context, se quiser
-      localStorage.setItem("user_email", data.user.email);
-      localStorage.setItem("user_nome", data.user.nome);
-      if (data.token) localStorage.setItem("auth_token", data.token);
 
-      navigate("/dashboard"); // redireciona para a página principal
+      // Salva token e dados do usuário
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("user_nome", data.usuario.nome);
+      localStorage.setItem("user_email", data.usuario.email);
+      localStorage.setItem("user_role", data.usuario.role);
+
+      navigate("/dashboard", { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -79,14 +81,26 @@ export default function LoginScreen() {
                 />
               </label>
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2 rounded-lg">
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                </div>
+              )}
 
               <button
                 type="submit"
                 className="btn btn-primary btn-block btn-sm bg-[#1877F2] text-white font-bold"
                 disabled={loading}
               >
-                {loading ? "Entrando..." : "Entrar"}
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="loading loading-spinner loading-xs" />
+                    Entrando...
+                  </span>
+                ) : (
+                  "Entrar"
+                )}
               </button>
             </form>
 

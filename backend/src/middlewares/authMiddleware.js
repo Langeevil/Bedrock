@@ -1,13 +1,14 @@
-// middlewares/authMiddleware.js
+// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "segredo_super_forte";
 
-export default function authMiddleware(req, res, next) {
+export function autenticar(req, res, next) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader)
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Token não fornecido." });
+  }
 
   const token = authHeader.split(" ")[1];
 
@@ -16,7 +17,9 @@ export default function authMiddleware(req, res, next) {
     req.userId = decoded.id;
     next();
   } catch (err) {
-    console.error("Erro ao verificar token:", err.message);
-    return res.status(401).json({ error: "Token inválido." });
+    return res.status(401).json({ error: "Token inválido ou expirado." });
   }
 }
+
+// default export for convenience
+export default autenticar;
