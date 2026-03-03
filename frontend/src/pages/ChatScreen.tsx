@@ -434,8 +434,8 @@ export default function ChatScreen() {
           )}
         </div>
 
-        <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_320px] 2xl:grid-cols-[340px_minmax(0,1fr)_340px]">
-          <section className="order-3 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm xl:order-none">
+        <div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 xl:grid-cols-[340px_minmax(0,1fr)] xl:grid-rows-[auto_minmax(0,1fr)]">
+          <section className="order-1 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-start-1 xl:row-start-1">
             <div className="order-1 border-b border-slate-200 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Acoes Rapidas</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -592,7 +592,7 @@ export default function ChatScreen() {
             </div>
           </section>
 
-          <section className="order-1 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm xl:order-none">
+          <section className="order-2 flex min-h-0 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-start-1 xl:row-start-2">
             <div className="border-b border-slate-200 px-4 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -655,8 +655,8 @@ export default function ChatScreen() {
             </div>
           </section>
 
-          <section className="order-2 rounded-2xl border border-slate-200 bg-white shadow-sm xl:order-none">
-            <div className="grid h-full grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_290px]">
+          <section className="order-3 min-h-0 rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-start-2 xl:row-span-2">
+            <div className="grid h-full grid-cols-1">
               <div className="flex min-w-0 flex-col">
                 <div className="border-b border-slate-200 px-5 py-4">
                   <div className="flex items-center justify-between gap-4">
@@ -693,6 +693,71 @@ export default function ChatScreen() {
 
                   {activeConversation && (
                     <>
+                      <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                              Membros
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {activeConversation.members.length} participante
+                              {activeConversation.members.length === 1 ? "" : "s"}
+                            </p>
+                          </div>
+                          {activeConversation.permissions.can_manage_members &&
+                            activeConversation.type !== "direct" && (
+                              <div className="w-full max-w-xs">
+                                <input
+                                  value={manageSearch}
+                                  onChange={(event) => setManageSearch(event.target.value)}
+                                  placeholder="Adicionar membros"
+                                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                                />
+                              </div>
+                            )}
+                        </div>
+
+                        {manageResults.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {manageResults.map((user) => (
+                              <button
+                                key={user.id}
+                                type="button"
+                                onClick={() => addMember(user)}
+                                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm hover:border-blue-300"
+                              >
+                                <span className="truncate text-slate-700">{user.nome}</span>
+                                <span className="text-[11px] text-slate-400">Adicionar</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                          {activeConversation.members.map((member) => (
+                            <div
+                              key={member.id}
+                              className="min-w-[180px] rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold text-slate-800">
+                                    {member.nome}
+                                  </p>
+                                  <p className="truncate text-xs text-slate-500">{member.email}</p>
+                                </div>
+                                <span className="text-[11px] uppercase text-slate-400">
+                                  {member.member_role}
+                                </span>
+                              </div>
+                              <p className="mt-2 text-[11px] text-slate-400">
+                                {member.presence_status || "offline"}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       {hasMore && (
                         <div className="mb-4 flex justify-center">
                           <button
@@ -762,7 +827,7 @@ export default function ChatScreen() {
                 </form>
               </div>
 
-              <aside className="hidden border-t border-slate-200 bg-white 2xl:flex 2xl:flex-col 2xl:border-l 2xl:border-t-0">
+              <aside className="hidden">
                 <div className="border-b border-slate-200 px-4 py-4">
                   <h3 className="font-semibold text-slate-900">Membros</h3>
                   <p className="text-xs text-slate-500">
