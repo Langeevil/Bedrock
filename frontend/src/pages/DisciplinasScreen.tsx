@@ -430,7 +430,7 @@ export default function DisciplinesScreen() {
       </main>
 
       {/* Modal — ocupa tela inteira no mobile */}
-      <Dialog.Root open={isModalOpen} onOpenChange={(open) => { if (!open) setIsModalOpen(false); }}>
+      <Dialog.Root open={isModalOpen} onOpenChange={(open: boolean) => { if (!open) setIsModalOpen(false); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
           <Dialog.Content

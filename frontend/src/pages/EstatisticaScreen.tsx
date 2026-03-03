@@ -16,7 +16,7 @@ export default function EstatisticaScreen() {
         setStudents(stats.totalStudents);
         setCourses(stats.activeCourses);
         setCompletion(stats.graduationRate);
-        setDisciplinesCount(disciplines.length);
+        setDisciplinesCount(disciplines.data.length);
       } catch {
         setStudents(0);
         setCourses(0);
