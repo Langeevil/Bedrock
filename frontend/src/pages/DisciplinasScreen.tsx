@@ -44,10 +44,10 @@ const COLORS = [
 function getColor(id: number) { return COLORS[id % COLORS.length]; }
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
-function ProfessorAvatar({ name }: Readonly<{ name: string }>) {
+function ProfessorAvatar({ name, colorBg }: Readonly<{ name: string; colorBg: string }>) {
   const initials = name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
   return (
-    <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-200 text-slate-600 text-lg font-bold shrink-0">
+    <span className={`inline-flex items-center justify-center w-28 h-28 rounded-full bg-gradient-to-r ${colorBg} text-white text-3xl font-bold shrink-0`}>
       {initials}
     </span>
   );
@@ -157,9 +157,8 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col min-h-[320px]"
+      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col min-h-[280px]"
     >
-      <div className={`h-2 w-full bg-gradient-to-r ${color.bg}`} />
       <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className={`p-2 rounded-xl ${color.light}`}>
@@ -170,7 +169,7 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
           </span>
         </div>
         <div className="flex items-center justify-center gap-4 flex-1">
-          <ProfessorAvatar name={discipline.professor} />
+          <ProfessorAvatar name={discipline.professor} colorBg={color.bg} />
           <div className="flex flex-col justify-center">
             <h3 className="font-bold text-slate-800 text-2xl leading-tight">{discipline.name}</h3>
             <span className="text-sm text-slate-500 mt-1">{discipline.professor}</span>
