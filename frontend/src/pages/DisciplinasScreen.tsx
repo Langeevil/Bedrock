@@ -47,7 +47,7 @@ function getColor(id: number) { return COLORS[id % COLORS.length]; }
 function ProfessorAvatar({ name }: Readonly<{ name: string }>) {
   const initials = name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
   return (
-    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-200 text-slate-600 text-xs font-bold shrink-0">
+    <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-200 text-slate-600 text-lg font-bold shrink-0">
       {initials}
     </span>
   );
@@ -157,10 +157,10 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col min-h-[320px]"
     >
       <div className={`h-2 w-full bg-gradient-to-r ${color.bg}`} />
-      <div className="p-4 sm:p-5 flex flex-col gap-3 flex-1">
+      <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className={`p-2 rounded-xl ${color.light}`}>
             <BookOpen className={`w-5 h-5 ${color.text}`} />
@@ -169,12 +169,14 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
             {discipline.code}
           </span>
         </div>
-        <h3 className="font-semibold text-slate-800 text-base leading-snug line-clamp-2">{discipline.name}</h3>
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-2 min-w-0">
-            <ProfessorAvatar name={discipline.professor} />
-            <span className="text-sm text-slate-500 truncate">{discipline.professor}</span>
+        <div className="flex items-center justify-center gap-4 flex-1">
+          <ProfessorAvatar name={discipline.professor} />
+          <div className="flex flex-col justify-center">
+            <h3 className="font-bold text-slate-800 text-2xl leading-tight">{discipline.name}</h3>
+            <span className="text-sm text-slate-500 mt-1">{discipline.professor}</span>
           </div>
+        </div>
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
           {/* Botões sempre visíveis no mobile, hover no desktop */}
           <div className="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <Tooltip.Provider delayDuration={200}>
