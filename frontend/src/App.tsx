@@ -17,6 +17,7 @@ import CadastrarSenhaScreen from "./pages/CadastrarSenhaScreen";
 import DashBoardScreen from "./pages/DashBoardScreen";
 import ProjetosScreen from "./pages/ProjetosScreen";
 import DisciplinasScreen from "./pages/DisciplinasScreen";
+import DisciplinaDetailScreen from "./pages/DisciplinaDetailScreen";
 import ChatScreen from "./pages/ChatScreen";
 import BibliotecaScreen from "./pages/BibliotecaScreen";
 import EstatisticaScreen from "./pages/EstatisticaScreen";
@@ -52,13 +53,70 @@ function App() {
         <Route path="/CadastrarSenhaScreen" element={<CadastrarSenhaScreen />} />
 
         {/* Páginas privadas — exigem login */}
-        <Route path="/dashboard"    element={<PrivateRoute><DashBoardScreen /></PrivateRoute>} />
-        <Route path="/projetos"     element={<PrivateRoute><ProjetosScreen /></PrivateRoute>} />
-        <Route path="/disciplinas"  element={<PrivateRoute><DisciplinasScreen /></PrivateRoute>} />
-        <Route path="/chat"         element={<PrivateRoute><ChatScreen /></PrivateRoute>} />
-        <Route path="/biblioteca"   element={<PrivateRoute><BibliotecaScreen /></PrivateRoute>} />
-        <Route path="/estatistica"  element={<PrivateRoute><EstatisticaScreen /></PrivateRoute>} />
-        <Route path="/settings"     element={<PrivateRoute><SettingsScreen /></PrivateRoute>} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashBoardScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos"
+          element={
+            <PrivateRoute>
+              <ProjetosScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/disciplinas"
+          element={
+            <PrivateRoute>
+              <DisciplinasScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/disciplinas/:id"
+          element={
+            <PrivateRoute>
+              <DisciplinaDetailScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <ChatScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/biblioteca"
+          element={
+            <PrivateRoute>
+              <BibliotecaScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/estatistica"
+          element={
+            <PrivateRoute>
+              <EstatisticaScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <SettingsScreen />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

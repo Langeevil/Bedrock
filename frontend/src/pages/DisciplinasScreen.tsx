@@ -9,10 +9,22 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Toaster, toast } from "sonner";
 import {
-  Search, Plus, BookOpen, X, Pencil, Trash2,
-  GraduationCap, Hash, User, BookMarked,
-  ChevronLeft, ChevronRight, AlertCircle, Menu,
+  Search,
+  Plus,
+  BookOpen,
+  X,
+  Pencil,
+  Trash2,
+  GraduationCap,
+  Hash,
+  User,
+  BookMarked,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Menu,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { SidebarSimple } from "../components/sidebar-simple";
 import {
   createDiscipline,
@@ -26,52 +38,113 @@ import {
 // ─── Schema ───────────────────────────────────────────────────────────────────
 const disciplineSchema = z.object({
   name: z.string().min(3, "Mínimo 3 caracteres.").max(100, "Máximo 100 caracteres.").trim(),
-  code: z.string().min(2, "Mínimo 2 caracteres.").max(20, "Máximo 20 caracteres.")
-    .regex(/^[A-Za-z0-9]+$/, "Apenas letras e números, sem espaços.").trim(),
+  code: z
+    .string()
+    .min(2, "Mínimo 2 caracteres.")
+    .max(20, "Máximo 20 caracteres.")
+    .regex(/^[A-Za-z0-9]+$/, "Apenas letras e números, sem espaços.")
+    .trim(),
   professor: z.string().min(3, "Mínimo 3 caracteres.").max(100, "Máximo 100 caracteres.").trim(),
 });
 type DisciplineForm = z.infer<typeof disciplineSchema>;
 
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const COLORS = [
-  { bg: "from-violet-500 to-purple-600", light: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
-  { bg: "from-blue-500 to-cyan-600",     light: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200"   },
-  { bg: "from-emerald-500 to-teal-600",  light: "bg-emerald-50",text: "text-emerald-700",border: "border-emerald-200"},
-  { bg: "from-rose-500 to-pink-600",     light: "bg-rose-50",   text: "text-rose-700",   border: "border-rose-200"   },
-  { bg: "from-amber-500 to-orange-600",  light: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-200"  },
-  { bg: "from-indigo-500 to-blue-600",   light: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-200" },
+  {
+    bg: "from-violet-500 to-purple-600",
+    light: "bg-violet-50",
+    text: "text-violet-700",
+    border: "border-violet-200",
+  },
+  {
+    bg: "from-blue-500 to-cyan-600",
+    light: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+  },
+  {
+    bg: "from-emerald-500 to-teal-600",
+    light: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+  },
+  {
+    bg: "from-rose-500 to-pink-600",
+    light: "bg-rose-50",
+    text: "text-rose-700",
+    border: "border-rose-200",
+  },
+  {
+    bg: "from-amber-500 to-orange-600",
+    light: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+  },
+  {
+    bg: "from-indigo-500 to-blue-600",
+    light: "bg-indigo-50",
+    text: "text-indigo-700",
+    border: "border-indigo-200",
+  },
 ];
-function getColor(id: number) { return COLORS[id % COLORS.length]; }
+function getColor(id: number) {
+  return COLORS[id % COLORS.length];
+}
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 function ProfessorAvatar({ name, colorBg }: Readonly<{ name: string; colorBg: string }>) {
-  const initials = name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
   return (
-    <span className={`inline-flex items-center justify-center w-[68px] h-[68px] rounded-full bg-gradient-to-r ${colorBg} text-white text-2xl font-bold shrink-0`}>
+    <span
+      className={`inline-flex items-center justify-center w-[68px] h-[68px] rounded-full bg-gradient-to-r ${colorBg} text-white text-2xl font-bold shrink-0`}
+    >
       {initials}
     </span>
   );
 }
 
 // ─── Campo com erro ───────────────────────────────────────────────────────────
-function FormField({ icon: Icon, label, id, placeholder, error, registration }: Readonly<{
-  icon: React.ElementType; label: string; id: string;
-  placeholder: string; error?: string; registration: object;
+function FormField({
+  icon: Icon,
+  label,
+  id,
+  placeholder,
+  error,
+  registration,
+}: Readonly<{
+  icon: React.ElementType;
+  label: string;
+  id: string;
+  placeholder: string;
+  error?: string;
+  registration: object;
 }>) {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5 text-slate-400" />{label}
+        <Icon className="w-3.5 h-3.5 text-slate-400" />
+        {label}
       </label>
       <input
-        id={id} type="text" placeholder={placeholder} {...registration}
+        id={id}
+        type="text"
+        placeholder={placeholder}
+        {...registration}
         className={`w-full px-3 py-2.5 rounded-xl border text-slate-800 text-sm placeholder:text-slate-400 bg-slate-50 focus:outline-none focus:ring-2 focus:border-transparent transition ${
-          error ? "border-red-300 focus:ring-red-400 bg-red-50" : "border-slate-200 focus:ring-blue-400"
+          error
+            ? "border-red-300 focus:ring-red-400 bg-red-50"
+            : "border-slate-200 focus:ring-blue-400"
         }`}
       />
       {error && (
         <p className="flex items-center gap-1.5 text-xs text-red-500 mt-0.5">
-          <AlertCircle className="w-3 h-3 shrink-0" />{error}
+          <AlertCircle className="w-3 h-3 shrink-0" />
+          {error}
         </p>
       )}
     </div>
@@ -79,8 +152,12 @@ function FormField({ icon: Icon, label, id, placeholder, error, registration }: 
 }
 
 // ─── Paginação ────────────────────────────────────────────────────────────────
-function PaginationBar({ pagination, onPageChange }: Readonly<{
-  pagination: Pagination; onPageChange: (page: number) => void;
+function PaginationBar({
+  pagination,
+  onPageChange,
+}: Readonly<{
+  pagination: Pagination;
+  onPageChange: (page: number) => void;
 }>) {
   const { page, totalPages, totalItems, hasPrevPage, hasNextPage } = pagination;
   if (totalPages <= 1) return null;
@@ -91,20 +168,31 @@ function PaginationBar({ pagination, onPageChange }: Readonly<{
         {totalItems} disciplina{totalItems === 1 ? "" : "s"} no total
       </p>
       <div className="flex items-center gap-1 order-1 sm:order-2">
-        <button onClick={() => onPageChange(page - 1)} disabled={!hasPrevPage}
-          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={!hasPrevPage}
+          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
           <ChevronLeft className="w-4 h-4" />
         </button>
         {pages.map((p) => (
-          <button key={p} onClick={() => onPageChange(p)}
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
             className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-              p === page ? "bg-blue-500 text-white shadow-sm" : "border border-slate-200 text-slate-600 hover:bg-slate-100"
-            }`}>
+              p === page
+                ? "bg-blue-500 text-white shadow-sm"
+                : "border border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
             {p}
           </button>
         ))}
-        <button onClick={() => onPageChange(page + 1)} disabled={!hasNextPage}
-          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={!hasNextPage}
+          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -113,8 +201,16 @@ function PaginationBar({ pagination, onPageChange }: Readonly<{
 }
 
 // ─── Confirm Delete ───────────────────────────────────────────────────────────
-function ConfirmDeleteDialog({ open, onConfirm, onCancel, disciplineName }: Readonly<{
-  open: boolean; onConfirm: () => void; onCancel: () => void; disciplineName: string;
+function ConfirmDeleteDialog({
+  open,
+  onConfirm,
+  onCancel,
+  disciplineName,
+}: Readonly<{
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  disciplineName: string;
 }>) {
   return (
     <AlertDialog.Root open={open}>
@@ -126,16 +222,30 @@ function ConfirmDeleteDialog({ open, onConfirm, onCancel, disciplineName }: Read
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6"
           >
-            <AlertDialog.Title className="font-bold text-slate-800 text-lg mb-2">Excluir disciplina?</AlertDialog.Title>
+            <AlertDialog.Title className="font-bold text-slate-800 text-lg mb-2">
+              Excluir disciplina?
+            </AlertDialog.Title>
             <AlertDialog.Description className="text-slate-500 text-sm mb-6">
-              Tem certeza que deseja excluir <span className="font-semibold text-slate-700">"{disciplineName}"</span>? Essa ação não pode ser desfeita.
+              Tem certeza que deseja excluir{" "}
+              <span className="font-semibold text-slate-700">"{disciplineName}"</span>? Essa ação
+              não pode ser desfeita.
             </AlertDialog.Description>
             <div className="flex gap-3 justify-end">
               <AlertDialog.Cancel asChild>
-                <button onClick={onCancel} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
+                <button
+                  onClick={onCancel}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
-                <button onClick={onConfirm} className="px-4 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors shadow-sm">Sim, excluir</button>
+                <button
+                  onClick={onConfirm}
+                  className="px-4 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors shadow-sm"
+                >
+                  Sim, excluir
+                </button>
               </AlertDialog.Action>
             </div>
           </motion.div>
@@ -146,9 +256,18 @@ function ConfirmDeleteDialog({ open, onConfirm, onCancel, disciplineName }: Read
 }
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
-function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
-  discipline: Discipline; index: number;
-  onEdit: (d: Discipline) => void; onDelete: (d: Discipline) => void;
+function DisciplineCard({
+  discipline,
+  index,
+  onEdit,
+  onDelete,
+  onClick,
+}: Readonly<{
+  discipline: Discipline;
+  index: number;
+  onEdit: (d: Discipline) => void;
+  onDelete: (d: Discipline) => void;
+  onClick?: () => void;
 }>) {
   const color = getColor(discipline.id);
   return (
@@ -157,14 +276,29 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col min-h-[280px]"
+      onClick={onClick}
+      className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col min-h-[280px] cursor-pointer"
+      {...(onClick
+        ? {
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            },
+          }
+        : {})}
     >
       <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className={`p-2 rounded-xl ${color.light}`}>
             <BookOpen className={`w-5 h-5 ${color.text}`} />
           </div>
-          <span className={`text-xs font-mono font-semibold px-2 py-1 rounded-lg ${color.light} ${color.text} border ${color.border}`}>
+          <span
+            className={`text-xs font-mono font-semibold px-2 py-1 rounded-lg ${color.light} ${color.text} border ${color.border}`}
+          >
             {discipline.code}
           </span>
         </div>
@@ -181,24 +315,43 @@ function DisciplineCard({ discipline, index, onEdit, onDelete }: Readonly<{
             <Tooltip.Provider delayDuration={200}>
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button onClick={() => onEdit(discipline)}
-                    className="p-1.5 rounded-lg bg-slate-50 sm:bg-white border border-slate-200 shadow-sm hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(discipline);
+                    }}
+                  >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
-                  <Tooltip.Content className="text-xs bg-slate-800 text-white px-2 py-1 rounded-md" sideOffset={4}>Editar</Tooltip.Content>
+                  <Tooltip.Content
+                    className="text-xs bg-slate-800 text-white px-2 py-1 rounded-md"
+                    sideOffset={4}
+                  >
+                    Editar
+                  </Tooltip.Content>
                 </Tooltip.Portal>
               </Tooltip.Root>
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button onClick={() => onDelete(discipline)}
-                    className="p-1.5 rounded-lg bg-slate-50 sm:bg-white border border-slate-200 shadow-sm hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(discipline);
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-50 sm:bg-white border border-slate-200 shadow-sm hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors"
+                  >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
-                  <Tooltip.Content className="text-xs bg-slate-800 text-white px-2 py-1 rounded-md" sideOffset={4}>Excluir</Tooltip.Content>
+                  <Tooltip.Content
+                    className="text-xs bg-slate-800 text-white px-2 py-1 rounded-md"
+                    sideOffset={4}
+                  >
+                    Excluir
+                  </Tooltip.Content>
                 </Tooltip.Portal>
               </Tooltip.Root>
             </Tooltip.Provider>
@@ -222,13 +375,20 @@ export default function DisciplinesScreen() {
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Discipline | null>(null);
 
+  const navigate = useNavigate();
+
   // prepare derived strings for rendering
   const pluralSuffix = pagination?.totalItems === 1 ? "" : "s";
   const headerCount = pagination
     ? `${pagination.totalItems} disciplina${pluralSuffix} cadastrada${pluralSuffix}`
     : "Carregando...";
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<DisciplineForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<DisciplineForm>({
     resolver: zodResolver(disciplineSchema),
   });
 
@@ -263,12 +423,23 @@ export default function DisciplinesScreen() {
     const t = searchTerm.toLowerCase();
     if (!t) return disciplines;
     return disciplines.filter(
-      (d) => d.name.toLowerCase().includes(t) || d.code.toLowerCase().includes(t) || d.professor.toLowerCase().includes(t)
+      (d) =>
+        d.name.toLowerCase().includes(t) ||
+        d.code.toLowerCase().includes(t) ||
+        d.professor.toLowerCase().includes(t)
     );
   }, [disciplines, searchTerm]);
 
-  const openAdd = () => { setEditingDiscipline(null); reset({ name: "", code: "", professor: "" }); setIsModalOpen(true); };
-  const openEdit = (d: Discipline) => { setEditingDiscipline(d); reset({ name: d.name, code: d.code, professor: d.professor }); setIsModalOpen(true); };
+  const openAdd = () => {
+    setEditingDiscipline(null);
+    reset({ name: "", code: "", professor: "" });
+    setIsModalOpen(true);
+  };
+  const openEdit = (d: Discipline) => {
+    setEditingDiscipline(d);
+    reset({ name: d.name, code: d.code, professor: d.professor });
+    setIsModalOpen(true);
+  };
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
@@ -288,11 +459,14 @@ export default function DisciplinesScreen() {
       if (editingDiscipline) {
         await updateDiscipline(editingDiscipline.id, data);
         toast.success("Disciplina atualizada com sucesso!");
+        setIsModalOpen(false);
       } else {
-        await createDiscipline(data);
+        const created = await createDiscipline(data);
         toast.success("Disciplina criada com sucesso!");
+        // fecha modal antes de navegar para não deixar estado pendente
+        setIsModalOpen(false);
+        navigate(`/disciplinas/${created.id}`);
       }
-      setIsModalOpen(false);
       loadDisciplines(currentPage);
     } catch (err: any) {
       toast.error(err.message || "Erro ao salvar disciplina.");
@@ -364,13 +538,14 @@ export default function DisciplinesScreen() {
                 </div>
                 Disciplinas
               </h1>
-              <p className="text-slate-400 text-sm mt-1 ml-14">
-                {headerCount}
-              </p>
+              <p className="text-slate-400 text-sm mt-1 ml-14">{headerCount}</p>
             </div>
-            <button onClick={openAdd}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold text-sm shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95">
-              <Plus className="w-4 h-4" />Nova Disciplina
+            <button
+              onClick={openAdd}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold text-sm shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Disciplina
             </button>
           </div>
 
@@ -388,7 +563,8 @@ export default function DisciplinesScreen() {
 
           {error && (
             <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-              <X className="w-4 h-4 shrink-0" />{error}
+              <X className="w-4 h-4 shrink-0" />
+              {error}
             </div>
           )}
 
@@ -399,16 +575,24 @@ export default function DisciplinesScreen() {
           )}
 
           {!loading && filtered.length === 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-16 lg:py-24 gap-4 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-16 lg:py-24 gap-4 text-center"
+            >
               <div className="p-5 rounded-2xl bg-slate-100">
                 <GraduationCap className="w-10 h-10 text-slate-400" />
               </div>
               <p className="text-slate-500 font-medium">
-                {searchTerm ? "Nenhuma disciplina encontrada." : "Nenhuma disciplina cadastrada ainda."}
+                {searchTerm
+                  ? "Nenhuma disciplina encontrada."
+                  : "Nenhuma disciplina cadastrada ainda."}
               </p>
               {!searchTerm && (
-                <button onClick={openAdd} className="text-blue-600 font-semibold text-sm hover:underline">
+                <button
+                  onClick={openAdd}
+                  className="text-blue-600 font-semibold text-sm hover:underline"
+                >
                   Adicionar primeira disciplina →
                 </button>
               )}
@@ -419,19 +603,37 @@ export default function DisciplinesScreen() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
             <AnimatePresence>
               {filtered.map((d, i) => (
-                <DisciplineCard key={d.id} discipline={d} index={i} onEdit={openEdit} onDelete={setDeleteTarget} />
+                <DisciplineCard
+                  key={d.id}
+                  discipline={d}
+                  index={i}
+                  onEdit={openEdit}
+                  onDelete={setDeleteTarget}
+                  onClick={() => navigate(`/disciplinas/${d.id}`)}
+                />
               ))}
             </AnimatePresence>
           </div>
 
           {pagination && !searchTerm && (
-            <PaginationBar pagination={pagination} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+            <PaginationBar
+              pagination={pagination}
+              onPageChange={(p) => {
+                setCurrentPage(p);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           )}
         </div>
       </main>
 
       {/* Modal — ocupa tela inteira no mobile */}
-      <Dialog.Root open={isModalOpen} onOpenChange={(open: boolean) => { if (!open) setIsModalOpen(false); }}>
+      <Dialog.Root
+        open={isModalOpen}
+        onOpenChange={(open: boolean) => {
+          if (!open) setIsModalOpen(false);
+        }}
+      >
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
           <Dialog.Content
@@ -460,24 +662,53 @@ export default function DisciplinesScreen() {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 flex flex-col gap-4">
-                <FormField icon={BookOpen} label="Nome" id="discipline-name" placeholder="Ex: Cálculo I" error={errors.name?.message} registration={register("name")} />
-                <FormField icon={Hash} label="Código" id="discipline-code" placeholder="Ex: MAT101" error={errors.code?.message} registration={register("code")} />
-                <FormField icon={User} label="Professor" id="discipline-professor" placeholder="Ex: Dr. João Silva" error={errors.professor?.message} registration={register("professor")} />
+                <FormField
+                  icon={BookOpen}
+                  label="Nome"
+                  id="discipline-name"
+                  placeholder="Ex: Cálculo I"
+                  error={errors.name?.message}
+                  registration={register("name")}
+                />
+                <FormField
+                  icon={Hash}
+                  label="Código"
+                  id="discipline-code"
+                  placeholder="Ex: MAT101"
+                  error={errors.code?.message}
+                  registration={register("code")}
+                />
+                <FormField
+                  icon={User}
+                  label="Professor"
+                  id="discipline-professor"
+                  placeholder="Ex: Dr. João Silva"
+                  error={errors.professor?.message}
+                  registration={register("professor")}
+                />
 
                 <div className="flex gap-3 pt-2 pb-safe">
                   <Dialog.Close asChild>
-                    <button type="button" className="flex-1 px-4 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors">
+                    <button
+                      type="button"
+                      className="flex-1 px-4 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                    >
                       Cancelar
                     </button>
                   </Dialog.Close>
-                  <button type="submit" disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-3 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{' '}
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{" "}
                         Salvando...
                       </span>
-                    ) : modalButtonText}
+                    ) : (
+                      modalButtonText
+                    )}
                   </button>
                 </div>
               </form>

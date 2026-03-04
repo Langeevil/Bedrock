@@ -36,7 +36,9 @@ export async function listDisciplines(page = 1, limit = 12): Promise<Disciplines
   return data as DisciplinesResponse;
 }
 
-export async function createDiscipline(payload: Omit<Discipline, "id" | "created_at">): Promise<Discipline> {
+export async function createDiscipline(
+  payload: Omit<Discipline, "id" | "created_at">
+): Promise<Discipline> {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -49,7 +51,10 @@ export async function createDiscipline(payload: Omit<Discipline, "id" | "created
   return data as Discipline;
 }
 
-export async function updateDiscipline(id: number, payload: Omit<Discipline, "id" | "created_at">): Promise<Discipline> {
+export async function updateDiscipline(
+  id: number,
+  payload: Omit<Discipline, "id" | "created_at">
+): Promise<Discipline> {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
@@ -70,4 +75,16 @@ export async function removeDiscipline(id: number): Promise<void> {
 
   const data = await parseJsonOrThrow(res);
   if (!res.ok) throw new Error(data.error || "Erro ao remover disciplina");
+}
+
+// fetch a single discipline by its id
+export async function getDiscipline(id: number): Promise<Discipline> {
+  const res = await fetch(`${API_URL}/${id}`, {
+    headers: getAuthHeaders(false),
+  });
+
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao carregar disciplina");
+
+  return data as Discipline;
 }
