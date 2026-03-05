@@ -2,7 +2,7 @@ import pool from "../db.js";
 
 export async function countDisciplines() {
   const res = await pool.query("SELECT COUNT(*) FROM disciplines");
-  return parseInt(res.rows[0].count, 10);
+  return Number.parseInt(res.rows[0].count, 10);
 }
 
 export async function findAllDisciplines(limit, offset) {

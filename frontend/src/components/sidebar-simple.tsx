@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import UserProfile from "./UserProfile";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -202,6 +203,8 @@ export function SidebarSimple({ children }: Props) {
           </div>
         </div>
       )}
+
+      <UserProfile collapsed={collapsed} />
     </aside>
   );
 }

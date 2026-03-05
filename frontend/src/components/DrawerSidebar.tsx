@@ -5,7 +5,7 @@ type Props = { children?: React.ReactNode };
 export default function DrawerSidebar({ children }: Props) {
     return (
         <div className="drawer lg:drawer-open">
-            <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
+            <input id="my-drawer-4" type="checkbox" className="drawer-toggle" defaultChecked={false} />
             <div className="drawer-content">
                 {/* Navbar */}
                 <nav className="navbar w-full bg-base-100">

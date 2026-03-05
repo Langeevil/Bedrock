@@ -8,8 +8,8 @@ class HttpError extends Error {
 }
 
 export async function listDisciplines(page = 1, limit = 12) {
-  const p = Math.max(1, parseInt(page, 10) || 1);
-  const l = Math.min(50, parseInt(limit, 10) || 12);
+  const p = Math.max(1, Number.parseInt(page, 10) || 1);
+  const l = Math.min(50, Number.parseInt(limit, 10) || 12);
   const offset = (p - 1) * l;
 
   const [data, totalItems] = await Promise.all([

@@ -4,7 +4,7 @@ export default function Collapse() {
         <>
 
        <div className="collapse collapse-arrow border border-gray-200 rounded-lg bg-white">
-          <input type="radio" name="container-collapse" checked />
+          <input type="radio" name="container-collapse" defaultChecked={true} />
           <div className="collapse-title px-6 py-4 text-lg md:text-xl font-medium">
             Como funciona a centralização de aulas e tarefas?
           </div>
@@ -15,7 +15,7 @@ export default function Collapse() {
         </div>
 
         <div className="collapse collapse-arrow border border-gray-200 rounded-lg bg-white">
-          <input type="radio" name="container-collapse" />
+          <input type="radio" name="container-collapse" defaultChecked={false} />
           <div className="collapse-title px-6 py-4 text-lg md:text-xl font-medium">
             O sistema sincroniza com calendários externos?
           </div>
@@ -26,7 +26,7 @@ export default function Collapse() {
         </div>
 
         <div className="collapse collapse-arrow border border-gray-200 rounded-lg bg-white">
-          <input type="radio" name="container-collapse" />
+          <input type="radio" name="container-collapse" defaultChecked={false} />
           <div className="collapse-title px-6 py-4 text-lg md:text-xl font-medium">
             Posso usar em dispositivos móveis?
           </div>

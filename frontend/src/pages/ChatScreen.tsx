@@ -64,6 +64,7 @@ function shortTime(value?: string | null) {
 
 export default function ChatScreen() {
   const currentUserEmail = localStorage.getItem("user_email") || "";
+  const currentUserName = localStorage.getItem("user_nome") || "Usuário";
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [filter, setFilter] = useState<FilterMode>("all");
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -425,7 +426,9 @@ export default function ChatScreen() {
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold text-slate-900">Chat Workspace</h1>
-            <p className="text-sm text-slate-500">DM por e-mail, grupos privados e canais.</p>
+            <p className="text-sm text-slate-500">
+              Bem-vindo(a), <span className="font-semibold text-slate-700">{currentUserName}</span> • {currentUserEmail}
+            </p>
           </div>
           {error && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
