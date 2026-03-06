@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SidebarSimple } from "../components/sidebar-simple";
 import { getDashboardStats } from "../services/dashboardService";
-import { listDisciplines } from "../services/disciplinesService";
+import { listDisciplines } from "../features/disciplines/services/disciplinesService";
 
 export default function EstatisticaScreen() {
   const [students, setStudents] = useState(0);

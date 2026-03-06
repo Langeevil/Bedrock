@@ -19,8 +19,8 @@ import {
   Star,
   BookOpen,
 } from "lucide-react";
-import type { Discipline } from "../services/disciplinesService";
-import { getDiscipline } from "../services/disciplinesService";
+import type { Discipline } from "../features/disciplines/services/disciplinesService";
+import { getDiscipline } from "../features/disciplines/services/disciplinesService";
 import { getDisciplinePosts, createDisciplinePost } from "../services/disciplinePostsService";
 import { getDisciplineFiles } from "../services/disciplineFilesService";
 import { motion, AnimatePresence } from "framer-motion";
