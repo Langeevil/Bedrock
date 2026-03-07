@@ -20,3 +20,4 @@ export function useDiscipline(id: number) {
 
   return { discipline, loading, error };
 }
+

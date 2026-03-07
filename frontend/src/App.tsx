@@ -16,8 +16,8 @@ import CadastrarEmailScreen from "./pages/CadastrarEmailScreen";
 import CadastrarSenhaScreen from "./pages/CadastrarSenhaScreen";
 import DashBoardScreen from "./pages/DashBoardScreen";
 import ProjetosScreen from "./pages/ProjetosScreen";
-import DisciplinasScreen from "./features/disciplines/pages/DisciplineScreen";
-import DisciplinaDetailScreen from "./features/disciplines/pages/DisciplineScreen";
+import DisciplineScreen from "./features/disciplines/pages/DisciplineScreen";
+import DisciplinaDetailScreen from "./features/disciplines/pages/DisciplineDetailScreen";
 import ChatScreen from "./pages/ChatScreen";
 import BibliotecaScreen from "./pages/BibliotecaScreen";
 import EstatisticaScreen from "./pages/EstatisticaScreen";
@@ -73,7 +73,7 @@ function App() {
           path="/disciplinas"
           element={
             <PrivateRoute>
-              <DisciplinasScreen />
+              <DisciplineScreen />
             </PrivateRoute>
           }
         />

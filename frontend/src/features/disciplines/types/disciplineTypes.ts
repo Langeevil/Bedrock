@@ -1,41 +1,29 @@
-// types/disciplineTypes.ts
-// Tipos exclusivos da feature de disciplinas (Discipline vem de src/services/disciplinesService.ts)
+// src/features/disciplines/types/disciplineTypes.ts
 
-export interface Post {
+export type TabKey = "overview" | "materials" | "chat" | "settings";
+
+export interface DisciplinePost {
   id: number;
-  disciplineId: number;
-  authorName: string;
+  author: { nome: string };
   content: string;
-  createdAt: string;
-  likes: number;
-  comments: number;
+  created_at: string;
+  pinned: boolean;
 }
 
-export interface Material {
+export interface DisciplineFile {
   id: number;
-  disciplineId: number;
-  name: string;
-  type: "pdf" | "doc" | "image" | "video" | "other";
-  size: number;
-  uploadedBy: string;
-  uploadedAt: string;
-  url: string;
+  original_name: string;
+  mime_type: string;
+  size_bytes: number;
+  created_at: string;
+  uploaded_by_name?: string;
 }
 
-export interface Member {
-  id: number;
-  name: string;
-  role: "professor" | "student";
-  joinedAt: string;
+export interface RecentActivity {
+  id: string;
+  user: string;
+  action: string;
+  time: string;
+  type: "file" | "post" | "user";
+  timestamp: Date;
 }
-
-export interface ChatMessageType {
-  id: number;
-  disciplineId: number;
-  authorName: string;
-  content: string;
-  createdAt: string;
-  isMine?: boolean;
-}
-
-export type TabKey = "overview" | "posts" | "materials" | "chat" | "members" | "settings";

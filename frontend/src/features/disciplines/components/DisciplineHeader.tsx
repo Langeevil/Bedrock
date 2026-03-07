@@ -1,74 +1,105 @@
-// components/DisciplineHeader.tsx
+// src/features/disciplines/components/DisciplineHeader.tsx
 
-import { BookMarked, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type { Discipline } from "../../../features/disciplines/services/disciplinesService";
+import {
+  ChevronLeft, BookOpen,
+  Video, Phone, Search, Bell, Star, MoreHorizontal,
+} from "lucide-react";
+import type { Discipline } from "../services/disciplinesService";
+import type { TabKey } from "../types/disciplineTypes";
+import { TEAMS } from "../constants/teamsTheme";
 
-const COLORS = [
-  { bg: "from-violet-500 to-purple-600", light: "bg-violet-50", text: "text-violet-700" },
-  { bg: "from-blue-500 to-cyan-600", light: "bg-blue-50", text: "text-blue-700" },
-  { bg: "from-emerald-500 to-teal-600", light: "bg-emerald-50", text: "text-emerald-700" },
-  { bg: "from-rose-500 to-pink-600", light: "bg-rose-50", text: "text-rose-700" },
-  { bg: "from-amber-500 to-orange-600", light: "bg-amber-50", text: "text-amber-700" },
-  { bg: "from-indigo-500 to-blue-600", light: "bg-indigo-50", text: "text-indigo-700" },
+const TABS: { id: TabKey; label: string }[] = [
+  { id: "overview",  label: "Visão Geral"   },
+  { id: "materials", label: "Arquivos"       },
+  { id: "chat",      label: "Publicações"    },
+  { id: "settings",  label: "Configurações"  },
 ];
 
-function getColor(id: number) {
-  return COLORS[id % COLORS.length];
-}
+const ACTION_BTNS = [
+  { id: "meeting",       label: "Reunião",      Icon: Video          },
+  { id: "call",          label: "Ligar",        Icon: Phone          },
+  { id: "search",        label: "Buscar",       Icon: Search         },
+  { id: "notifications", label: "Notificações", Icon: Bell           },
+  { id: "favorite",      label: "Favoritar",    Icon: Star           },
+  { id: "more",          label: "Mais",         Icon: MoreHorizontal },
+];
 
 interface Props {
   discipline: Discipline;
+  activeTab: TabKey;
+  onTabChange: (tab: TabKey) => void;
 }
 
-export function DisciplineHeader({ discipline }: Readonly<Props>) {
+export function DisciplineHeader({ discipline, activeTab, onTabChange }: Readonly<Props>) {
   const navigate = useNavigate();
-  const color = getColor(discipline.id);
-
-  const initials = discipline.professor
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
 
   return (
-    <div className="bg-white border-b border-slate-100 shadow-sm">
-      <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-        {/* Back */}
+    <div style={{ background: TEAMS.white, borderBottom: `1px solid ${TEAMS.border}`, padding: "0 24px", display: "flex", flexDirection: "column" }}>
+      {/* Breadcrumb */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 0 0", fontSize: 12 }}>
         <button
           onClick={() => navigate("/disciplinas")}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-blue-600 text-sm font-medium mb-4 transition-colors group"
+          style={{ display: "flex", alignItems: "center", gap: 4, background: "transparent", border: "none", cursor: "pointer", color: TEAMS.purple, fontSize: 12, fontFamily: "'Segoe UI', sans-serif", padding: 0 }}
         >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Disciplinas
+          <ChevronLeft size={14} /> Disciplinas
         </button>
+        <span style={{ color: TEAMS.border }}>/</span>
+        <span style={{ color: TEAMS.textSecondary }}>{discipline.name}</span>
+      </div>
 
-        <div className="flex items-center gap-4">
-          {/* Avatar */}
-          <span
-            className={`inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${color.bg} text-white text-xl sm:text-2xl font-bold shadow-md shrink-0`}
-          >
-            {initials}
-          </span>
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight truncate">
-                {discipline.name}
-              </h1>
-              <span
-                className={`text-xs font-mono font-semibold px-2 py-0.5 rounded-lg ${color.light} ${color.text} border border-current/20 shrink-0`}
-              >
-                {discipline.code}
-              </span>
-            </div>
-            <p className="text-slate-500 text-sm mt-0.5 flex items-center gap-1.5">
-              <BookMarked className="w-3.5 h-3.5" />
-              {discipline.professor}
-            </p>
+      {/* Title row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 8, background: "linear-gradient(135deg, #6264A7, #8764B8)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+            <BookOpen size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: TEAMS.textPrimary, lineHeight: 1.2 }}>{discipline.name}</div>
+            <div style={{ fontSize: 12, color: TEAMS.textSecondary, marginTop: 2 }}>{discipline.code} · {discipline.professor}</div>
           </div>
         </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {ACTION_BTNS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              title={label}
+              style={{ display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", color: TEAMS.textSecondary, padding: "6px 10px", borderRadius: 4, transition: "background 0.15s" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F3F2F1")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+            >
+              <Icon size={16} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", marginTop: 8 }}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => onTabChange(t.id)}
+            style={{
+              padding: "10px 14px",
+              background: "transparent",
+              border: "none",
+              borderBottom: activeTab === t.id ? `2px solid ${TEAMS.purple}` : "2px solid transparent",
+              color: activeTab === t.id ? TEAMS.purple : TEAMS.textSecondary,
+              fontSize: 13,
+              fontWeight: activeTab === t.id ? 600 : 400,
+              cursor: "pointer",
+              fontFamily: "'Segoe UI', sans-serif",
+              transition: "all 0.15s",
+              marginBottom: -1,
+            }}
+            onMouseEnter={(e) => { if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textPrimary; }}
+            onMouseLeave={(e) => { if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textSecondary; }}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
     </div>
   );
