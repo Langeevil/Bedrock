@@ -7,7 +7,6 @@ import { SidebarSimple } from "../../../components/sidebar-simple";
 import type { Discipline } from "../services/disciplinesService";
 import { getDiscipline } from "../services/disciplinesService";
 import type { TabKey } from "../types/disciplineTypes";
-import { TEAMS } from "../constants/teamsTheme";
 import { DisciplineHeader } from "../components/DisciplineHeader";
 import { OverviewTab } from "../components/tabs/OverviewTab";
 import { MaterialsTab } from "../components/tabs/MaterialsTab";
@@ -40,18 +39,22 @@ export default function DisciplineDetailScreen() {
   }, [id]);
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+    <div className="flex h-screen bg-[#F5F5F5] font-sans overflow-hidden">
       <SidebarSimple />
 
-      <div style={{ flex: 1, background: TEAMS.bg, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         {loading && (
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: TEAMS.textSecondary, fontSize: 14 }}>
-            Carregando...
+          <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <span>Carregando disciplina...</span>
+            </div>
           </div>
         )}
 
         {error && (
-          <div style={{ margin: 24, padding: "12px 16px", background: "#FEF0F1", border: "1px solid #F3D1D3", borderRadius: 8, color: "#A4262C", fontSize: 14 }}>
+          <div className="m-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
             {error}
           </div>
         )}
@@ -64,30 +67,26 @@ export default function DisciplineDetailScreen() {
               onTabChange={setTab}
             />
 
-            <div style={{ flex: 1, padding: 24 }}>
-              <AnimatePresence mode="wait">
-                {tab === "overview" && (
-                  <motion.div key="overview" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                    <OverviewTab discipline={discipline} />
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+              <div className="max-w-7xl mx-auto">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={tab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    {tab === "overview" && <OverviewTab discipline={discipline} />}
+                    {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
+                    {tab === "chat" && (
+                      <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
+                    )}
+                    {tab === "settings" && <SettingsTab discipline={discipline} />}
                   </motion.div>
-                )}
-                {tab === "materials" && (
-                  <motion.div key="materials" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                    <MaterialsTab disciplineId={discipline.id} />
-                  </motion.div>
-                )}
-                {tab === "chat" && (
-                  <motion.div key="chat" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                    <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
-                  </motion.div>
-                )}
-                {tab === "settings" && (
-                  <motion.div key="settings" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                    <SettingsTab discipline={discipline} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                </AnimatePresence>
+              </div>
+            </main>
           </>
         )}
       </div>

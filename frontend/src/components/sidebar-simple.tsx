@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import UserProfile from "./UserProfile";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import UserProfile from "../shared/components/UserProfile";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -13,19 +13,57 @@ type Props = { children?: React.ReactNode };
 const SIDEBAR_KEY = "bedrock_sidebar_collapsed";
 
 const navItems = [
-  { to: "/dashboard", label: "Home", icon: Home, alt: "Icone da Home" },
-  { to: "/projetos", label: "Projetos", icon: Projects, alt: "Icone de Projetos" },
+  {
+    to: "/dashboard",
+    label: "Home",
+    icon: Home,
+    alt: "Icone da Home",
+    keywords: ["dashboard", "inicio", "painel", "home"],
+  },
+  {
+    to: "/projetos",
+    label: "Projetos",
+    icon: Projects,
+    alt: "Icone de Projetos",
+    keywords: ["projetos", "project", "tarefas", "planejamento"],
+  },
   {
     to: "/disciplinas",
     label: "Disciplinas",
     icon: Disciplinas,
     alt: "Icone de Disciplinas",
     badge: "14",
+    keywords: ["disciplinas", "materias", "turmas", "aulas"],
   },
-  { to: "/chat", label: "Chat", icon: Chat, alt: "Icone de Chat", topGap: true },
-  { to: "/biblioteca", label: "Biblioteca", icon: Biblioteca, alt: "Icone de Biblioteca" },
-  { to: "/estatistica", label: "Estatistica", icon: Estatica, alt: "Icone de Estatistica" },
+  {
+    to: "/chat",
+    label: "Chat",
+    icon: Chat,
+    alt: "Icone de Chat",
+    topGap: true,
+    keywords: ["chat", "mensagens", "conversas", "dm", "grupos", "canais"],
+  },
+  {
+    to: "/biblioteca",
+    label: "Biblioteca",
+    icon: Biblioteca,
+    alt: "Icone de Biblioteca",
+    keywords: ["biblioteca", "livros", "documentos", "conteudo"],
+  },
+  {
+    to: "/estatistica",
+    label: "Estatistica",
+    icon: Estatica,
+    alt: "Icone de Estatistica",
+    keywords: ["estatistica", "metricas", "dados", "indicadores"],
+  },
 ];
+
+const settingsItem = {
+  to: "/settings",
+  label: "Settings",
+  keywords: ["settings", "configuracoes", "perfil", "ajustes"],
+};
 
 function SettingsIcon() {
   return (
@@ -41,6 +79,7 @@ function NavItem({
   collapsed,
   badge,
   topGap,
+  active,
   children,
 }: Readonly<{
   to: string;
@@ -48,6 +87,7 @@ function NavItem({
   collapsed: boolean;
   badge?: string;
   topGap?: boolean;
+  active?: boolean;
   children: React.ReactNode;
 }>) {
   return (
@@ -55,7 +95,11 @@ function NavItem({
       <Link
         to={to}
         title={collapsed ? label : undefined}
-        className={`group flex items-center rounded-md px-3 py-2 text-white/95 transition-all hover:bg-white hover:text-[#0d2145] ${
+        className={`group flex items-center rounded-md px-3 py-2 transition-all ${
+          active
+            ? "bg-white text-[#0d2145]"
+            : "text-white/95 hover:bg-white hover:text-[#0d2145]"
+        } ${
           collapsed ? "justify-center" : "gap-3"
         }`}
       >
@@ -72,17 +116,44 @@ function NavItem({
 }
 
 export function SidebarSimple({ children }: Props) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [openAlert, setOpenAlert] = React.useState(true);
-  const [collapsed, setCollapsed] = React.useState(false);
-
-  React.useEffect(() => {
-    const saved = window.localStorage.getItem(SIDEBAR_KEY);
-    setCollapsed(saved === "true");
-  }, []);
+  const [collapsed, setCollapsed] = React.useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(SIDEBAR_KEY) === "true";
+  });
+  const [searchValue, setSearchValue] = React.useState("");
 
   React.useEffect(() => {
     window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
   }, [collapsed]);
+
+  const searchableItems = React.useMemo(
+    () => [...navItems, { ...settingsItem, icon: "", alt: "" }],
+    []
+  );
+
+  const searchResults = React.useMemo(() => {
+    const term = searchValue.trim().toLowerCase();
+    if (!term) return [];
+
+    return searchableItems.filter((item) => {
+      if (item.label.toLowerCase().includes(term)) return true;
+      return item.keywords.some((keyword) => keyword.includes(term));
+    });
+  }, [searchValue, searchableItems]);
+
+  function handleNavigate(path: string) {
+    navigate(path);
+    setSearchValue("");
+  }
+
+  function handleSearchSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (searchResults.length === 0) return;
+    handleNavigate(searchResults[0].to);
+  }
 
   return (
     <aside
@@ -124,26 +195,42 @@ export function SidebarSimple({ children }: Props) {
 
       <div className={`${collapsed ? "px-0" : "p-2"} transition-all duration-300`}>
         {collapsed ? (
-          <button
-            type="button"
-            aria-label="Buscar"
-            onClick={() => setCollapsed(false)}
-            className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/80 transition hover:bg-white hover:text-[#0d2145]"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="6" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          </button>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              aria-label="Reabrir menu lateral"
+              onClick={() => setCollapsed(false)}
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/80 transition hover:bg-white hover:text-[#0d2145]"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              aria-label="Buscar"
+              onClick={() => setCollapsed(false)}
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/80 transition hover:bg-white hover:text-[#0d2145]"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="6" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </button>
+          </div>
         ) : (
           <div className="relative">
+            <form onSubmit={handleSearchSubmit}>
             <input
               type="text"
               placeholder="Buscar"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
               className="w-full rounded-md border border-white/25 bg-white/10 px-3 py-2 pr-10 text-sm text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <button
-              type="button"
+              type="submit"
               className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-white/80 hover:text-white"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -151,6 +238,27 @@ export function SidebarSimple({ children }: Props) {
                 <path d="M21 21l-4.35-4.35" />
               </svg>
             </button>
+            </form>
+
+            {searchValue.trim() && (
+              <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 rounded-xl border border-white/15 bg-[#22467f] p-2 shadow-xl">
+                {searchResults.length === 0 && (
+                  <p className="px-2 py-2 text-sm text-white/75">Nenhum resultado encontrado.</p>
+                )}
+
+                {searchResults.map((item) => (
+                  <button
+                    key={item.to}
+                    type="button"
+                    onClick={() => handleNavigate(item.to)}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-white/90 transition hover:bg-white hover:text-[#0d2145]"
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-xs text-white/60">{item.to}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -165,12 +273,18 @@ export function SidebarSimple({ children }: Props) {
               collapsed={collapsed}
               badge={item.badge}
               topGap={item.topGap}
+              active={location.pathname === item.to}
             >
               <img src={item.icon} alt={item.alt} className="h-6 w-6 shrink-0 object-contain" />
             </NavItem>
           ))}
 
-          <NavItem to="/settings" label="Settings" collapsed={collapsed}>
+          <NavItem
+            to={settingsItem.to}
+            label={settingsItem.label}
+            collapsed={collapsed}
+            active={location.pathname === settingsItem.to}
+          >
             <SettingsIcon />
           </NavItem>
         </ul>

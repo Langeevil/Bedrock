@@ -1,5 +1,5 @@
 // src/services/disciplinesService.ts
-import { getAuthHeaders, parseJsonOrThrow } from "../../../services/http";
+import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
 export interface Discipline {
   id: number;
   name: string;

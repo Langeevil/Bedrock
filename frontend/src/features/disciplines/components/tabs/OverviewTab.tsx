@@ -5,8 +5,8 @@ import { FileText } from "lucide-react";
 import type { Discipline } from "../../services/disciplinesService";
 import { Avatar } from "../Avatar";
 import { TEAMS } from "../../constants/teamsTheme";
-import { getDisciplinePosts } from "../../../../services/disciplinePostsService";
-import { getDisciplineFiles } from "../../../../services/disciplineFilesService";
+import { listPosts as getDisciplinePosts } from "../../services/postsService";
+import { listFiles as getDisciplineFiles } from "../../services/filesService";
 
 function formatTimeAgo(date: Date): string {
   const diffMs = Date.now() - date.getTime();

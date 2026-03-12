@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, MoreHorizontal } from "lucide-react";
 import { TEAMS } from "../../constants/teamsTheme";
-import { getDisciplineFiles } from "../../../../services/disciplineFilesService";
+import { listFiles as getDisciplineFiles } from "../../services/filesService";
 
 function getFileType(mimeType: string): string {
   if (mimeType.includes("powerpoint") || mimeType.includes("presentation")) return "pptx";

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Paperclip, Smile, Send } from "lucide-react";
 import { Avatar } from "../Avatar";
 import { TEAMS } from "../../constants/teamsTheme";
-import { getDisciplinePosts, createDisciplinePost } from "../../../../services/disciplinePostsService";
+import { listPosts as getDisciplinePosts, createPost as createDisciplinePost } from "../../services/postsService";
 
 interface Message {
   id: number;

@@ -1,36 +1,72 @@
-// services/filesService.ts
-
+// src/features/disciplines/services/filesService.ts
+import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
 import type { Material } from "../types/disciplineTypes";
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+const API_URL = "http://localhost:4000/api/disciplines";
 
-export async function listFiles(disciplineId: number): Promise<Material[]> {
-  const res = await fetch(`${BASE}/disciplines/${disciplineId}/files`);
-  if (!res.ok) throw new Error("Erro ao buscar arquivos.");
-  return res.json();
+export interface FileListPage {
+  data: Material[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
+export async function listFiles(
+  disciplineId: number,
+  options: { page?: number; limit?: number } = {}
+): Promise<FileListPage> {
+  const params = new URLSearchParams();
+  if (options.page) params.set("page", String(options.page));
+  if (options.limit) params.set("limit", String(options.limit));
+
+  const res = await fetch(`${API_URL}/${disciplineId}/arquivos?${params.toString()}`, {
+    headers: getAuthHeaders(false),
+  });
+
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao listar arquivos");
+
+  return data as FileListPage;
 }
 
 export async function uploadFile(
   disciplineId: number,
   file: File
 ): Promise<Material> {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(`${BASE}/disciplines/${disciplineId}/files`, {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/${disciplineId}/arquivos/upload`, {
     method: "POST",
-    body: form,
+    headers: getAuthHeaders(),
+    body: formData,
   });
-  if (!res.ok) throw new Error("Erro ao enviar arquivo.");
-  return res.json();
+
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao fazer upload do arquivo");
+
+  return data as Material;
 }
 
-export async function deleteFile(fileId: number): Promise<void> {
-  const res = await fetch(`${BASE}/files/${fileId}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Erro ao excluir arquivo.");
+export async function deleteFile(disciplineId: number, fileId: number): Promise<void> {
+  const res = await fetch(`${API_URL}/${disciplineId}/arquivos/${fileId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao deletar arquivo");
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }

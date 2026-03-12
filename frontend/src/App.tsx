@@ -1,28 +1,31 @@
 // src/App.tsx
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Hero from "./components/Hero";
-import Navbar from "./components/Navbar";
-import Icones from "./components/sections/Icones";
-import SobreSistema from "./components/sections/SobreSistema";
-import Escalavel from "./components/sections/Escalavel";
-import Agenda from "./components/sections/Agenda";
-import Hero2 from "./components/sections/Hero2";
+import Hero from "./shared/components/Hero";
+import Navbar from "./shared/components/Navbar";
+import Icones from "./shared/components/sections/Icones";
+import SobreSistema from "./shared/components/sections/SobreSistema";
+import Escalavel from "./shared/components/sections/Escalavel";
+import Agenda from "./shared/components/sections/Agenda";
+import Hero2 from "./shared/components/sections/Hero2";
 import "./index.css";
-import Login from "./pages/Login";
-import Footer from "./components/Footer";
-import ContainerCollapse from "./components/sections/ContainerCollapse";
-import CadastrarNomeScreen from "./pages/CadastrarNomeScreen";
-import CadastrarEmailScreen from "./pages/CadastrarEmailScreen";
-import CadastrarSenhaScreen from "./pages/CadastrarSenhaScreen";
-import DashBoardScreen from "./pages/DashBoardScreen";
-import ProjetosScreen from "./pages/ProjetosScreen";
-import DisciplineScreen from "./features/disciplines/pages/DisciplineScreen";
-import DisciplinaDetailScreen from "./features/disciplines/pages/DisciplineDetailScreen";
-import ChatScreen from "./pages/ChatScreen";
-import BibliotecaScreen from "./pages/BibliotecaScreen";
-import EstatisticaScreen from "./pages/EstatisticaScreen";
-import SettingsScreen from "./pages/SettingsScreen";
-import PrivateRoute from "./components/PrivateRoute";
+import Footer from "./shared/components/Footer";
+import ContainerCollapse from "./shared/components/sections/ContainerCollapse";
+
+// Features
+import { 
+  LoginScreen, 
+  RegisterNameScreen, 
+  RegisterEmailScreen, 
+  RegisterPasswordScreen, 
+  PrivateRoute 
+} from "./features/auth";
+import { DashboardScreen } from "./features/dashboard";
+import { ProjectsScreen } from "./features/projects";
+import { DisciplineScreen, DisciplineDetailScreen } from "./features/disciplines";
+import { ChatScreen } from "./features/chat";
+import { LibraryScreen } from "./features/library";
+import { StatisticsScreen } from "./features/statistics";
+import { SettingsScreen } from "./features/settings";
 
 function App() {
   return (
@@ -47,17 +50,23 @@ function App() {
         />
 
         {/* Páginas públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/CadastrarNomeScreen" element={<CadastrarNomeScreen />} />
-        <Route path="/CadastrarEmailScreen" element={<CadastrarEmailScreen />} />
-        <Route path="/CadastrarSenhaScreen" element={<CadastrarSenhaScreen />} />
+        <Route path="/login" element={<LoginScreen />} />
+        {/* Mantendo as rotas antigas para compatibilidade se necessário, ou redirecionando */}
+        <Route path="/CadastrarNomeScreen" element={<RegisterNameScreen />} />
+        <Route path="/CadastrarEmailScreen" element={<RegisterEmailScreen />} />
+        <Route path="/CadastrarSenhaScreen" element={<RegisterPasswordScreen />} />
+        
+        {/* Novas rotas padronizadas */}
+        <Route path="/register-name" element={<RegisterNameScreen />} />
+        <Route path="/register-email" element={<RegisterEmailScreen />} />
+        <Route path="/register-password" element={<RegisterPasswordScreen />} />
 
         {/* Páginas privadas — exigem login */}
         <Route
           path="/dashboard"
           element={
             <PrivateRoute>
-              <DashBoardScreen />
+              <DashboardScreen />
             </PrivateRoute>
           }
         />
@@ -65,7 +74,7 @@ function App() {
           path="/projetos"
           element={
             <PrivateRoute>
-              <ProjetosScreen />
+              <ProjectsScreen />
             </PrivateRoute>
           }
         />
@@ -81,7 +90,7 @@ function App() {
           path="/disciplinas/:id"
           element={
             <PrivateRoute>
-              <DisciplinaDetailScreen />
+              <DisciplineDetailScreen />
             </PrivateRoute>
           }
         />
@@ -97,7 +106,7 @@ function App() {
           path="/biblioteca"
           element={
             <PrivateRoute>
-              <BibliotecaScreen />
+              <LibraryScreen />
             </PrivateRoute>
           }
         />
@@ -105,7 +114,7 @@ function App() {
           path="/estatistica"
           element={
             <PrivateRoute>
-              <EstatisticaScreen />
+              <StatisticsScreen />
             </PrivateRoute>
           }
         />
