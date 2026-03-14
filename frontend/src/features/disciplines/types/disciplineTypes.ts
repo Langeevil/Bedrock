@@ -27,3 +27,18 @@ export interface RecentActivity {
   type: "file" | "post" | "user";
   timestamp: Date;
 }
+
+
+export interface Material {
+  id: number;
+  discipline_id: number;
+
+  original_name: string;
+  mime_type: string;
+  size_bytes: number;
+
+  created_at: string;
+  updated_at?: string;
+
+  url?: string;
+}

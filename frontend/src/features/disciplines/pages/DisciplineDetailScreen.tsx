@@ -78,7 +78,10 @@ export default function DisciplineDetailScreen() {
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     {tab === "overview" && <OverviewTab discipline={discipline} />}
+
+                    {/* MENU DE MATERIAS/ARQUIVOS */}
                     {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
+                    
                     {tab === "chat" && (
                       <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
                     )}
