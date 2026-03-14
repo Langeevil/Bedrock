@@ -74,4 +74,96 @@ export async function uploadFile(
   }
 
   return data as Material;
+  }
+
+  export async function deleteFile(
+  disciplineId: number,
+  fileId: number
+  ): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/${disciplineId}/arquivos/${fileId}`,
+    {
+      method: "DELETE",
+      headers: getAuthHeaders(false),
+    }
+  );
+
+  const data = await parseJsonOrThrow(res);
+
+  if (!res.ok) {
+    throw new Error(data.error || "Erro ao excluir arquivo");
+  }
 }
+
+export async function downloadFile(
+  disciplineId: number,
+  fileId: number,
+  originalName: string
+): Promise<void> {
+  try {
+    console.log(`[FRONT] Solicitando download: disciplina ${disciplineId}, arquivo ${fileId}`);
+    const res = await fetch(
+      `${API_URL}/${disciplineId}/arquivos/${fileId}/download`,
+      {
+        headers: getAuthHeaders(false),
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("[FRONT] Erro na resposta do servidor:", res.status, errorData);
+      throw new Error(errorData.error || "Erro ao baixar arquivo");
+    }
+
+    const blob = await res.blob();
+    console.log(`[FRONT] Blob recebido: ${blob.size} bytes, tipo: ${blob.type}`);
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = originalName;
+    document.body.appendChild(a);
+    a.click();
+
+    // Pequeno delay para garantir o clique antes de revogar
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
+    } catch (err: any) {
+    console.error("[FRONT] Erro fatal no downloadFile:", err);
+    alert("Falha ao abrir arquivo: " + err.message);
+    }
+    }
+
+    export async function openFile(
+      disciplineId: number,
+      fileId: number
+    ): Promise<void> {
+      try {
+        const res = await fetch(
+          `${API_URL}/${disciplineId}/arquivos/${fileId}/download?view=true`,
+          {
+            headers: getAuthHeaders(false),
+          }
+        );
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || "Erro ao abrir arquivo");
+        }
+
+        const blob = await res.blob();
+        // Criamos um novo blob garantindo que o tipo MIME seja mantido para o navegador abrir corretamente
+        const fileURL = URL.createObjectURL(blob);
+
+        // Abrir em nova aba
+        const newWindow = window.open(fileURL, "_blank");
+        if (!newWindow) {
+          alert("O bloqueador de pop-ups impediu a abertura do arquivo.");
+        }
+      } catch (err: any) {
+        console.error("[FRONT] Erro ao abrir arquivo:", err);
+        alert("Falha ao abrir arquivo: " + err.message);
+      }
+    }

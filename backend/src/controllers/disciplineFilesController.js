@@ -1,10 +1,67 @@
 import * as repository from "../repositories/disciplineFilesRepository.js";
 import * as disciplineRepository from "../repositories/disciplineRepository.js";
 
+import path from "node:path";
+import fs from "node:fs";
+
 class HttpError extends Error {
   constructor(status, message) {
     super(message);
     this.status = status;
+  }
+}
+
+/**
+ * Faz download de um arquivo físico
+ */
+export async function baixarArquivo(req, res) {
+  try {
+    const { id, fileId } = req.params;
+    console.log(`[DOWNLOAD] Iniciando download: disciplina ${id}, arquivo ${fileId}`);
+
+    const arquivo = await repository.findFileById(fileId);
+    if (!arquivo) {
+      console.error(`[DOWNLOAD] Arquivo ID ${fileId} não encontrado no banco.`);
+      throw new HttpError(404, "Arquivo não encontrado no banco.");
+    }
+
+    if (arquivo.discipline_id !== Number.parseInt(id, 10)) {
+      console.error(`[DOWNLOAD] Disciplina ID ${id} não coincide com o arquivo (pertence a ${arquivo.discipline_id}).`);
+      throw new HttpError(404, "Arquivo não pertence a esta disciplina.");
+    }
+
+    // O storage_key contém o caminho do arquivo (ex: uploads/123-abc.pdf)
+    const filePath = path.resolve(arquivo.storage_key);
+    console.log(`[DOWNLOAD] Caminho resolvido: ${filePath}`);
+
+    if (!fs.existsSync(filePath)) {
+      console.error(`[DOWNLOAD] Arquivo físico não encontrado em: ${filePath}`);
+      throw new HttpError(404, "Arquivo físico não encontrado no servidor.");
+    }
+
+    console.log(`[DOWNLOAD] Enviando arquivo: ${arquivo.original_name}`);
+    
+    // Se o parâmetro 'inline' estiver presente, visualiza no browser, senão baixa
+    if (req.query.view === "true") {
+      res.setHeader("Content-Type", arquivo.mime_type);
+      res.setHeader("Content-Disposition", `inline; filename="${arquivo.original_name}"`);
+      return res.sendFile(filePath);
+    }
+
+    // Forçar o nome original no download (comportamento padrão)
+    res.download(filePath, arquivo.original_name, (err) => {
+      if (err) {
+        console.error(`[DOWNLOAD] Erro ao enviar com res.download:`, err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: "Erro ao processar o download." });
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Erro ao baixar arquivo:", err);
+    res
+      .status(err.status || 500)
+      .json({ error: err.message || "Erro interno no servidor." });
   }
 }
 

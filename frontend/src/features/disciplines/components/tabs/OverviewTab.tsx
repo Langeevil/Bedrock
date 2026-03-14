@@ -49,8 +49,15 @@ export function OverviewTab({ discipline }: Readonly<Props>) {
         filesResponse.data.forEach((file: { id: number; uploaded_by_name?: string; created_at: string }) => {
           activities.push({ id: `file-${file.id}`, user: file.uploaded_by_name || "Usuário", action: "adicionou um novo arquivo", time: formatTimeAgo(new Date(file.created_at)), type: "file", timestamp: new Date(file.created_at) });
         });
-        postsResponse.data.forEach((post: { id: number; author?: { nome: string }; created_at: string }) => {
-          activities.push({ id: `post-${post.id}`, user: post.author?.nome || "Usuário", action: "publicou uma mensagem", time: formatTimeAgo(new Date(post.created_at)), type: "post", timestamp: new Date(post.created_at) });
+        postsResponse.data.forEach((post) => {
+          activities.push({ 
+            id: `post-${post.id}`, 
+            user: post.authorName, 
+            action: "publicou uma mensagem", 
+            time: formatTimeAgo(new Date(post.createdAt)), 
+            type: "post", 
+            timestamp: new Date(post.createdAt) 
+          });
         });
         activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         setRecentActivities(activities.slice(0, 5));

@@ -8,9 +8,11 @@ import pool from "../db.js";
  */
 export async function findPostsByDisciplineId(disciplineId) {
   const res = await pool.query(
-    `SELECT dp.*, u.nome as author_name, u.email as author_email
+    `SELECT dp.*, u.nome as author_name, u.email as author_email,
+            df.original_name as file_name, df.mime_type as file_type, df.size_bytes as file_size
      FROM discipline_posts dp
      JOIN users u ON dp.author_id = u.id
+     LEFT JOIN discipline_files df ON dp.file_id = df.id
      WHERE dp.discipline_id = $1 AND dp.deleted_at IS NULL
      ORDER BY dp.pinned DESC, dp.created_at DESC`,
     [disciplineId]
@@ -25,9 +27,11 @@ export async function findPostsByDisciplineId(disciplineId) {
  */
 export async function findPostById(postId) {
   const res = await pool.query(
-    `SELECT dp.*, u.nome as author_name, u.email as author_email
+    `SELECT dp.*, u.nome as author_name, u.email as author_email,
+            df.original_name as file_name, df.mime_type as file_type, df.size_bytes as file_size
      FROM discipline_posts dp
      JOIN users u ON dp.author_id = u.id
+     LEFT JOIN discipline_files df ON dp.file_id = df.id
      WHERE dp.id = $1 AND dp.deleted_at IS NULL`,
     [postId]
   );
@@ -61,13 +65,14 @@ export async function createPost({
   author_id,
   content,
   pinned = false,
+  file_id = null,
 }) {
   const res = await pool.query(
     `INSERT INTO discipline_posts 
-     (discipline_id, author_id, content, pinned)
-     VALUES ($1, $2, $3, $4)
+     (discipline_id, author_id, content, pinned, file_id)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [discipline_id, author_id, content, pinned]
+    [discipline_id, author_id, content, pinned, file_id]
   );
   return res.rows[0];
 }
@@ -135,9 +140,11 @@ export async function deletePost(postId) {
  */
 export async function findPostsByDisciplineIdPaginated(disciplineId, limit, offset) {
   const res = await pool.query(
-    `SELECT dp.*, u.nome as author_name, u.email as author_email
+    `SELECT dp.*, u.nome as author_name, u.email as author_email,
+            df.original_name as file_name, df.mime_type as file_type, df.size_bytes as file_size
      FROM discipline_posts dp
      JOIN users u ON dp.author_id = u.id
+     LEFT JOIN discipline_files df ON dp.file_id = df.id
      WHERE dp.discipline_id = $1 AND dp.deleted_at IS NULL
      ORDER BY dp.pinned DESC, dp.created_at DESC
      LIMIT $2 OFFSET $3`,

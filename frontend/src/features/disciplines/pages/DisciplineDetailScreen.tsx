@@ -82,6 +82,7 @@ export default function DisciplineDetailScreen() {
                     {/* MENU DE MATERIAS/ARQUIVOS */}
                     {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
                     
+                    {/* MENU DE CHAT/POSTAGEM */}
                     {tab === "chat" && (
                       <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
                     )}

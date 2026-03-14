@@ -1,9 +1,15 @@
 // src/features/disciplines/components/tabs/MaterialsTab.tsx
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, MoreHorizontal } from "lucide-react";
+import { Plus, MoreHorizontal, Trash2, ExternalLink } from "lucide-react";
 import { TEAMS } from "../../constants/teamsTheme";
-import { listFiles as getDisciplineFiles, uploadFile } from "../../services/filesService";
+import { 
+  listFiles as getDisciplineFiles, 
+  uploadFile, 
+  deleteFile,
+  downloadFile,
+  openFile
+} from "../../services/filesService";
 import type { Material } from "../../types/disciplineTypes";
 
 function getFileType(mimeType: string): string {
@@ -37,6 +43,7 @@ interface Props {
 export function MaterialsTab({ disciplineId }: Readonly<Props>) {
   const [files, setFiles] = useState<Material[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function loadFiles() {
@@ -57,6 +64,13 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
     loadFiles();
   }, [disciplineId]);
 
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClose = () => setOpenDropdownId(null);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, []);
+
   function openFileSelector() {
     fileInputRef.current?.click();
   }
@@ -67,14 +81,26 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
 
     try {
       setLoading(true);
-
       await uploadFile(disciplineId, file);
-
-      const r = await getDisciplineFiles(disciplineId, { page: 1, limit: 50 });
-      setFiles(r.data);
+      await loadFiles();
     } catch (err) {
       console.error(err);
       alert("Erro ao enviar arquivo.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(fileId: number) {
+    if (!window.confirm("Tem certeza que deseja excluir este arquivo?")) return;
+
+    try {
+      setLoading(true);
+      await deleteFile(disciplineId, fileId);
+      await loadFiles();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir arquivo.");
     } finally {
       setLoading(false);
     }
@@ -133,10 +159,10 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
           background: TEAMS.white,
           border: `1px solid ${TEAMS.border}`,
           borderRadius: 8,
-          overflow: "hidden",
+          overflow: "visible", // Permitir que o dropdown saia do container
         }}
       >
-        {loading && (
+        {loading && files.length === 0 && (
           <div
             style={{
               padding: "40px 16px",
@@ -162,7 +188,7 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
           </div>
         )}
 
-        {!loading && files.length > 0 && (
+        {files.length > 0 && (
           <>
             <div
               style={{
@@ -188,9 +214,8 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
               const fileType = getFileType(file.mime_type);
 
               return (
-                <button
+                <div
                   key={file.id}
-                  onClick={() => console.log("Arquivo:", file.original_name)}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "2fr 1fr 1fr 80px",
@@ -200,21 +225,16 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
                         ? `1px solid ${TEAMS.border}`
                         : "none",
                     alignItems: "center",
-                    cursor: "pointer",
                     transition: "background 0.15s",
                     background: "transparent",
-                    border: "none",
                     fontFamily: "inherit",
-                    textAlign: "left",
-                    width: "100%",
+                    position: "relative",
                   }}
                   onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background =
-                    "#FAF9F8")
+                    (e.currentTarget.style.background = "#FAF9F8")
                   }
                   onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background =
-                    "transparent")
+                    (e.currentTarget.style.background = "transparent")
                   }
                 >
                   <div
@@ -222,7 +242,10 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
                       display: "flex",
                       alignItems: "center",
                       gap: 10,
+                      cursor: "pointer",
+                      flex: 1,
                     }}
+                    onClick={() => downloadFile(disciplineId, file.id, file.original_name)}
                   >
                     <div
                       style={{
@@ -272,19 +295,96 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
                     {new Date(file.created_at).toLocaleDateString("pt-BR")}
                   </span>
 
-                  <button
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer",
-                      color: TEAMS.textMuted,
-                      padding: 4,
-                      borderRadius: 4,
-                    }}
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
-                </button>
+                  <div style={{ position: "relative", textAlign: "right" }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdownId(openDropdownId === file.id ? null : file.id);
+                      }}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        color: TEAMS.textMuted,
+                        padding: 8,
+                        borderRadius: 4,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginLeft: "auto",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#EDEBE9")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <MoreHorizontal size={18} />
+                    </button>
+
+                    {openDropdownId === file.id && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          top: "100%",
+                          background: "#fff",
+                          boxShadow: "0px 8px 16px rgba(0,0,0,0.14)",
+                          border: `1px solid ${TEAMS.border}`,
+                          borderRadius: 4,
+                          zIndex: 100,
+                          minWidth: 160,
+                          padding: "4px 0",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            openFile(disciplineId, file.id);
+                            setOpenDropdownId(null);
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            border: "none",
+                            background: "transparent",
+                            cursor: "pointer",
+                            fontSize: 13,
+                            color: TEAMS.textPrimary,
+                            textAlign: "left",
+                            fontFamily: "inherit",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F2F1")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <ExternalLink size={14} /> Abrir
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(file.id)}
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            border: "none",
+                            background: "transparent",
+                            cursor: "pointer",
+                            fontSize: 13,
+                            color: "#A4262C",
+                            textAlign: "left",
+                            fontFamily: "inherit",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F2F1")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <Trash2 size={14} /> Excluir
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </>

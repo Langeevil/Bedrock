@@ -1,7 +1,8 @@
 // components/posts/PostItem.tsx
 
-import { Trash2, Heart, MessageCircle } from "lucide-react";
+import { Trash2, Heart, MessageCircle, Paperclip, Download } from "lucide-react";
 import type { Post } from "../../types/disciplineTypes";
+import { downloadFile } from "../../services/filesService";
 
 function timeAgo(dateStr: string) {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
@@ -26,6 +27,12 @@ interface Props {
 }
 
 export function PostItem({ post, onDelete }: Readonly<Props>) {
+  const handleDownload = () => {
+    if (post.fileId && post.fileName) {
+      downloadFile(post.disciplineId, post.fileId, post.fileName);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
@@ -49,6 +56,35 @@ export function PostItem({ post, onDelete }: Readonly<Props>) {
       </div>
 
       <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+
+      {post.fileName && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group">
+          <div 
+            className="flex items-center gap-3 cursor-pointer flex-1"
+            onClick={handleDownload}
+          >
+            <div className="p-2 rounded-lg bg-white border border-slate-200 text-blue-600">
+              <Paperclip className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-slate-700 truncate max-w-[200px]">
+                {post.fileName}
+              </span>
+              <span className="text-[10px] text-slate-400">
+                {(post.fileSize || 0) / 1024 < 1024 
+                  ? `${Math.round((post.fileSize || 0) / 1024)} KB` 
+                  : `${Math.round((post.fileSize || 0) / 1024 / 1024)} MB`}
+              </span>
+            </div>
+          </div>
+          <button 
+            onClick={handleDownload}
+            className="p-2 rounded-lg hover:bg-white text-slate-400 hover:text-blue-600 transition-all"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-4 pt-1 border-t border-slate-50">
         <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-500 transition-colors">

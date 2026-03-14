@@ -75,6 +75,11 @@ export async function ensureAppSchema() {
       )
     `);
 
+    await pool.query(`
+      ALTER TABLE discipline_posts
+      ADD COLUMN IF NOT EXISTS file_id BIGINT REFERENCES discipline_files(id) ON DELETE SET NULL
+    `);
+
     // Create index for discipline_posts
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_discipline_posts_discipline_id 

@@ -2,13 +2,26 @@
 
 export type TabKey = "overview" | "materials" | "chat" | "settings";
 
-export interface DisciplinePost {
+export interface Post {
   id: number;
-  author: { nome: string };
+  disciplineId: number;
+  authorId: number;
+  authorName: string;
+  authorEmail: string;
   content: string;
-  created_at: string;
   pinned: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  likes: number;
+  comments: number;
+  // Campos de anexo (opcionais)
+  fileId?: number;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
 }
+
+export type DisciplinePost = Post;
 
 export interface DisciplineFile {
   id: number;

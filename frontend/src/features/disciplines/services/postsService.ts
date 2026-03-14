@@ -16,6 +16,26 @@ export interface PostsPaginationResponse {
   };
 }
 
+function mapBackendPostToFrontend(p: any): Post {
+  return {
+    id: p.id,
+    disciplineId: p.discipline_id,
+    authorId: p.author_id,
+    authorName: p.author_name || "Usuário",
+    authorEmail: p.author_email || "",
+    content: p.content,
+    pinned: Boolean(p.pinned),
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+    likes: 0,
+    comments: 0,
+    fileId: p.file_id,
+    fileName: p.file_name,
+    fileType: p.file_type,
+    fileSize: p.file_size,
+  };
+}
+
 export async function listPosts(
   disciplineId: number,
   page = 1,
@@ -32,26 +52,30 @@ export async function listPosts(
   const data = await parseJsonOrThrow(res);
   if (!res.ok) throw new Error(data.error || "Falha ao buscar posts");
 
-  return data as PostsPaginationResponse;
+  return {
+    ...data,
+    data: (data.data || []).map(mapBackendPostToFrontend),
+  } as PostsPaginationResponse;
 }
 
 export async function createPost(
   disciplineId: number,
-  content: string
+  content: string,
+  fileId?: number
 ): Promise<Post> {
   const res = await fetch(
     `${API_URL}/${disciplineId}/posts`,
     {
       method: "POST",
       headers: getAuthHeaders(true),
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, fileId }),
     }
   );
 
   const data = await parseJsonOrThrow(res);
   if (!res.ok) throw new Error(data.error || "Falha ao criar post");
 
-  return data as Post;
+  return mapBackendPostToFrontend(data);
 }
 
 export async function deletePost(

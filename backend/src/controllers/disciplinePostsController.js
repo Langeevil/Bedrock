@@ -74,11 +74,11 @@ export async function buscarPost(req, res) {
 export async function criarPost(req, res) {
   try {
     const { id } = req.params;
-    const { content, pinned } = req.body;
+    const { content, pinned, fileId } = req.body;
 
-    // Validação
-    if (!content || content.trim().length === 0) {
-      throw new HttpError(400, "Campo obrigatório: content");
+    // Validação: precisa de conteúdo OU um arquivo
+    if ((!content || content.trim().length === 0) && !fileId) {
+      throw new HttpError(400, "Campo obrigatório: content ou fileId");
     }
 
     const disciplina = await disciplineRepository.findDisciplineById(id);
@@ -87,11 +87,12 @@ export async function criarPost(req, res) {
     const post = await repository.createPost({
       discipline_id: id,
       author_id: req.userId,
-      content: content.trim(),
+      content: (content || "").trim(),
       pinned: Boolean(pinned),
+      file_id: fileId || null,
     });
 
-    // Buscar dados completos do post
+    // Buscar dados completos do post (incluindo join com arquivos)
     const postCompleto = await repository.findPostById(post.id);
     res.status(201).json(postCompleto);
   } catch (err) {
