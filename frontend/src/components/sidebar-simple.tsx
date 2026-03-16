@@ -1,6 +1,10 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import UserProfile from "./UserProfile";
+=======
+import UserProfile from "../shared/components/UserProfile";
+>>>>>>> 42016915976d931218c1ded4581b04d9f42c8a72
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
