@@ -61,6 +61,81 @@ export async function ensureAppSchema() {
       END $$;
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS discipline_files (
+        id BIGSERIAL PRIMARY KEY,
+        discipline_id INTEGER NOT NULL REFERENCES disciplines(id) ON DELETE CASCADE,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        storage_provider VARCHAR(30) NOT NULL DEFAULT 'local',
+        storage_key VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(120) NOT NULL,
+        size_bytes BIGINT NOT NULL,
+        uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        UNIQUE (discipline_id, file_name)
+      )
+    `);
+
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS file_path TEXT
+    `);
+    
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS file_data BYTEA
+    `);
+
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ALTER COLUMN file_name DROP NOT NULL,
+      ALTER COLUMN storage_key DROP NOT NULL
+    `);
+    
+    // Ensure file_path is nullable if it exists (legacy DBs might have it as NOT NULL)
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ALTER COLUMN file_path DROP NOT NULL
+    `);
+
+    // Ensure all columns exist in discipline_files
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS original_name VARCHAR(255)
+    `);
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS storage_provider VARCHAR(30) DEFAULT 'local'
+    `);
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS storage_key VARCHAR(255)
+    `);
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS mime_type VARCHAR(120)
+    `);
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS size_bytes BIGINT
+    `);
+    await pool.query(`
+      ALTER TABLE discipline_files
+      ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES users(id) ON DELETE CASCADE
+    `);
+
+    // Create index for discipline_files
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_discipline_files_discipline_id 
+      ON discipline_files(discipline_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_discipline_files_created_at_desc
+      ON discipline_files(discipline_id, created_at DESC)
+    `);
+
     // Create discipline_posts table for discipline announcements/posts
     await pool.query(`
       CREATE TABLE IF NOT EXISTS discipline_posts (
@@ -78,43 +153,6 @@ export async function ensureAppSchema() {
     await pool.query(`
       ALTER TABLE discipline_posts
       ADD COLUMN IF NOT EXISTS file_id BIGINT REFERENCES discipline_files(id) ON DELETE SET NULL
-    `);
-
-    // Create index for discipline_posts
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_discipline_posts_discipline_id 
-      ON discipline_posts(discipline_id)
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_discipline_posts_created_at_desc
-      ON discipline_posts(discipline_id, created_at DESC)
-    `);
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS discipline_files (
-        id BIGSERIAL PRIMARY KEY,
-        discipline_id INTEGER NOT NULL REFERENCES disciplines(id) ON DELETE CASCADE,
-        file_name VARCHAR(255) NOT NULL,
-        original_name VARCHAR(255) NOT NULL,
-        storage_provider VARCHAR(30) NOT NULL DEFAULT 'local',
-        storage_key VARCHAR(255) NOT NULL,
-        mime_type VARCHAR(120) NOT NULL,
-        size_bytes BIGINT NOT NULL,
-        uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        UNIQUE (discipline_id, file_name)
-      )
-    `);
-
-    // Create index for discipline_files
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_discipline_files_discipline_id 
-      ON discipline_files(discipline_id)
-    `);
-
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_discipline_files_created_at_desc
-      ON discipline_files(discipline_id, created_at DESC)
     `);
 
     await pool.query(`

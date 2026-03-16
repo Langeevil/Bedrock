@@ -12,12 +12,12 @@ class HttpError extends Error {
 }
 
 /**
- * Faz download de um arquivo físico
+ * Faz download de um arquivo do banco de dados (BYTEA)
  */
 export async function baixarArquivo(req, res) {
   try {
     const { id, fileId } = req.params;
-    console.log(`[DOWNLOAD] Iniciando download: disciplina ${id}, arquivo ${fileId}`);
+    console.log(`[DOWNLOAD] Iniciando download do banco: disciplina ${id}, arquivo ${fileId}`);
 
     const arquivo = await repository.findFileById(fileId);
     if (!arquivo) {
@@ -30,35 +30,26 @@ export async function baixarArquivo(req, res) {
       throw new HttpError(404, "Arquivo não pertence a esta disciplina.");
     }
 
-    // O storage_key contém o caminho do arquivo (ex: uploads/123-abc.pdf)
-    const filePath = path.resolve(arquivo.storage_key);
-    console.log(`[DOWNLOAD] Caminho resolvido: ${filePath}`);
-
-    if (!fs.existsSync(filePath)) {
-      console.error(`[DOWNLOAD] Arquivo físico não encontrado em: ${filePath}`);
-      throw new HttpError(404, "Arquivo físico não encontrado no servidor.");
+    if (!arquivo.file_data) {
+      console.error(`[DOWNLOAD] Conteúdo binário (file_data) não encontrado para o arquivo ID ${fileId}.`);
+      throw new HttpError(404, "Conteúdo do arquivo não encontrado no banco.");
     }
 
-    console.log(`[DOWNLOAD] Enviando arquivo: ${arquivo.original_name}`);
+    console.log(`[DOWNLOAD] Enviando arquivo do banco: ${arquivo.original_name}`);
     
-    // Se o parâmetro 'inline' estiver presente, visualiza no browser, senão baixa
+    // Configura headers
+    res.setHeader("Content-Type", arquivo.mime_type);
+    
     if (req.query.view === "true") {
-      res.setHeader("Content-Type", arquivo.mime_type);
       res.setHeader("Content-Disposition", `inline; filename="${arquivo.original_name}"`);
-      return res.sendFile(filePath);
+    } else {
+      res.setHeader("Content-Disposition", `attachment; filename="${arquivo.original_name}"`);
     }
 
-    // Forçar o nome original no download (comportamento padrão)
-    res.download(filePath, arquivo.original_name, (err) => {
-      if (err) {
-        console.error(`[DOWNLOAD] Erro ao enviar com res.download:`, err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: "Erro ao processar o download." });
-        }
-      }
-    });
+    // Envia o buffer diretamente do banco
+    return res.send(arquivo.file_data);
   } catch (err) {
-    console.error("Erro ao baixar arquivo:", err);
+    console.error("Erro ao baixar arquivo do banco:", err);
     res
       .status(err.status || 500)
       .json({ error: err.message || "Erro interno no servidor." });
@@ -224,7 +215,7 @@ export async function deletarArquivo(req, res) {
 }
 
 /**
- * Upload de arquivo (com multer)
+ * Upload de arquivo diretamente para o banco (BYTEA)
  */
 export async function uploadArquivo(req, res) {
   try {
@@ -236,19 +227,22 @@ export async function uploadArquivo(req, res) {
     if (!req.file)
       throw new HttpError(400, "Arquivo não enviado.");
 
+    console.log(`[UPLOAD] Recebido arquivo para o banco: ${req.file.originalname} (${req.file.size} bytes)`);
+
     const arquivo = await repository.createFile({
       discipline_id: id,
-      file_name: req.file.filename,
+      file_name: req.file.originalname, // Usamos o nome original como chave lógica
       original_name: req.file.originalname,
-      storage_key: req.file.path,
+      storage_key: "database", // Marcador de que está no banco
       mime_type: req.file.mimetype,
       size_bytes: req.file.size,
       uploaded_by: req.userId || null,
+      file_data: req.file.buffer, // O buffer vindo do MemoryStorage do Multer
     });
 
     res.status(201).json(arquivo);
   } catch (err) {
-    console.error("Erro ao fazer upload:", err);
+    console.error("Erro ao fazer upload para o banco:", err);
     res
       .status(err.status || 500)
       .json({ error: err.message || "Erro interno no servidor." });
