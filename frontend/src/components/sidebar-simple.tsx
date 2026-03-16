@@ -1,10 +1,11 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
-import UserProfile from "./UserProfile";
-=======
 import UserProfile from "../shared/components/UserProfile";
->>>>>>> 42016915976d931218c1ded4581b04d9f42c8a72
+import {
+  getStoredThemePreference,
+  setThemePreference,
+  type ThemePreference,
+} from "../shared/theme";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -71,7 +72,7 @@ const settingsItem = {
 
 function SettingsIcon() {
   return (
-    <svg className="h-6 w-6 text-white/80" viewBox="0 0 24 24" fill="currentColor">
+    <svg className="h-6 w-6 text-[color:var(--app-sidebar-contrast)]/80" viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.4 12.9c.04-.3.06-.6.06-.9s-.02-.6-.06-.9l2.1-1.6c.19-.14.24-.42.12-.63l-2-3.4c-.12-.21-.38-.3-.61-.22l-2.5 1c-.52-.4-1.08-.73-1.69-.98L14.5 2h-5l-.38 2.2c-.61-.25-1.17.57-1.69-.98l-2.5-1c-.23-.09-.49.01-.61.22l-2 3.4c-.12.21-.07.49.12.63L4.6 11.1c-.04.3-.06.6-.06.9s.02.6.06.9L2.5 14.6c-.19-.14-.24-.42-.12-.63l2 3.4c.12.21.38.3.61-.22l2.5-1c.52.4 1.08.73 1.69-.98L9.5 22h5l.38-2.2c.61-.25 1.17-.57 1.69-.98l2.5 1c.23-.09.49-.01-.61-.22l2-3.4c-.12-.21-.07-.49-.12-.63L19.4 13.9z" />
     </svg>
   );
@@ -101,8 +102,8 @@ function NavItem({
         title={collapsed ? label : undefined}
         className={`group flex items-center rounded-md px-3 py-2 transition-all ${
           active
-            ? "bg-white text-[#0d2145]"
-            : "text-white/95 hover:bg-white hover:text-[#0d2145]"
+            ? "bg-[var(--app-sidebar-hover)] text-[var(--app-sidebar-hover-text)]"
+            : "text-[color:var(--app-sidebar-contrast)]/95 hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
         } ${
           collapsed ? "justify-center" : "gap-3"
         }`}
@@ -110,7 +111,7 @@ function NavItem({
         {children}
         {!collapsed && <span className="truncate">{label}</span>}
         {!collapsed && badge && (
-          <span className="ml-auto rounded-full bg-white/90 px-2 py-0.5 text-xs text-black">
+          <span className="ml-auto rounded-full bg-[var(--app-sidebar-hover)] px-2 py-0.5 text-xs text-[var(--app-sidebar-hover-text)]">
             {badge}
           </span>
         )}
@@ -128,10 +129,23 @@ export function SidebarSimple({ children }: Props) {
     return window.localStorage.getItem(SIDEBAR_KEY) === "true";
   });
   const [searchValue, setSearchValue] = React.useState("");
+  const [themePreference, setThemePreferenceState] = React.useState<ThemePreference>(() => {
+    if (typeof window === "undefined") return "system";
+    return getStoredThemePreference();
+  });
 
   React.useEffect(() => {
     window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
   }, [collapsed]);
+
+  React.useEffect(() => {
+    function handleThemeChange() {
+      setThemePreferenceState(getStoredThemePreference());
+    }
+
+    window.addEventListener("bedrock-theme-change", handleThemeChange);
+    return () => window.removeEventListener("bedrock-theme-change", handleThemeChange);
+  }, []);
 
   const searchableItems = React.useMemo(
     () => [...navItems, { ...settingsItem, icon: "", alt: "" }],
@@ -159,9 +173,26 @@ export function SidebarSimple({ children }: Props) {
     handleNavigate(searchResults[0].to);
   }
 
+  function cycleTheme() {
+    const nextTheme: ThemePreference =
+      themePreference === "system"
+        ? "bedrocklight"
+        : themePreference === "bedrocklight"
+          ? "bedrockdark"
+          : "system";
+    setThemePreference(nextTheme);
+    setThemePreferenceState(nextTheme);
+  }
+
+  function themeLabel() {
+    if (themePreference === "system") return "Tema: sistema";
+    if (themePreference === "bedrocklight") return "Tema: claro";
+    return "Tema: escuro";
+  }
+
   return (
     <aside
-      className={`z-20 flex h-screen flex-col gap-4 bg-[#18396F] p-4 text-white shadow-2xl transition-all duration-300 ease-out ${
+      className={`z-20 flex h-screen flex-col gap-4 bg-[var(--app-sidebar)] p-4 text-[var(--app-sidebar-contrast)] shadow-2xl transition-all duration-300 ease-out ${
         collapsed ? "w-24 min-w-[6rem]" : "w-80 min-w-[20rem]"
       }`}
     >
@@ -174,26 +205,60 @@ export function SidebarSimple({ children }: Props) {
             alt="Logo"
             className="h-8 w-8 shrink-0"
           />
-          {!collapsed && <h3 className="truncate text-lg font-semibold text-white">Menu Lateral</h3>}
+          {!collapsed && <h3 className="truncate text-lg font-semibold text-[var(--app-sidebar-contrast)]">Menu Lateral</h3>}
         </div>
 
         {!collapsed && (
-          <button
-            type="button"
-            onClick={() => setCollapsed(true)}
-            aria-label="Recolher menu lateral"
-            className="ml-auto rounded-xl border border-white/15 bg-white/10 p-2 text-white/90 transition hover:bg-white hover:text-[#0d2145]"
-          >
-            <svg
-              className="h-4 w-4 transition-transform duration-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={cycleTheme}
+              title={themeLabel()}
+              aria-label={themeLabel()}
+              className="rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
             >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
+              {themePreference === "bedrockdark" ? (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2.5" />
+                  <path d="M12 19.5V22" />
+                  <path d="M4.93 4.93l1.77 1.77" />
+                  <path d="M17.3 17.3l1.77 1.77" />
+                  <path d="M2 12h2.5" />
+                  <path d="M19.5 12H22" />
+                  <path d="M4.93 19.07l1.77-1.77" />
+                  <path d="M17.3 6.7l1.77-1.77" />
+                </svg>
+              ) : themePreference === "bedrocklight" ? (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79z" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="14" rx="2" />
+                  <path d="M8 20h8" />
+                  <path d="M12 18v2" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCollapsed(true)}
+              aria-label="Recolher menu lateral"
+              className="rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
+            >
+              <svg
+                className="h-4 w-4 transition-transform duration-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
         )}
       </div>
 
@@ -202,9 +267,41 @@ export function SidebarSimple({ children }: Props) {
           <div className="flex flex-col items-center gap-3">
             <button
               type="button"
+              aria-label={themeLabel()}
+              title={themeLabel()}
+              onClick={cycleTheme}
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
+            >
+              {themePreference === "bedrockdark" ? (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2.5" />
+                  <path d="M12 19.5V22" />
+                  <path d="M4.93 4.93l1.77 1.77" />
+                  <path d="M17.3 17.3l1.77 1.77" />
+                  <path d="M2 12h2.5" />
+                  <path d="M19.5 12H22" />
+                  <path d="M4.93 19.07l1.77-1.77" />
+                  <path d="M17.3 6.7l1.77-1.77" />
+                </svg>
+              ) : themePreference === "bedrocklight" ? (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="14" rx="2" />
+                  <path d="M8 20h8" />
+                  <path d="M12 18v2" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              type="button"
               aria-label="Reabrir menu lateral"
               onClick={() => setCollapsed(false)}
-              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/80 transition hover:bg-white hover:text-[#0d2145]"
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 6l6 6-6 6" />
@@ -215,7 +312,7 @@ export function SidebarSimple({ children }: Props) {
               type="button"
               aria-label="Buscar"
               onClick={() => setCollapsed(false)}
-              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/80 transition hover:bg-white hover:text-[#0d2145]"
+              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="6" />
@@ -231,11 +328,11 @@ export function SidebarSimple({ children }: Props) {
               placeholder="Buscar"
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
-              className="w-full rounded-md border border-white/25 bg-white/10 px-3 py-2 pr-10 text-sm text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] px-3 py-2 pr-10 text-sm text-[var(--app-sidebar-contrast)] placeholder:text-[color:var(--app-sidebar-contrast)]/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <button
               type="submit"
-              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-white/80 hover:text-white"
+              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[color:var(--app-sidebar-contrast)]/80 hover:text-[var(--app-sidebar-contrast)]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="6" />
@@ -245,9 +342,9 @@ export function SidebarSimple({ children }: Props) {
             </form>
 
             {searchValue.trim() && (
-              <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 rounded-xl border border-white/15 bg-[#22467f] p-2 shadow-xl">
+              <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-popup)] p-2 shadow-xl">
                 {searchResults.length === 0 && (
-                  <p className="px-2 py-2 text-sm text-white/75">Nenhum resultado encontrado.</p>
+                  <p className="px-2 py-2 text-sm text-[color:var(--app-sidebar-contrast)]/75">Nenhum resultado encontrado.</p>
                 )}
 
                 {searchResults.map((item) => (
@@ -255,10 +352,10 @@ export function SidebarSimple({ children }: Props) {
                     key={item.to}
                     type="button"
                     onClick={() => handleNavigate(item.to)}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-white/90 transition hover:bg-white hover:text-[#0d2145]"
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
                   >
                     <span>{item.label}</span>
-                    <span className="text-xs text-white/60">{item.to}</span>
+                    <span className="text-xs text-[color:var(--app-sidebar-contrast)]/60">{item.to}</span>
                   </button>
                 ))}
               </div>
@@ -295,14 +392,14 @@ export function SidebarSimple({ children }: Props) {
       </nav>
 
       {openAlert && !collapsed && (
-        <div className="mt-4 rounded-md border-l-4 border-blue-300 bg-white/90 p-3 text-slate-800 transition-opacity">
+        <div className="mt-4 rounded-md border-l-4 border-blue-300 bg-white/90 p-3 text-[var(--app-text)] transition-opacity">
           <div className="flex items-start gap-3">
             <svg className="h-8 w-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
             </svg>
             <div>
-              <h4 className="font-semibold text-slate-900">Upgrade to PRO</h4>
-              <p className="text-sm text-slate-700">
+              <h4 className="font-semibold text-[var(--app-text)]">Upgrade to PRO</h4>
+              <p className="text-sm text-[var(--app-text-muted)]">
                 Upgrade to Material Tailwind PRO and get more components, plugins and premium features.
               </p>
             </div>

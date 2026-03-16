@@ -1,5 +1,3 @@
-// src/features/settings/pages/SettingsScreen.tsx
-
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarSimple } from "../../../components/sidebar-simple";
@@ -27,8 +25,8 @@ export default function SettingsScreen() {
     loadUser();
   }, []);
 
-  function saveLocalProfile(e: FormEvent) {
-    e.preventDefault();
+  function saveLocalProfile(event: FormEvent) {
+    event.preventDefault();
     localStorage.setItem("user_nome", nome);
     localStorage.setItem("user_email", email);
     alert("Dados locais atualizados.");
@@ -60,35 +58,63 @@ export default function SettingsScreen() {
     <div className="flex h-screen">
       <SidebarSimple />
 
-      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
-        <h1 className="text-3xl font-semibold text-slate-800 mb-6">Configurações</h1>
+      <div className="app-page flex-grow overflow-y-auto p-8">
+        <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">Configurações</h1>
 
-        <form onSubmit={saveLocalProfile} className="card bg-white shadow p-6 mb-6 max-w-2xl">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Dados da conta</h2>
+        <form onSubmit={saveLocalProfile} className="card app-panel mb-6 max-w-2xl p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold text-[var(--app-text)]">Dados da conta</h2>
           <label className="form-control mb-3">
-            <span className="label-text text-slate-700">Nome</span>
-            <input className="input input-bordered bg-white" value={nome} onChange={(e) => setNome(e.target.value)} />
+            <span className="label-text text-[var(--app-text)]">Nome</span>
+            <input
+              className="input input-bordered app-input"
+              value={nome}
+              onChange={(event) => setNome(event.target.value)}
+            />
           </label>
           <label className="form-control mb-3">
-            <span className="label-text text-slate-700">E-mail</span>
-            <input className="input input-bordered bg-white" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <span className="label-text text-[var(--app-text)]">E-mail</span>
+            <input
+              className="input input-bordered app-input"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
           </label>
-          <button className="btn btn-primary w-fit" type="submit">Salvar dados locais</button>
+          <button
+            className="btn w-fit border-0 bg-blue-600 text-white hover:bg-blue-500"
+            type="submit"
+          >
+            Salvar dados locais
+          </button>
         </form>
 
-        <div className="card bg-white shadow p-6 max-w-2xl">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Tipo de perfil</h2>
-          <select className="select select-bordered bg-white mb-4" value={role} onChange={(e) => setRole(e.target.value)}>
+        <div className="card app-panel max-w-2xl p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold text-[var(--app-text)]">Tipo de perfil</h2>
+          <select
+            className="select select-bordered app-input mb-4"
+            value={role}
+            onChange={(event) => setRole(event.target.value)}
+          >
             <option value="">Selecione...</option>
             <option value="professor">Professor</option>
             <option value="aluno">Aluno</option>
             <option value="empresa">Empresa</option>
           </select>
           <div className="flex flex-wrap gap-3">
-            <button className="btn btn-secondary" onClick={saveRole} disabled={loading} type="button">
+            <button
+              className="btn border-0 bg-cyan-600 text-white hover:bg-cyan-500 disabled:border-0 disabled:bg-slate-600 disabled:text-slate-200"
+              onClick={saveRole}
+              disabled={loading}
+              type="button"
+            >
               {loading ? "Salvando..." : "Atualizar perfil"}
             </button>
-            <button className="btn btn-outline btn-error" onClick={logout} type="button">Sair da conta</button>
+            <button
+              className="btn btn-outline border-red-400 text-red-300 hover:border-red-300 hover:bg-red-500/10 hover:text-red-200"
+              onClick={logout}
+              type="button"
+            >
+              Sair da conta
+            </button>
           </div>
         </div>
       </div>

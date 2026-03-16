@@ -1,5 +1,3 @@
-// src/features/dashboard/pages/DashboardScreen.tsx
-
 import { useEffect, useState } from "react";
 import ProfileModal from "../../auth/components/ProfileModal";
 import { getMe } from "../../auth/services/authService";
@@ -49,32 +47,32 @@ export default function DashboardScreen() {
 
       {showModal && <ProfileModal onClose={() => setShowModal(false)} />}
 
-      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
-        <h1 className="text-3xl font-semibold text-slate-800 mb-8">Dashboard Overview</h1>
+      <div className="app-page flex-grow overflow-y-auto p-8">
+        <h1 className="mb-8 text-3xl font-semibold text-[var(--app-text)]">Dashboard Overview</h1>
 
         {error && (
-          <div className="alert alert-warning mb-6 bg-amber-100 border-amber-300 text-amber-900">
+          <div className="alert alert-warning mb-6 border-amber-300 bg-amber-100 text-amber-900">
             <span>{error}</span>
           </div>
         )}
 
-        <div className="stats stats-vertical lg:stats-horizontal shadow mb-8 bg-white">
+        <div className="stats app-panel mb-8 shadow stats-vertical lg:stats-horizontal">
           <div className="stat">
-            <div className="stat-title text-slate-500">Total Students</div>
+            <div className="stat-title app-text-muted">Total Students</div>
             <div className="stat-value text-primary">{stats.totalStudents}</div>
-            <div className="stat-desc text-slate-500">Dados atuais de alunos com perfil.</div>
+            <div className="stat-desc app-text-muted">Dados atuais de alunos com perfil.</div>
           </div>
 
           <div className="stat">
-            <div className="stat-title text-slate-500">Active Courses</div>
+            <div className="stat-title app-text-muted">Active Courses</div>
             <div className="stat-value text-secondary">{stats.activeCourses}</div>
-            <div className="stat-desc text-slate-500">Disciplinas cadastradas por você.</div>
+            <div className="stat-desc app-text-muted">Disciplinas cadastradas por você.</div>
           </div>
 
           <div className="stat">
-            <div className="stat-title text-slate-500">Profile Completion</div>
+            <div className="stat-title app-text-muted">Profile Completion</div>
             <div className="stat-value text-accent">{stats.graduationRate}%</div>
-            <div className="stat-desc text-slate-500">Usuários com perfil completo.</div>
+            <div className="stat-desc app-text-muted">Usuários com perfil completo.</div>
           </div>
         </div>
       </div>

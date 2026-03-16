@@ -1,5 +1,3 @@
-// src/features/library/pages/LibraryScreen.tsx
-
 import { useMemo, useState } from "react";
 import { SidebarSimple } from "../../../components/sidebar-simple";
 import type { Resource } from "../types/libraryTypes";
@@ -29,20 +27,20 @@ export default function LibraryScreen() {
     <div className="flex h-screen">
       <SidebarSimple />
 
-      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
-        <h1 className="text-3xl font-semibold text-slate-800 mb-6">Biblioteca</h1>
+      <div className="app-page flex-grow overflow-y-auto p-8">
+        <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">Biblioteca</h1>
 
-        <div className="card bg-white shadow p-4 mb-6 flex flex-col md:flex-row gap-3">
+        <div className="card app-panel mb-6 flex flex-col gap-3 p-4 shadow md:flex-row">
           <input
-            className="input input-bordered bg-white text-slate-800 flex-1"
+            className="input input-bordered app-input flex-1"
             placeholder="Buscar por título ou área"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
           />
           <select
-            className="select select-bordered bg-white"
+            className="select select-bordered app-input"
             value={type}
-            onChange={(e) => setType(e.target.value as any)}
+            onChange={(event) => setType(event.target.value as "todos" | Resource["type"])}
           >
             <option value="todos">Todos os tipos</option>
             <option value="artigo">Artigos</option>
@@ -51,14 +49,16 @@ export default function LibraryScreen() {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((item) => (
-            <div key={item.id} className="card bg-white shadow">
+            <div key={item.id} className="card app-panel shadow">
               <div className="card-body">
-                <h2 className="card-title text-slate-900">{item.title}</h2>
-                <p className="text-slate-600">Área: {item.subject}</p>
-                <div className="badge badge-outline text-slate-700">{item.type}</div>
-                <div className="card-actions justify-end mt-2">
+                <h2 className="card-title text-[var(--app-text)]">{item.title}</h2>
+                <p className="app-text-muted">Área: {item.subject}</p>
+                <div className="badge badge-outline border-[var(--app-border)] text-[var(--app-text)]">
+                  {item.type}
+                </div>
+                <div className="card-actions mt-2 justify-end">
                   <button className="btn btn-primary btn-sm">Abrir</button>
                 </div>
               </div>
@@ -67,7 +67,7 @@ export default function LibraryScreen() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="card bg-white shadow p-6 text-slate-600">Nenhum material encontrado.</div>
+          <div className="card app-panel app-text-muted p-6 shadow">Nenhum material encontrado.</div>
         )}
       </div>
     </div>

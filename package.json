@@ -1,4 +1,11 @@
 {
+  "name": "bedrock-root",
+  "private": true,
+  "scripts": {
+    "start": "node scripts/start-all.js",
+    "start:backend": "npm --prefix backend start",
+    "start:frontend": "npm --prefix frontend run dev"
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",

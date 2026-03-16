@@ -9,7 +9,6 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Buscar dados do usuário do localStorage
     const nome = localStorage.getItem("user_nome");
     const email = localStorage.getItem("user_email");
     setUserName(nome);
@@ -25,23 +24,23 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   };
 
   return (
-    <div className="mt-auto border-t border-white/20 pt-4">
+    <div className="mt-auto border-t border-[var(--app-sidebar-surface-border)] pt-4">
       <div className={`relative ${collapsed ? "flex justify-center" : ""}`}>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className={`flex items-center w-full rounded-md px-3 py-2 text-white/95 hover:bg-white/10 transition-all ${
+          className={`flex w-full items-center rounded-md px-3 py-2 text-[color:var(--app-sidebar-contrast)]/95 transition-all hover:bg-[var(--app-sidebar-surface)] ${
             collapsed ? "justify-center" : "gap-3"
           }`}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 flex-shrink-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--app-sidebar-surface)]">
             <User size={18} />
           </div>
           {!collapsed && (
-            <div className="flex-1 min-w-0 text-left">
-              <div className="text-sm font-semibold truncate text-white">
+            <div className="min-w-0 flex-1 text-left">
+              <div className="truncate text-sm font-semibold text-[var(--app-sidebar-contrast)]">
                 {userName || "Usuário"}
               </div>
-              <div className="text-xs truncate text-white/70">
+              <div className="truncate text-xs text-[color:var(--app-sidebar-contrast)]/70">
                 {userEmail || "email@exemplo.com"}
               </div>
             </div>
@@ -49,20 +48,20 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
         </button>
 
         {showMenu && !collapsed && (
-          <div className="absolute bottom-full left-0 mb-2 w-full bg-[#0d2145] rounded-md shadow-xl border border-white/10 z-50">
+          <div className="absolute bottom-full left-0 z-50 mb-2 w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-popup)] shadow-xl">
             <button
               onClick={() => {
                 navigate("/settings");
                 setShowMenu(false);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 text-white/80 hover:bg-white/10 text-sm transition-all rounded-t-md"
+              className="flex w-full items-center gap-3 rounded-t-md px-3 py-2 text-sm text-[color:var(--app-sidebar-contrast)]/80 transition-all hover:bg-[var(--app-sidebar-surface)]"
             >
               <User size={16} />
               Perfil
             </button>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 text-red-400 hover:bg-red-500/10 text-sm transition-all rounded-b-md border-t border-white/10"
+              className="flex w-full items-center gap-3 rounded-b-md border-t border-[var(--app-sidebar-surface-border)] px-3 py-2 text-sm text-red-300 transition-all hover:bg-red-500/10"
             >
               <LogOut size={16} />
               Sair

@@ -1,5 +1,3 @@
-// src/features/projects/pages/ProjectsScreen.tsx
-
 import { useMemo, useState, type FormEvent } from "react";
 import { SidebarSimple } from "../../../components/sidebar-simple";
 import type { Project } from "../types/projectTypes";
@@ -35,8 +33,8 @@ export default function ProjectsScreen() {
     localStorage.setItem(storageKey, JSON.stringify(next));
   }
 
-  function addProject(e: FormEvent) {
-    e.preventDefault();
+  function addProject(event: FormEvent) {
+    event.preventDefault();
     if (!title.trim()) return;
 
     const next: Project[] = [
@@ -55,62 +53,69 @@ export default function ProjectsScreen() {
   }
 
   function updateStatus(id: number, status: Project["status"]) {
-    persist(projects.map((p) => (p.id === id ? { ...p, status } : p)));
+    persist(projects.map((project) => (project.id === id ? { ...project, status } : project)));
   }
 
   function removeProject(id: number) {
-    persist(projects.filter((p) => p.id !== id));
+    persist(projects.filter((project) => project.id !== id));
   }
 
   return (
     <div className="flex h-screen">
       <SidebarSimple />
 
-      <div className="flex-grow p-8 overflow-y-auto bg-[#f4f7fc]">
-        <h1 className="text-3xl font-semibold text-slate-800 mb-6">Projetos</h1>
+      <div className="app-page flex-grow overflow-y-auto p-8">
+        <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">Projetos</h1>
 
-        <form onSubmit={addProject} className="card bg-white shadow p-4 mb-6 grid gap-3 md:grid-cols-3">
+        <form onSubmit={addProject} className="card app-panel mb-6 grid gap-3 p-4 shadow md:grid-cols-3">
           <input
-            className="input input-bordered bg-white text-slate-800"
+            className="input input-bordered app-input"
             placeholder="Nome do projeto"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(event) => setTitle(event.target.value)}
           />
           <input
-            className="input input-bordered bg-white text-slate-800"
+            className="input input-bordered app-input"
             placeholder="Descrição rápida"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(event) => setDescription(event.target.value)}
           />
-          <button className="btn btn-primary" type="submit">Adicionar projeto</button>
+          <button className="btn btn-primary" type="submit">
+            Adicionar projeto
+          </button>
         </form>
 
         <div className="mb-6">
           <input
-            className="input input-bordered bg-white text-slate-800 w-full max-w-md"
+            className="input input-bordered app-input w-full max-w-md"
             placeholder="Buscar projeto"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visibleProjects.map((project) => (
-            <div key={project.id} className="card bg-white shadow">
+            <div key={project.id} className="card app-panel shadow">
               <div className="card-body">
-                <h2 className="card-title text-slate-900">{project.title}</h2>
-                <p className="text-slate-600">{project.description || "Sem descrição"}</p>
+                <h2 className="card-title text-[var(--app-text)]">{project.title}</h2>
+                <p className="app-text-muted">{project.description || "Sem descrição"}</p>
                 <select
-                  className="select select-bordered bg-white mt-2"
+                  className="select select-bordered app-input mt-2"
                   value={project.status}
-                  onChange={(e) => updateStatus(project.id, e.target.value as Project["status"])}
+                  onChange={(event) =>
+                    updateStatus(project.id, event.target.value as Project["status"])
+                  }
                 >
                   <option value="planejado">Planejado</option>
                   <option value="em andamento">Em andamento</option>
                   <option value="concluido">Concluído</option>
                 </select>
-                <div className="card-actions justify-end mt-3">
-                  <button className="btn btn-error btn-outline btn-sm" onClick={() => removeProject(project.id)}>
+                <div className="card-actions mt-3 justify-end">
+                  <button
+                    className="btn btn-error btn-outline btn-sm"
+                    onClick={() => removeProject(project.id)}
+                  >
                     Excluir
                   </button>
                 </div>
@@ -120,7 +125,7 @@ export default function ProjectsScreen() {
         </div>
 
         {visibleProjects.length === 0 && (
-          <div className="card bg-white shadow p-6 text-slate-600">Nenhum projeto encontrado.</div>
+          <div className="card app-panel app-text-muted p-6 shadow">Nenhum projeto encontrado.</div>
         )}
       </div>
     </div>

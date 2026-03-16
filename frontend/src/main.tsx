@@ -2,9 +2,16 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
+import {
+  applyTheme,
+  getStoredThemePreference,
+  subscribeToSystemThemeChanges,
+} from "./shared/theme";
 
-document.documentElement.setAttribute("data-theme", "bedrocklight");
-document.documentElement.style.colorScheme = "light";
+applyTheme(getStoredThemePreference());
+subscribeToSystemThemeChanges(() => {
+  applyTheme(getStoredThemePreference());
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
