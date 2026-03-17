@@ -16,13 +16,13 @@ function buildDonut(values: number[], r = 60, stroke = 20) {
   const circ = 2 * Math.PI * r;
   let offset = 0;
 
-  return values.map((v, i) => {
+  return values.map((v) => {
     const pct = v / total;
     const dash = pct * circ;
     const gap = circ - dash;
     const rotation = -90 + (offset / total) * 360;
     offset += v;
-    return { dash, gap, rotation, cx, cy, r, circ, stroke };
+    return { dash, gap, rotation, cx, cy, r, stroke };
   });
 }
 
@@ -38,7 +38,7 @@ export function ProjectChart({ projects }: Props) {
       <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
         {/* SVG Donut */}
         <svg width={160} height={160} viewBox="0 0 160 160">
-          {arcs.map(({ dash, gap, rotation, cx, cy, r, circ, stroke }, i) => (
+          {arcs.map(({ dash, gap, rotation, cx, cy, r, stroke }, i) => (
             <circle
               key={i}
               cx={cx} cy={cy} r={r}
