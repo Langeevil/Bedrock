@@ -42,7 +42,7 @@ export function ProjectHeader({ activeTab, onTabChange, projectCount }: Readonly
       {/* Breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 0 0", fontSize: 12 }}>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           style={{
             display: "flex", alignItems: "center", gap: 4,
             background: "transparent", border: "none", cursor: "pointer",
