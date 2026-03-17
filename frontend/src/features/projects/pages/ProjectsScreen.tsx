@@ -1,133 +1,60 @@
-import { useMemo, useState, type FormEvent } from "react";
 import { SidebarSimple } from "../../../components/sidebar-simple";
-import type { Project } from "../types/projectTypes";
-
-const storageKey = "bedrock_projects";
-
-function loadProjects(): Project[] {
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
+import { useProjects } from "../hooks/useProjects";
+import { ProjectForm } from "../components/ProjectForm";
+import { ProjectStats } from "../components/ProjectStats";
+import { ProjectChart } from "../components/ProjectChart";
+import { ProjectCard } from "../components/ProjectCard";
+import type { ProjectStatus } from "../types/projectTypes";
 
 export default function ProjectsScreen() {
-  const [projects, setProjects] = useState<Project[]>(loadProjects());
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [search, setSearch] = useState("");
-
-  const visibleProjects = useMemo(() => {
-    const term = search.toLowerCase();
-    return projects.filter(
-      (p) => p.title.toLowerCase().includes(term) || p.description.toLowerCase().includes(term)
-    );
-  }, [projects, search]);
-
-  function persist(next: Project[]) {
-    setProjects(next);
-    localStorage.setItem(storageKey, JSON.stringify(next));
-  }
-
-  function addProject(event: FormEvent) {
-    event.preventDefault();
-    if (!title.trim()) return;
-
-    const next: Project[] = [
-      {
-        id: Date.now(),
-        title: title.trim(),
-        description: description.trim(),
-        status: "planejado",
-      },
-      ...projects,
-    ];
-
-    persist(next);
-    setTitle("");
-    setDescription("");
-  }
-
-  function updateStatus(id: number, status: Project["status"]) {
-    persist(projects.map((project) => (project.id === id ? { ...project, status } : project)));
-  }
-
-  function removeProject(id: number) {
-    persist(projects.filter((project) => project.id !== id));
-  }
+  const { projects, loading, addProject, updateStatus, removeProject } = useProjects();
 
   return (
-    <div className="flex h-screen">
+    <div style={{ display: "flex", height: "100vh", background: "#f8fafc", fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <SidebarSimple />
 
-      <div className="app-page flex-grow overflow-y-auto p-8">
-        <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">Projetos</h1>
+      <main style={{ flex: 1, overflowY: "auto", padding: "40px 48px" }}>
+        {/* Header */}
+        <header style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", margin: 0 }}>Projetos</h1>
+          <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 4 }}>Gerencie suas iniciativas e acompanhe o progresso</p>
+        </header>
 
-        <form onSubmit={addProject} className="card app-panel mb-6 grid gap-3 p-4 shadow md:grid-cols-3">
-          <input
-            className="input input-bordered app-input"
-            placeholder="Nome do projeto"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-          <input
-            className="input input-bordered app-input"
-            placeholder="Descrição rápida"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-          <button className="btn btn-primary" type="submit">
-            Adicionar projeto
-          </button>
-        </form>
-
-        <div className="mb-6">
-          <input
-            className="input input-bordered app-input w-full max-w-md"
-            placeholder="Buscar projeto"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+        {/* Form */}
+        <div style={{ marginBottom: 32 }}>
+          <ProjectForm onAdd={addProject} />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {visibleProjects.map((project) => (
-            <div key={project.id} className="card app-panel shadow">
-              <div className="card-body">
-                <h2 className="card-title text-[var(--app-text)]">{project.title}</h2>
-                <p className="app-text-muted">{project.description || "Sem descrição"}</p>
-                <select
-                  className="select select-bordered app-input mt-2"
-                  value={project.status}
-                  onChange={(event) =>
-                    updateStatus(project.id, event.target.value as Project["status"])
-                  }
-                >
-                  <option value="planejado">Planejado</option>
-                  <option value="em andamento">Em andamento</option>
-                  <option value="concluido">Concluído</option>
-                </select>
-                <div className="card-actions mt-3 justify-end">
-                  <button
-                    className="btn btn-error btn-outline btn-sm"
-                    onClick={() => removeProject(project.id)}
-                  >
-                    Excluir
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {visibleProjects.length === 0 && (
-          <div className="card app-panel app-text-muted p-6 shadow">Nenhum projeto encontrado.</div>
+        {/* Stats + Chart */}
+        {projects.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 16, marginBottom: 32, alignItems: "start" }}>
+            <ProjectStats projects={projects} />
+            <ProjectChart projects={projects} />
+          </div>
         )}
-      </div>
+
+        {/* Grid */}
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: 80 }}>
+            <span className="loading loading-spinner loading-lg text-primary" />
+          </div>
+        ) : projects.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 0", borderRadius: 16, border: "2px dashed #e2e8f0" }}>
+            <p style={{ color: "#94a3b8", fontSize: 14 }}>Nenhum projeto ainda. Crie o primeiro acima.</p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onUpdateStatus={(id, s) => updateStatus(id, s as ProjectStatus)}
+                onRemove={removeProject}
+              />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
