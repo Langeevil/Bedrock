@@ -11,9 +11,9 @@ export const useProjects = () => {
     setLoading(true);
     try {
       const data = await service.listProjects();
-      setProjects(data);
+      setProjects(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao listar projetos:", error);
     } finally {
       setLoading(false);
     }
@@ -24,8 +24,13 @@ export const useProjects = () => {
   }, [refresh]);
 
   const addProject = async (dto: CreateProjectDTO) => {
-    const newProject = await service.createProject(dto);
-    setProjects((prev) => [newProject, ...prev]);
+    try {
+      const newProject = await service.createProject(dto);
+      setProjects((prev) => [newProject, ...prev]);
+    } catch (error) {
+      console.error("Erro ao adicionar projeto:", error);
+      throw error;
+    }
   };
 
   const updateStatus = async (id: string, status: ProjectStatus) => {

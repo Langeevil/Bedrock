@@ -1,52 +1,57 @@
-// src/features/projects/services/projectsService.ts
-import type { Project, CreateProjectDTO, ProjectStatus } from "../types/projectTypes";
+import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import type { Project, ProjectStatus, CreateProjectDTO } from "../types/projectTypes";
 
-const STORAGE_KEY = "bedrock_projects";
+const API_URL = "http://localhost:4000/api/projects";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// Tipos para os dados do Grafo
+export interface GraphData {
+  nodes: { id: string; label: string; type: string; color?: string }[];
+  links: { source: string; target: string; relationship: string }[];
+}
 
-const getStoredProjects = (): Project[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-};
+export interface ProjectDetailsResponse {
+  project: Project;
+  graphData: GraphData;
+}
 
-const setStoredProjects = (projects: Project[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-};
+export async function listProjects(): Promise<Project[]> {
+  const res = await fetch(`${API_URL}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  return await parseJsonOrThrow(res);
+}
 
-export const listProjects = async (): Promise<Project[]> => {
-  await delay(300); // Simulate network
-  return getStoredProjects();
-};
+export async function createProject(dto: CreateProjectDTO): Promise<Project> {
+  const res = await fetch(`${API_URL}`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ name: dto.title }),
+  });
+  const data = await parseJsonOrThrow(res);
+  return data.project || data;
+}
 
-export const createProject = async (dto: CreateProjectDTO): Promise<Project> => {
-  await delay(500);
-  const projects = getStoredProjects();
-  const newProject: Project = {
-    id: crypto.randomUUID(),
-    title: dto.title,
-    description: dto.description || "",
-    status: "planejado",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  setStoredProjects([newProject, ...projects]);
-  return newProject;
-};
+export async function updateProjectStatus(id: string, status: ProjectStatus): Promise<Project> {
+  const res = await fetch(`${API_URL}/${id}/status`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ status }),
+  });
+  return await parseJsonOrThrow(res);
+}
 
-export const updateProjectStatus = async (id: string, status: ProjectStatus): Promise<Project> => {
-  await delay(300);
-  const projects = getStoredProjects();
-  const index = projects.findIndex((p) => p.id === id);
-  if (index === -1) throw new Error("Project not found");
-  
-  projects[index] = { ...projects[index], status, updatedAt: new Date().toISOString() };
-  setStoredProjects(projects);
-  return projects[index];
-};
+export async function deleteProject(id: string): Promise<void> {
+  await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+}
 
-export const deleteProject = async (id: string): Promise<void> => {
-  await delay(300);
-  const projects = getStoredProjects();
-  setStoredProjects(projects.filter((p) => p.id !== id));
-};
+export async function getProjectGraph(id: string): Promise<ProjectDetailsResponse> {
+  const res = await fetch(`${API_URL}/${id}/graph`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  return await parseJsonOrThrow(res);
+}

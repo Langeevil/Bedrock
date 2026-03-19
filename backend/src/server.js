@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import disciplinesRoutes from "./routes/disciplines.js";
 import chatRoutes from "./routes/chat.js";
+import projectRoutes from "./routes/projects.js";
 
 import { ensureAppSchema } from "./dbInit.js";
 import { initChatSocket } from "./chatSocket.js";
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/disciplines", disciplinesRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/projects", projectRoutes);
 app.use("/uploads", express.static("uploads"));
 /* SERVER HTTP */
 const PORT = process.env.PORT || 4000;

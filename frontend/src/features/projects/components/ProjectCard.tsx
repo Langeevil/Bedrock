@@ -13,7 +13,9 @@ const statusStyle: Record<ProjectStatus, { color: string; bg: string; label: str
 };
 
 export function ProjectCard({ project, onUpdateStatus, onRemove }: Props) {
-  const s = statusStyle[project.status];
+  // Adiciona fallback para evitar erro de 'undefined' na leitura de .color
+  const status = project.status || "planejado";
+  const s = statusStyle[status] || statusStyle["planejado"];
 
   return (
     <div style={{
@@ -57,7 +59,7 @@ export function ProjectCard({ project, onUpdateStatus, onRemove }: Props) {
       </div>
 
       <p style={{ fontSize: 11, color: "#cbd5e1", margin: 0 }}>
-        {new Date(project.createdAt).toLocaleDateString("pt-BR")}
+        {new Date(project.createdAt || Date.now()).toLocaleDateString("pt-BR")}
       </p>
     </div>
   );
