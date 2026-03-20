@@ -1,127 +1,114 @@
-import { useNavigate } from "react-router-dom";
-import {
-  ChevronLeft, FolderKanban,
-  Search, Bell, Star, MoreHorizontal, SlidersHorizontal,
-} from "lucide-react";
-import { TEAMS } from "../constants/TEAMS";
-import type { ProjectTabKey } from "../types/projectTypes";
+import { PROJECT, TABS } from "../constants";
 
-export const PROJECT_TABS: { id: ProjectTabKey; label: string }[] = [
-  { id: "overview",    label: "Visão Geral"   },
-  { id: "graph",       label: "Grafo"         },
-  { id: "new",         label: "Novo Projeto"  },
-  { id: "settings",    label: "Configurações" },
-];
+const css = {
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 20px",
+    height: 52,
+    background: "#ffffff",
+    borderBottom: "0.5px solid #e2e0d8",
+    position: "sticky",
+    top: 0,
+    zIndex: 100,
+    gap: 12,
+    fontFamily: "'DM Sans', system-ui, sans-serif",
+  },
+  left: { display: "flex", alignItems: "center", gap: 12 },
+  logo: {
+    fontFamily: "monospace",
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: "0.06em",
+    color: "#1a1a18",
+    padding: "5px 9px",
+    border: "0.5px solid #ccc9bf",
+    borderRadius: 6,
+    background: "#f4f3ef",
+    userSelect: "none",
+  },
+  projBadge: {
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
+    padding: "5px 11px",
+    border: "0.5px solid #e2e0d8",
+    borderRadius: 6,
+    fontSize: 13,
+    color: "#6b6960",
+    background: "#fff",
+    userSelect: "none",
+  },
+  dot: { width: 8, height: 8, borderRadius: "50%", background: "#4a6fa5" },
+  tabs: {
+    display: "flex",
+    gap: 2,
+    background: "#f0efe9",
+    borderRadius: 8,
+    padding: 3,
+  },
+  btnPrimary: {
+    padding: "6px 14px",
+    borderRadius: 6,
+    fontSize: 13,
+    cursor: "pointer",
+    border: "0.5px solid #1a1a18",
+    background: "#1a1a18",
+    color: "#f4f3ef",
+    fontFamily: "inherit",
+    transition: "opacity .15s",
+  },
+};
 
-const ACTION_BTNS = [
-  { id: "search",        label: "Buscar",       Icon: Search          },
-  { id: "filter",        label: "Filtrar",      Icon: SlidersHorizontal },
-  { id: "notifications", label: "Notificações", Icon: Bell            },
-  { id: "favorite",      label: "Favoritar",    Icon: Star            },
-  { id: "more",          label: "Mais",         Icon: MoreHorizontal  },
-];
-
-interface Props {
-  activeTab: ProjectTabKey;
-  onTabChange: (tab: ProjectTabKey) => void;
-  projectCount: number;
+function Tab({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: "5px 14px",
+        borderRadius: 6,
+        fontSize: 13,
+        cursor: "pointer",
+        border: "none",
+        fontFamily: "inherit",
+        background: active ? "#fff" : "transparent",
+        color: active ? "#1a1a18" : "#6b6960",
+        boxShadow: active ? "0 0 0 0.5px #e2e0d8" : "none",
+        transition: "all .15s",
+      }}
+    >
+      {label}
+    </button>
+  );
 }
 
-export function ProjectHeader({ activeTab, onTabChange, projectCount }: Readonly<Props>) {
-  const navigate = useNavigate();
-
+export function ProjectHeader({ activeTab, onTabChange, onNewTask }) {
   return (
-    <div style={{
-      background: TEAMS.white,
-      borderBottom: `1px solid ${TEAMS.border}`,
-      padding: "0 24px",
-      display: "flex",
-      flexDirection: "column",
-      flexShrink: 0,
-    }}>
-      {/* Breadcrumb */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 0 0", fontSize: 12 }}>
-        <button
-          onClick={() => navigate("/dashboard")}
-          style={{
-            display: "flex", alignItems: "center", gap: 4,
-            background: "transparent", border: "none", cursor: "pointer",
-            color: TEAMS.purple, fontSize: 12,
-            fontFamily: "'Segoe UI', sans-serif", padding: 0,
-          }}
-        >
-          <ChevronLeft size={14} /> Início
-        </button>
-        <span style={{ color: TEAMS.border }}>/</span>
-        <span style={{ color: TEAMS.textSecondary }}>Projetos</span>
-      </div>
-
-      {/* Title row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 8,
-            background: "linear-gradient(135deg, #6264A7, #8764B8)",
-            display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
-          }}>
-            <FolderKanban size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: TEAMS.textPrimary, lineHeight: 1.2 }}>
-              Projetos
-            </div>
-            <div style={{ fontSize: 12, color: TEAMS.textSecondary, marginTop: 2 }}>
-              {projectCount} {projectCount === 1 ? "projeto" : "projetos"} no total
-            </div>
-          </div>
+    <header style={css.header}>
+      <div style={css.left}>
+        <div style={css.logo}>proj</div>
+        <div style={css.projBadge}>
+          <span style={css.dot} />
+          <span>{PROJECT.name}</span>
+          <span style={{ color: "#ccc9bf" }}>▾</span>
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {ACTION_BTNS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              title={label}
-              style={{
-                display: "flex", alignItems: "center",
-                background: "transparent", border: "none", cursor: "pointer",
-                color: TEAMS.textSecondary, padding: "6px 10px",
-                borderRadius: 4, transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F3F2F1")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
-            >
-              <Icon size={16} />
-            </button>
+        <div style={css.tabs}>
+          {TABS.map((tab) => (
+            <Tab
+              key={tab.key}
+              label={tab.label}
+              active={activeTab === tab.key}
+              onClick={() => onTabChange(tab.key)}
+            />
           ))}
         </div>
       </div>
-
-      {/* Tabs */}
-      <div style={{ display: "flex", marginTop: 8 }}>
-        {PROJECT_TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => onTabChange(t.id)}
-            style={{
-              padding: "10px 14px",
-              background: "transparent",
-              border: "none",
-              borderBottom: activeTab === t.id ? `2px solid ${TEAMS.purple}` : "2px solid transparent",
-              color: activeTab === t.id ? TEAMS.purple : TEAMS.textSecondary,
-              fontSize: 13,
-              fontWeight: activeTab === t.id ? 600 : 400,
-              cursor: "pointer",
-              fontFamily: "'Segoe UI', sans-serif",
-              transition: "all 0.15s",
-              marginBottom: -1,
-            }}
-            onMouseEnter={(e) => { if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textPrimary; }}
-            onMouseLeave={(e) => { if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textSecondary; }}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div>
+        <button style={css.btnPrimary} onClick={onNewTask}>
+          + tarefa
+        </button>
       </div>
-    </div>
+    </header>
   );
 }

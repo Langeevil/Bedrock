@@ -1,47 +1,29 @@
-// src/features/projects/hooks/useProjects.ts
-import { useState, useEffect, useCallback } from "react";
-import type { Project, CreateProjectDTO, ProjectStatus } from "../types/projectTypes";
-import * as service from "../services/projectsService";
+import { useState } from "react";
+import { INIT_TASKS, INIT_TAGS } from "../constants";
 
-export const useProjects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useProjects() {
+  const [tasks, setTasks] = useState(INIT_TASKS);
+  const [tags, setTags] = useState(INIT_TAGS);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await service.listProjects();
-      setProjects(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Erro ao listar projetos:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const addTag = (tag) => setTags((prev) => [...prev, tag]);
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  const addProject = async (dto: CreateProjectDTO) => {
-    try {
-      const newProject = await service.createProject(dto);
-      setProjects((prev) => [newProject, ...prev]);
-    } catch (error) {
-      console.error("Erro ao adicionar projeto:", error);
-      throw error;
-    }
+  const deleteTag = (id) => {
+    setTags((prev) => prev.filter((t) => t.id !== id));
+    setTasks((prev) => prev.map((t) => ({ ...t, tags: t.tags.filter((tid) => tid !== id) })));
   };
 
-  const updateStatus = async (id: string, status: ProjectStatus) => {
-    const updated = await service.updateProjectStatus(id, status);
-    setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
+  const addTask = (task) => setTasks((prev) => [...prev, task]);
+
+  const updateTask = (updated) =>
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+
+  const deleteTask = (id) => setTasks((prev) => prev.filter((t) => t.id !== id));
+
+  const stats = {
+    total: tasks.length,
+    done: tasks.filter((t) => t.status === "done").length,
+    tagCount: tags.length,
   };
 
-  const removeProject = async (id: string) => {
-    await service.deleteProject(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  return { projects, loading, addProject, updateStatus, removeProject, refresh };
-};
+  return { tasks, tags, stats, addTag, deleteTag, addTask, updateTask, deleteTask };
+}
