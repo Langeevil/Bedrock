@@ -8,9 +8,9 @@ export async function findById(id) {
   const query = `
     SELECT 
       p.id,
-      p.name as title,
+      p.name,
       p.user_id,
-      p.created_at as "createdAt",
+      p.created_at,
       COALESCE(
         (SELECT json_agg(t.*) FROM tasks t WHERE t.project_id = p.id), 
         '[]'
@@ -41,9 +41,9 @@ export async function findByUserId(userId) {
   const res = await pool.query(
     `SELECT 
       id, 
-      name as title, 
+      name, 
       user_id, 
-      created_at as "createdAt" 
+      created_at 
      FROM projects 
      WHERE user_id = $1 
      ORDER BY created_at DESC`,
@@ -57,7 +57,7 @@ export async function findByUserId(userId) {
  */
 export async function create({ name, user_id }) {
   const res = await pool.query(
-    "INSERT INTO projects (name, user_id) VALUES ($1, $2) RETURNING id, name as title, user_id, created_at as \"createdAt\"",
+    "INSERT INTO projects (name, user_id) VALUES ($1, $2) RETURNING id, name, user_id, created_at",
     [name, user_id]
   );
   return new Project(res.rows[0]);

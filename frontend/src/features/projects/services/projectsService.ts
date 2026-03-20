@@ -1,57 +1,72 @@
-import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
-import type { Project, ProjectStatus, CreateProjectDTO } from "../types/projectTypes";
+import type { Task, Tag, Project } from "../types/projectTypes";
+import { INIT_TASKS, INIT_TAGS, PROJECT_ID, PROJECT_NAME } from "../constants/projectConstants";
 
-const API_URL = "http://localhost:4000/api/projects";
+/**
+ * In-memory mock service.
+ * Replace the methods below with real API calls (fetch / axios / trpc / etc.)
+ * without touching any component or hook — they all consume this service.
+ */
 
-// Tipos para os dados do Grafo
-export interface GraphData {
-  nodes: { id: string; label: string; type: string; color?: string }[];
-  links: { source: string; target: string; relationship: string }[];
+// ── Simulated latency helper ─────────────────────────────────────────────────
+const delay = (ms = 0) => new Promise<void>(res => setTimeout(res, ms));
+
+// ── In-memory store (replace with actual API) ────────────────────────────────
+let _tasks: Task[] = [...INIT_TASKS];
+let _tags:  Tag[]  = [...INIT_TAGS];
+
+// ── Project ──────────────────────────────────────────────────────────────────
+export async function fetchProject(): Promise<Project> {
+  await delay();
+  return {
+    id:         PROJECT_ID,
+    name:       PROJECT_NAME,
+    user_id:    "u1",
+    created_at: Date.now(),
+    tasks:      [..._tasks],
+    tags:       [..._tags],
+  };
 }
 
-export interface ProjectDetailsResponse {
-  project: Project;
-  graphData: GraphData;
+// ── Tasks ────────────────────────────────────────────────────────────────────
+export async function fetchTasks(): Promise<Task[]> {
+  await delay();
+  return [..._tasks];
 }
 
-export async function listProjects(): Promise<Project[]> {
-  const res = await fetch(`${API_URL}`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-  return await parseJsonOrThrow(res);
+export async function createTask(payload: Omit<Task, "id">): Promise<Task> {
+  await delay();
+  const task: Task = { id: "t" + Date.now(), ...payload };
+  _tasks = [..._tasks, task];
+  return task;
 }
 
-export async function createProject(dto: CreateProjectDTO): Promise<Project> {
-  const res = await fetch(`${API_URL}`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ name: dto.title }),
-  });
-  const data = await parseJsonOrThrow(res);
-  return data.project || data;
+export async function updateTask(updated: Task): Promise<Task> {
+  await delay();
+  _tasks = _tasks.map(t => (t.id === updated.id ? updated : t));
+  return updated;
 }
 
-export async function updateProjectStatus(id: string, status: ProjectStatus): Promise<Project> {
-  const res = await fetch(`${API_URL}/${id}/status`, {
-    method: "PATCH",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ status }),
-  });
-  return await parseJsonOrThrow(res);
+export async function deleteTask(id: string): Promise<void> {
+  await delay();
+  _tasks = _tasks.filter(t => t.id !== id);
 }
 
-export async function deleteProject(id: string): Promise<void> {
-  await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  });
+// ── Tags ─────────────────────────────────────────────────────────────────────
+export async function fetchTags(): Promise<Tag[]> {
+  await delay();
+  return [..._tags];
 }
 
-export async function getProjectGraph(id: string): Promise<ProjectDetailsResponse> {
-  const res = await fetch(`${API_URL}/${id}/graph`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-  return await parseJsonOrThrow(res);
+export async function createTag(payload: Omit<Tag, "id">): Promise<Tag> {
+  await delay();
+  const tag: Tag = { id: "tg" + Date.now(), ...payload };
+  _tags = [..._tags, tag];
+  return tag;
+}
+
+export async function deleteTag(id: string): Promise<void> {
+  await delay();
+  _tags  = _tags.filter(t => t.id !== id);
+  // Cascade: remove deleted tag from all tasks
+  _tasks = _tasks.map(t => ({ ...t, tags: t.tags.filter(tid => tid !== id) }));
 }

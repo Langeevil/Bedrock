@@ -1,27 +1,56 @@
-import { useState } from "react";
-import { INIT_TASKS, INIT_TAGS } from "../constants";
+import { useState, useCallback } from "react";
+import type { Task, Tag, ProjectStats } from "../types/projectTypes";
+import * as projectsService from "../services/projectsService";
+import { INIT_TASKS, INIT_TAGS } from "../constants/projectConstants";
 
-export function useProjects() {
-  const [tasks, setTasks] = useState(INIT_TASKS);
-  const [tags, setTags] = useState(INIT_TAGS);
+export interface UseProjectsReturn {
+  tasks: Task[];
+  tags: Tag[];
+  stats: ProjectStats;
+  addTag: (payload: Omit<Tag, "id">) => Promise<void>;
+  deleteTag: (id: string) => Promise<void>;
+  addTask: (payload: Omit<Task, "id">) => Promise<void>;
+  updateTask: (task: Task) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
+}
 
-  const addTag = (tag) => setTags((prev) => [...prev, tag]);
+export function useProjects(): UseProjectsReturn {
+  // Seed local state from the service mock (sync for now, replace with useEffect + fetch)
+  const [tasks, setTasks] = useState<Task[]>(INIT_TASKS);
+  const [tags,  setTags]  = useState<Tag[]>(INIT_TAGS);
 
-  const deleteTag = (id) => {
-    setTags((prev) => prev.filter((t) => t.id !== id));
-    setTasks((prev) => prev.map((t) => ({ ...t, tags: t.tags.filter((tid) => tid !== id) })));
-  };
+  // ── Tags ────────────────────────────────────────────────────────────────
+  const addTag = useCallback(async (payload: Omit<Tag, "id">) => {
+    const created = await projectsService.createTag(payload);
+    setTags(prev => [...prev, created]);
+  }, []);
 
-  const addTask = (task) => setTasks((prev) => [...prev, task]);
+  const deleteTag = useCallback(async (id: string) => {
+    await projectsService.deleteTag(id);
+    setTags(prev  => prev.filter(t => t.id !== id));
+    setTasks(prev => prev.map(t => ({ ...t, tags: t.tags.filter(tid => tid !== id) })));
+  }, []);
 
-  const updateTask = (updated) =>
-    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  // ── Tasks ───────────────────────────────────────────────────────────────
+  const addTask = useCallback(async (payload: Omit<Task, "id">) => {
+    const created = await projectsService.createTask(payload);
+    setTasks(prev => [...prev, created]);
+  }, []);
 
-  const deleteTask = (id) => setTasks((prev) => prev.filter((t) => t.id !== id));
+  const updateTask = useCallback(async (task: Task) => {
+    const updated = await projectsService.updateTask(task);
+    setTasks(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+  }, []);
 
-  const stats = {
-    total: tasks.length,
-    done: tasks.filter((t) => t.status === "done").length,
+  const deleteTask = useCallback(async (id: string) => {
+    await projectsService.deleteTask(id);
+    setTasks(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  // ── Stats ───────────────────────────────────────────────────────────────
+  const stats: ProjectStats = {
+    total:    tasks.length,
+    done:     tasks.filter(t => t.status === "done").length,
     tagCount: tags.length,
   };
 

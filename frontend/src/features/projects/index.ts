@@ -1,5 +1,9 @@
-// src/features/projects/index.ts
-export { default as ProjectsScreen } from "./pages/ProjectsScreen";
-export * from "./types/projectTypes";
-export * from "./hooks/useProjects";
-export * as projectsService from "./services/projectsService";
+// ── Public API of the projects feature ───────────────────────────────────────
+
+export { ProjectsScreen } from "./pages";
+
+export * from "./types";
+
+export * from "./hooks";
+
+export * as projectsService from "./services";
