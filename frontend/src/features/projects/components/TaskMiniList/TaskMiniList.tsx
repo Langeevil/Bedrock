@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Task, Tag } from "../types";
+import type { Task, Tag } from "../../types";
 import { STATUS_META } from "../../constants/projectConstants";
 
 interface Props {

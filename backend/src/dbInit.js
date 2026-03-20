@@ -31,13 +31,11 @@ export async function ensureAppSchema() {
       )
     `);
 
-    // if the table already existed but lacked user_id (older schema), add it
     await pool.query(`
       ALTER TABLE disciplines
       ADD COLUMN IF NOT EXISTS user_id INTEGER
     `);
 
-    // Add description and updated_at columns if they don't exist
     await pool.query(`
       ALTER TABLE disciplines
       ADD COLUMN IF NOT EXISTS description TEXT
@@ -48,7 +46,6 @@ export async function ensureAppSchema() {
       ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     `);
 
-    // create index only if the column exists to avoid errors on legacy DBs
     await pool.query(`
       DO $$
       BEGIN
@@ -93,13 +90,11 @@ export async function ensureAppSchema() {
       ALTER COLUMN storage_key DROP NOT NULL
     `);
     
-    // Ensure file_path is nullable if it exists (legacy DBs might have it as NOT NULL)
     await pool.query(`
       ALTER TABLE discipline_files
       ALTER COLUMN file_path DROP NOT NULL
     `);
 
-    // Ensure all columns exist in discipline_files
     await pool.query(`
       ALTER TABLE discipline_files
       ADD COLUMN IF NOT EXISTS original_name VARCHAR(255)
@@ -125,7 +120,6 @@ export async function ensureAppSchema() {
       ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES users(id) ON DELETE CASCADE
     `);
 
-    // Create index for discipline_files
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_discipline_files_discipline_id 
       ON discipline_files(discipline_id)
@@ -136,7 +130,6 @@ export async function ensureAppSchema() {
       ON discipline_files(discipline_id, created_at DESC)
     `);
 
-    // Create discipline_posts table for discipline announcements/posts
     await pool.query(`
       CREATE TABLE IF NOT EXISTS discipline_posts (
         id BIGSERIAL PRIMARY KEY,
@@ -366,6 +359,7 @@ export async function ensureAppSchema() {
       END $$;
     `);
 
+    // ── Projects ────────────────────────────────────────────────────────────────
     await pool.query(`
       CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
@@ -375,26 +369,63 @@ export async function ensureAppSchema() {
       )
     `);
 
+    // ── Tasks ───────────────────────────────────────────────────────────────────
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
         project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
         title VARCHAR(255) NOT NULL,
-        status VARCHAR(50) NOT NULL DEFAULT 'pending',
-        "order" INTEGER DEFAULT 0,
+        status VARCHAR(50) NOT NULL DEFAULT 'todo',
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `);
 
+    // Migrate old status default value if needed
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'tasks' AND column_name = 'status'
+        ) THEN
+          ALTER TABLE tasks ALTER COLUMN status SET DEFAULT 'todo';
+        END IF;
+      END $$;
+    `);
+
+    // ── Tags ────────────────────────────────────────────────────────────────────
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tags (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL UNIQUE,
+        project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
         color VARCHAR(7) DEFAULT '#10b981',
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `);
 
+    // Add project_id to existing tags table if missing
+    await pool.query(`
+      ALTER TABLE tags
+      ADD COLUMN IF NOT EXISTS project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE
+    `);
+
+    // Remove unique constraint on name — tags are scoped per project now
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.table_constraints
+          WHERE table_name = 'tags'
+            AND constraint_name = 'tags_name_key'
+            AND constraint_type = 'UNIQUE'
+        ) THEN
+          ALTER TABLE tags DROP CONSTRAINT tags_name_key;
+        END IF;
+      END $$;
+    `);
+
+    // ── Task-Tags junction ──────────────────────────────────────────────────────
     await pool.query(`
       CREATE TABLE IF NOT EXISTS task_tags (
         task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -403,9 +434,15 @@ export async function ensureAppSchema() {
       )
     `);
 
+    // ── Indexes ─────────────────────────────────────────────────────────────────
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
-      CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
+      CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_tags_project_id ON tags(project_id)
     `);
 
     await pool.query(`
@@ -464,6 +501,7 @@ export async function ensureAppSchema() {
         AND geral.archived_at IS NULL
       ON CONFLICT (conversation_id, user_id) DO NOTHING
     `);
+
   } catch (err) {
     console.error("Erro ao garantir schema:", err);
     throw err;

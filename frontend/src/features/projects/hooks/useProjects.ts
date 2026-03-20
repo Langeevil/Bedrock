@@ -1,58 +1,126 @@
-import { useState, useCallback } from "react";
-import type { Task, Tag, ProjectStats } from "../types/projectTypes";
+import { useState, useCallback, useEffect } from "react";
+import type { Project, Task, Tag, ProjectStats } from "../types/projectTypes";
 import * as projectsService from "../services/projectsService";
-import { INIT_TASKS, INIT_TAGS } from "../constants/projectConstants";
 
 export interface UseProjectsReturn {
+  // Project list
+  projects: Project[];
+  activeProject: Project | null;
+  selectProject: (project: Project) => void;
+  createProject: (name: string) => Promise<void>;
+
+  // Active project data
   tasks: Task[];
   tags: Tag[];
   stats: ProjectStats;
-  addTag: (payload: Omit<Tag, "id">) => Promise<void>;
+
+  // Tags
+  addTag: (payload: Omit<Tag, "id" | "project_id">) => Promise<void>;
   deleteTag: (id: string) => Promise<void>;
-  addTask: (payload: Omit<Task, "id">) => Promise<void>;
+
+  // Tasks
+  addTask: (payload: Omit<Task, "id" | "project_id">) => Promise<void>;
   updateTask: (task: Task) => Promise<void>;
-  deleteTask: (id: string) => Promise<void>;
+  deleteTask: (task: Task) => Promise<void>;
+
+  loading: boolean;
+  error: string | null;
 }
 
 export function useProjects(): UseProjectsReturn {
-  // Seed local state from the service mock (sync for now, replace with useEffect + fetch)
-  const [tasks, setTasks] = useState<Task[]>(INIT_TASKS);
-  const [tags,  setTags]  = useState<Tag[]>(INIT_TAGS);
+  const [projects, setProjects]           = useState<Project[]>([]);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [tasks, setTasks]                 = useState<Task[]>([]);
+  const [tags, setTags]                   = useState<Tag[]>([]);
+  const [loading, setLoading]             = useState(false);
+  const [error, setError]                 = useState<string | null>(null);
 
-  // ── Tags ────────────────────────────────────────────────────────────────
-  const addTag = useCallback(async (payload: Omit<Tag, "id">) => {
-    const created = await projectsService.createTag(payload);
-    setTags(prev => [...prev, created]);
+  // ── Load project list on mount ───────────────────────────────────────────
+  useEffect(() => {
+    setLoading(true);
+    projectsService
+      .fetchProjects()
+      .then(setProjects)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
   }, []);
+
+  // ── Load tasks + tags when active project changes ────────────────────────
+  useEffect(() => {
+    if (!activeProject) {
+      setTasks([]);
+      setTags([]);
+      return;
+    }
+    setLoading(true);
+    Promise.all([
+      projectsService.fetchTasks(activeProject.id),
+      projectsService.fetchTags(activeProject.id),
+    ])
+      .then(([t, tg]) => { setTasks(t); setTags(tg); })
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [activeProject]);
+
+  // ── Projects ─────────────────────────────────────────────────────────────
+  const createProject = useCallback(async (name: string) => {
+    const created = await projectsService.createProject(name);
+    setProjects((prev: Project[]) => [...prev, created]);
+    setActiveProject(created);
+  }, []);
+
+  const selectProject = useCallback((project: Project) => {
+    setActiveProject(project);
+  }, []);
+
+  // ── Tags ─────────────────────────────────────────────────────────────────
+  const addTag = useCallback(async (payload: Omit<Tag, "id" | "project_id">) => {
+    if (!activeProject) return;
+    const created = await projectsService.createTag(activeProject.id, payload);
+    setTags((prev: Tag[]) => [...prev, created]);
+  }, [activeProject]);
 
   const deleteTag = useCallback(async (id: string) => {
-    await projectsService.deleteTag(id);
-    setTags(prev  => prev.filter(t => t.id !== id));
-    setTasks(prev => prev.map(t => ({ ...t, tags: t.tags.filter(tid => tid !== id) })));
-  }, []);
+    if (!activeProject) return;
+    await projectsService.deleteTag(activeProject.id, id);
+    setTags((prev: Tag[]) => prev.filter((t: Tag) => t.id !== id));
+    // Remove deleted tag from all tasks
+    setTasks((prev: Task[]) =>
+      prev.map((t: Task) => ({ ...t, tags: t.tags.filter((tid: string) => tid !== id) }))
+    );
+  }, [activeProject]);
 
-  // ── Tasks ───────────────────────────────────────────────────────────────
-  const addTask = useCallback(async (payload: Omit<Task, "id">) => {
-    const created = await projectsService.createTask(payload);
-    setTasks(prev => [...prev, created]);
-  }, []);
+  // ── Tasks ─────────────────────────────────────────────────────────────────
+  const addTask = useCallback(async (payload: Omit<Task, "id" | "project_id">) => {
+    if (!activeProject) return;
+    const created = await projectsService.createTask(activeProject.id, payload);
+    setTasks((prev: Task[]) => [...prev, created]);
+  }, [activeProject]);
 
   const updateTask = useCallback(async (task: Task) => {
     const updated = await projectsService.updateTask(task);
-    setTasks(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+    setTasks((prev: Task[]) =>
+      prev.map((t: Task) => (t.id === updated.id ? updated : t))
+    );
   }, []);
 
-  const deleteTask = useCallback(async (id: string) => {
-    await projectsService.deleteTask(id);
-    setTasks(prev => prev.filter(t => t.id !== id));
+  const deleteTask = useCallback(async (task: Task) => {
+    await projectsService.deleteTask(task);
+    setTasks((prev: Task[]) => prev.filter((t: Task) => t.id !== task.id));
   }, []);
 
-  // ── Stats ───────────────────────────────────────────────────────────────
+  // ── Stats ─────────────────────────────────────────────────────────────────
   const stats: ProjectStats = {
     total:    tasks.length,
-    done:     tasks.filter(t => t.status === "done").length,
+    done:     tasks.filter((t: Task) => t.status === "done").length,
     tagCount: tags.length,
   };
 
-  return { tasks, tags, stats, addTag, deleteTag, addTask, updateTask, deleteTask };
+  return {
+    projects, activeProject, selectProject, createProject,
+    tasks, tags, stats,
+    addTag, deleteTag,
+    addTask, updateTask, deleteTask,
+    loading, error,
+  };
 }

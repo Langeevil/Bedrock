@@ -1,1 +1,1 @@
-export { default as ProjectsScreen }
+export { default as ProjectsScreen } from "./ProjectsScreen";

@@ -1,18 +1,26 @@
 import { useState, useEffect } from "react";
-import type { Task, Tag, TaskStatus } from "../types";
+import type { Task, Tag, TaskStatus } from "../../types/projectTypes";
 import { STATUS_META } from "../../constants/projectConstants";
 
-interface Props {
+// ── Types ─────────────────────────────────────────────────────────────────────
+// The panel emits everything except project_id — parent injects that.
+export type TaskPanelPayload = Omit<Task, "project_id">;
+
+interface TaskPanelProps {
   open: boolean;
   mode: "new" | "edit" | null;
   task: Task | null;
   tags: Tag[];
   onClose: () => void;
-  onSave: (task: Task) => void;
-  onDelete: (id: string) => void;
+  onSave: (payload: TaskPanelPayload) => Promise<void>;
+  onDelete: (task: Task) => Promise<void>;
 }
 
-export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }: Props) {
+// ── Component ─────────────────────────────────────────────────────────────────
+export function TaskPanel({
+  open, mode, task, tags,
+  onClose, onSave, onDelete,
+}: TaskPanelProps) {
   const [title,   setTitle]   = useState("");
   const [status,  setStatus]  = useState<TaskStatus>("todo");
   const [selTags, setSelTags] = useState<string[]>([]);
@@ -32,14 +40,22 @@ export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }:
   const toggleTag = (id: string) =>
     setSelTags(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) return;
-    onSave({
+    // project_id omitted intentionally — ProjectsScreen injects it before calling the service
+    const payload: TaskPanelPayload = {
       id:     task?.id ?? "t" + Date.now(),
       title:  title.trim(),
       status,
       tags:   selTags,
-    });
+    };
+    await onSave(payload);
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block", fontSize: 10, color: "#9c9a8e",
+    textTransform: "uppercase", letterSpacing: "0.07em",
+    marginBottom: 6, marginTop: 14,
   };
 
   return (
@@ -50,7 +66,6 @@ export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }:
       transform: open ? "translateX(0)" : "translateX(100%)",
       transition: "transform .2s ease",
     }}>
-      {/* Close */}
       <button
         onClick={onClose}
         style={{
@@ -67,25 +82,22 @@ export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }:
       </div>
 
       {/* Title */}
-      <span style={{ display: "block", fontSize: 10, color: "#9c9a8e", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>
-        Título
-      </span>
+      <span style={{ ...labelStyle, marginTop: 0 }}>Título</span>
       <input
         value={title}
         onChange={e => setTitle(e.target.value)}
         onKeyDown={e => e.key === "Enter" && handleSave()}
         placeholder="Nome da tarefa..."
         style={{
-          width: "100%", padding: "7px 10px", border: "0.5px solid #e2e0d8",
-          borderRadius: 6, fontSize: 13, fontFamily: "inherit", color: "#1a1a18",
+          width: "100%", padding: "7px 10px",
+          border: "0.5px solid #e2e0d8", borderRadius: 6,
+          fontSize: 13, fontFamily: "inherit", color: "#1a1a18",
           background: "#f4f3ef", outline: "none", boxSizing: "border-box",
         }}
       />
 
       {/* Status */}
-      <span style={{ display: "block", fontSize: 10, color: "#9c9a8e", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, marginTop: 14 }}>
-        Status
-      </span>
+      <span style={labelStyle}>Status</span>
       <div style={{ display: "flex", gap: 5 }}>
         {(Object.entries(STATUS_META) as [TaskStatus, typeof STATUS_META[TaskStatus]][]).map(([key, meta]) => (
           <button
@@ -105,16 +117,17 @@ export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }:
       </div>
 
       {/* Tags */}
-      <span style={{ display: "block", fontSize: 10, color: "#9c9a8e", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, marginTop: 14 }}>
-        Tags
-      </span>
+      <span style={labelStyle}>Tags</span>
       {tags.length === 0 && (
         <span style={{ fontSize: 12, color: "#9c9a8e" }}>Crie tags primeiro</span>
       )}
       {tags.map(tg => (
         <label
           key={tg.id}
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 7px", borderRadius: 5, cursor: "pointer", marginBottom: 3 }}
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "5px 7px", borderRadius: 5, cursor: "pointer", marginBottom: 3,
+          }}
         >
           <input
             type="checkbox"
@@ -141,7 +154,7 @@ export function TaskPanel({ open, mode, task, tags, onClose, onSave, onDelete }:
         </button>
         {mode === "edit" && task && (
           <button
-            onClick={() => onDelete(task.id)}
+            onClick={() => onDelete(task)}
             style={{
               padding: "7px 12px", borderRadius: 6, fontSize: 13,
               cursor: "pointer", border: "0.5px solid #e8c8c0",
