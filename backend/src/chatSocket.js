@@ -10,6 +10,8 @@ import {
   normalizePresenceStatus,
   upsertPresence,
 } from "./chatCore.js";
+import { resolveAuthContext } from "./auth/authContext.js";
+import { PERMISSIONS, hasPermission } from "./auth/accessControl.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "segredo_super_forte";
 const activeConnections = new Map();
@@ -23,20 +25,28 @@ export function initChatSocket(httpServer) {
   });
 
   io.use((socket, next) => {
-    try {
+    (async () => {
+      try {
       const token = socket.handshake.auth?.token;
       if (!token) return next(new Error("Token ausente"));
 
       const payload = jwt.verify(token, JWT_SECRET);
-      socket.data.userId = payload.id;
+      const auth = await resolveAuthContext(Number(payload.id || payload.sub));
+      if (!auth || auth.accountStatus !== "active") {
+        return next(new Error("Usuario invalido"));
+      }
+      socket.data.userId = auth.userId;
+      socket.data.auth = auth;
       return next();
-    } catch {
-      return next(new Error("Token invalido"));
-    }
+      } catch {
+        return next(new Error("Token invalido"));
+      }
+    })();
   });
 
   io.on("connection", async (socket) => {
     const userId = socket.data.userId;
+    const auth = socket.data.auth;
     const currentConnections = activeConnections.get(userId) || 0;
     activeConnections.set(userId, currentConnections + 1);
 
@@ -59,13 +69,18 @@ export function initChatSocket(httpServer) {
 
         const access = await getConversationAccess(userId, conversationId, {
           autoJoinPublicChannel: true,
+          organizationId: auth?.organization?.id || null,
+          isSystemAdmin: auth?.systemRole === "system_admin",
         });
 
         if (!access.found || !access.allowed) return;
 
         socket.join(getConversationChannel(conversationId));
 
-        const summary = await getConversationSummary(userId, conversationId);
+        const summary = await getConversationSummary(userId, conversationId, {
+          organizationId: auth?.organization?.id || null,
+          isSystemAdmin: auth?.systemRole === "system_admin",
+        });
         if (summary) {
           socket.emit("chat:conversationUpdated", summary);
         }
@@ -90,9 +105,13 @@ export function initChatSocket(httpServer) {
 
         const access = await getConversationAccess(userId, conversationId, {
           autoJoinPublicChannel: true,
+          organizationId: auth?.organization?.id || null,
+          isSystemAdmin: auth?.systemRole === "system_admin",
         });
 
         if (!access.found || !access.allowed) return;
+
+        if (!hasPermission(auth, PERMISSIONS.CHAT_ACCESS)) return;
 
         socket.join(getConversationChannel(conversationId));
 
@@ -120,6 +139,8 @@ export function initChatSocket(httpServer) {
 
         const access = await getConversationAccess(userId, conversationId, {
           autoJoinPublicChannel: true,
+          organizationId: auth?.organization?.id || null,
+          isSystemAdmin: auth?.systemRole === "system_admin",
         });
 
         if (!access.memberRole) return;
@@ -127,7 +148,10 @@ export function initChatSocket(httpServer) {
         const receipt = await markConversationRead(userId, conversationId, lastReadMessageId);
         io.to(getConversationChannel(conversationId)).emit("chat:readUpdated", receipt);
 
-        const summary = await getConversationSummary(userId, conversationId);
+        const summary = await getConversationSummary(userId, conversationId, {
+          organizationId: auth?.organization?.id || null,
+          isSystemAdmin: auth?.systemRole === "system_admin",
+        });
         if (summary) {
           socket.emit("chat:conversationUpdated", summary);
         }

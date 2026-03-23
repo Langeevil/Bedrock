@@ -50,7 +50,11 @@ export async function upsertPresence(userId, status) {
 }
 
 export async function getConversationAccess(userId, conversationId, options = {}) {
-  const { autoJoinPublicChannel = false } = options;
+  const {
+    autoJoinPublicChannel = false,
+    organizationId = null,
+    isSystemAdmin = false,
+  } = options;
 
   const result = await pool.query(
     `SELECT
@@ -66,8 +70,9 @@ export async function getConversationAccess(userId, conversationId, options = {}
        ON m.conversation_id = c.id
       AND m.user_id = $2
      WHERE c.id = $1
+       AND ($3::boolean = TRUE OR c.organization_id = $4)
        AND c.archived_at IS NULL`,
-    [conversationId, userId]
+    [conversationId, userId, isSystemAdmin, organizationId]
   );
 
   if (result.rows.length === 0) {
@@ -78,6 +83,16 @@ export async function getConversationAccess(userId, conversationId, options = {}
   const isMember = Boolean(row.member_role);
   const isPublicChannel =
     row.type === CHAT_TYPES.CHANNEL && row.is_private === false;
+
+  if (isSystemAdmin) {
+    return {
+      found: true,
+      allowed: true,
+      conversation: row,
+      memberRole: row.member_role || MEMBER_ROLES.OWNER,
+      autoJoined: false,
+    };
+  }
 
   if (isMember) {
     return {
@@ -140,7 +155,12 @@ function mapConversationRow(row) {
 }
 
 export async function listConversationsForUser(userId, options = {}) {
-  const { type = null, includePublic = true } = options;
+  const {
+    type = null,
+    includePublic = true,
+    organizationId = null,
+    isSystemAdmin = false,
+  } = options;
 
   const result = await pool.query(
     `SELECT
@@ -193,6 +213,7 @@ export async function listConversationsForUser(userId, options = {}) {
        LIMIT 1
      ) counterpart ON c.type = 'direct'
      WHERE c.archived_at IS NULL
+       AND ($4::boolean = TRUE OR c.organization_id = $5)
        AND (
          member_link.user_id IS NOT NULL
          OR (
@@ -203,14 +224,18 @@ export async function listConversationsForUser(userId, options = {}) {
        )
        AND ($3::text IS NULL OR c.type = $3::text)
      ORDER BY COALESCE(lm.created_at, c.updated_at, c.created_at) DESC, c.id DESC`,
-    [userId, includePublic, type]
+    [userId, includePublic, type, isSystemAdmin, organizationId]
   );
 
   return result.rows.map(mapConversationRow);
 }
 
-export async function getConversationSummary(userId, conversationId) {
-  const rows = await listConversationsForUser(userId, { includePublic: true });
+export async function getConversationSummary(userId, conversationId, options = {}) {
+  const rows = await listConversationsForUser(userId, {
+    includePublic: true,
+    organizationId: options.organizationId,
+    isSystemAdmin: options.isSystemAdmin,
+  });
   return rows.find((row) => row.id === Number(conversationId)) || null;
 }
 
@@ -336,7 +361,9 @@ export async function markConversationRead(userId, conversationId, lastReadMessa
   };
 }
 
-export async function getRelevantPresenceForUser(userId) {
+export async function getRelevantPresenceForUser(userId, options = {}) {
+  const { organizationId = null, isSystemAdmin = false } = options;
+
   const result = await pool.query(
     `SELECT DISTINCT
        u.id,
@@ -350,10 +377,13 @@ export async function getRelevantPresenceForUser(userId) {
      JOIN chat_conversation_members shared_membership
        ON shared_membership.conversation_id = my_membership.conversation_id
       AND shared_membership.user_id = u.id
+     LEFT JOIN organization_memberships orgm
+       ON orgm.user_id = u.id
      LEFT JOIN chat_user_presence p ON p.user_id = u.id
      WHERE u.id <> $1
+       AND ($2::boolean = TRUE OR orgm.organization_id = $3)
      ORDER BY LOWER(u.nome), LOWER(u.email)`,
-    [userId]
+    [userId, isSystemAdmin, organizationId]
   );
 
   return result.rows.map((row) => ({

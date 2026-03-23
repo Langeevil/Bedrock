@@ -25,7 +25,7 @@ export async function getMe(): Promise<User> {
   return data as User;
 }
 
-export async function completeProfile(role: string): Promise<void> {
+export async function completeProfile(role: string): Promise<User> {
   const res = await fetch(`${API_URL}/atualizar-perfil`, {
     method: "PUT",
     headers: getAuthHeaders(),
@@ -34,4 +34,5 @@ export async function completeProfile(role: string): Promise<void> {
 
   const data = await parseJsonOrThrow(res);
   if (!res.ok) throw new Error(data.error || "Erro ao atualizar perfil");
+  return (data.usuario || data) as User;
 }

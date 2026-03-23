@@ -1,4 +1,5 @@
 import pool from "../db.js";
+import { PERMISSIONS, hasPermission } from "../auth/accessControl.js";
 
 const searchRateLimit = new Map();
 const SEARCH_WINDOW_MS = 60 * 1000;
@@ -22,6 +23,14 @@ function canSearch(userId) {
 
 export async function searchUsers(req, res) {
   try {
+    if (!hasPermission(req.auth, PERMISSIONS.USER_VIEW_DIRECTORY)) {
+      return res.status(403).json({ error: "Sem permissao para buscar usuarios." });
+    }
+
+    if (!req.auth?.organization?.id) {
+      return res.status(400).json({ error: "Usuario sem organizacao ativa." });
+    }
+
     if (!canSearch(req.userId)) {
       return res.status(429).json({ error: "Muitas buscas. Tente novamente em instantes." });
     }
@@ -41,22 +50,26 @@ export async function searchUsers(req, res) {
          u.role,
          COALESCE(p.status, 'offline') AS presence_status
        FROM users u
+       JOIN organization_memberships om
+         ON om.user_id = u.id
        LEFT JOIN chat_user_presence p ON p.user_id = u.id
        WHERE u.id <> $1
+         AND om.organization_id = $2
+         AND om.status = 'active'
          AND (
-           LOWER(u.email) LIKE $2
-           OR LOWER(u.nome) LIKE $2
+           LOWER(u.email) LIKE $3
+           OR LOWER(u.nome) LIKE $3
          )
        ORDER BY
          CASE
-           WHEN LOWER(u.email) = $3 THEN 0
-           WHEN LOWER(u.email) LIKE $4 THEN 1
+           WHEN LOWER(u.email) = $4 THEN 0
+           WHEN LOWER(u.email) LIKE $5 THEN 1
            ELSE 2
          END,
          LOWER(u.nome),
          LOWER(u.email)
        LIMIT 20`,
-      [req.userId, pattern, query, `${query}%`]
+      [req.userId, req.auth.organization.id, pattern, query, `${query}%`]
     );
 
     return res.json(

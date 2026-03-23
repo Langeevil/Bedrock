@@ -20,6 +20,17 @@ export interface LoginResponse {
     nome: string;
     email: string;
     role: string;
+    system_role?: string | null;
+    organization?: {
+      id: number;
+      name: string;
+      slug: string;
+    } | null;
+    membership?: {
+      organization_id: number;
+      role: string;
+      status: string;
+    } | null;
   };
 }
 

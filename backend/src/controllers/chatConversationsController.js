@@ -7,6 +7,7 @@ import {
   getConversationSummary,
   listConversationsForUser,
 } from "../chatCore.js";
+import { PERMISSIONS, hasPermission } from "../auth/accessControl.js";
 
 function normalizeMemberIds(rawIds, currentUserId) {
   const items = Array.isArray(rawIds) ? rawIds : [];
@@ -22,14 +23,23 @@ function normalizeMemberIds(rawIds, currentUserId) {
   return [...nextIds];
 }
 
-async function userExists(userId) {
-  const result = await pool.query("SELECT 1 FROM users WHERE id = $1", [userId]);
+async function userExists(userId, organizationId) {
+  const result = await pool.query(
+    `SELECT 1
+     FROM organization_memberships
+     WHERE user_id = $1
+       AND organization_id = $2
+       AND status = 'active'`,
+    [userId, organizationId]
+  );
   return result.rows.length > 0;
 }
 
-async function ensureRoleForConversation(userId, conversationId) {
-  const access = await getConversationAccess(userId, conversationId, {
+async function ensureRoleForConversation(auth, conversationId) {
+  const access = await getConversationAccess(auth.userId, conversationId, {
     autoJoinPublicChannel: false,
+    organizationId: auth.organization?.id || null,
+    isSystemAdmin: auth.systemRole === "system_admin",
   });
 
   if (!access.found) {
@@ -40,6 +50,10 @@ async function ensureRoleForConversation(userId, conversationId) {
     return { ok: false, status: 403, error: "Sem permissao para alterar esta conversa." };
   }
 
+  if (auth.systemRole === "system_admin") {
+    return { ok: true, access };
+  }
+
   if (![MEMBER_ROLES.OWNER, MEMBER_ROLES.ADMIN].includes(access.memberRole)) {
     return { ok: false, status: 403, error: "Somente admin ou owner pode alterar esta conversa." };
   }
@@ -47,21 +61,26 @@ async function ensureRoleForConversation(userId, conversationId) {
   return { ok: true, access };
 }
 
-async function buildConversationPayload(userId, conversationId) {
-  const conversation = await getConversationSummary(userId, conversationId);
+async function buildConversationPayload(auth, conversationId) {
+  const conversation = await getConversationSummary(auth.userId, conversationId, {
+    organizationId: auth.organization?.id || null,
+    isSystemAdmin: auth.systemRole === "system_admin",
+  });
   if (!conversation) return null;
 
   const members = await getConversationMembers(conversationId);
-  const membership = members.find((member) => member.id === userId) || null;
+  const membership = members.find((member) => member.id === auth.userId) || null;
 
   return {
     ...conversation,
     members,
     permissions: {
       can_manage_members:
+        auth.systemRole === "system_admin" ||
         membership?.member_role === MEMBER_ROLES.OWNER ||
         membership?.member_role === MEMBER_ROLES.ADMIN,
       can_edit:
+        auth.systemRole === "system_admin" ||
         membership?.member_role === MEMBER_ROLES.OWNER ||
         membership?.member_role === MEMBER_ROLES.ADMIN,
     },
@@ -73,6 +92,10 @@ export async function listConversations(req, res) {
     const type = req.query.type ? String(req.query.type) : null;
     const includePublic = req.query.include_public !== "false";
 
+    if (!hasPermission(req.auth, PERMISSIONS.CHAT_ACCESS)) {
+      return res.status(403).json({ error: "Sem permissao para acessar o chat." });
+    }
+
     if (type && !Object.values(CHAT_TYPES).includes(type)) {
       return res.status(400).json({ error: "Tipo de conversa invalido." });
     }
@@ -80,6 +103,8 @@ export async function listConversations(req, res) {
     const conversations = await listConversationsForUser(req.userId, {
       type,
       includePublic,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     return res.json(conversations);
@@ -90,6 +115,10 @@ export async function listConversations(req, res) {
 }
 
 export async function createDirectConversation(req, res) {
+  if (!hasPermission(req.auth, PERMISSIONS.CHAT_CREATE_DIRECT)) {
+    return res.status(403).json({ error: "Sem permissao para iniciar conversas diretas." });
+  }
+
   const targetUserId = Number(req.body?.targetUserId);
 
   if (!Number.isInteger(targetUserId) || targetUserId <= 0) {
@@ -101,7 +130,7 @@ export async function createDirectConversation(req, res) {
   }
 
   try {
-    if (!(await userExists(targetUserId))) {
+    if (!(await userExists(targetUserId, req.auth?.organization?.id))) {
       return res.status(404).json({ error: "Usuario nao encontrado." });
     }
 
@@ -135,10 +164,10 @@ export async function createDirectConversation(req, res) {
 
         if (!conversationId) {
           const createdConversation = await client.query(
-            `INSERT INTO chat_conversations (type, is_private, created_by)
-             VALUES ($1, TRUE, $2)
+            `INSERT INTO chat_conversations (type, is_private, created_by, organization_id)
+             VALUES ($1, TRUE, $2, $3)
              RETURNING id`,
-            [CHAT_TYPES.DIRECT, req.userId]
+            [CHAT_TYPES.DIRECT, req.userId, req.auth.organization.id]
           );
 
           conversationId = Number(createdConversation.rows[0].id);
@@ -167,7 +196,7 @@ export async function createDirectConversation(req, res) {
       }
     }
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.status(existing.rows.length > 0 ? 200 : 201).json(payload);
   } catch (err) {
     console.error("Erro ao criar conversa direta:", err);
@@ -176,6 +205,10 @@ export async function createDirectConversation(req, res) {
 }
 
 export async function createConversation(req, res) {
+  if (!req.auth?.organization?.id) {
+    return res.status(400).json({ error: "Usuario sem organizacao ativa." });
+  }
+
   const type = String(req.body?.type || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
   const description = String(req.body?.description || "").trim() || null;
@@ -183,6 +216,14 @@ export async function createConversation(req, res) {
 
   if (![CHAT_TYPES.GROUP, CHAT_TYPES.CHANNEL].includes(type)) {
     return res.status(400).json({ error: "Tipo de conversa invalido." });
+  }
+
+  if (type === CHAT_TYPES.GROUP && !hasPermission(req.auth, PERMISSIONS.CHAT_CREATE_GROUP)) {
+    return res.status(403).json({ error: "Sem permissao para criar grupos." });
+  }
+
+  if (type === CHAT_TYPES.CHANNEL && !hasPermission(req.auth, PERMISSIONS.CHAT_CREATE_CHANNEL)) {
+    return res.status(403).json({ error: "Sem permissao para criar canais." });
   }
 
   if (!name) {
@@ -194,7 +235,7 @@ export async function createConversation(req, res) {
   try {
     const invalidMembers = [];
     for (const userId of memberIds) {
-      if (!(await userExists(userId))) {
+      if (!(await userExists(userId, req.auth.organization.id))) {
         invalidMembers.push(userId);
       }
     }
@@ -211,10 +252,10 @@ export async function createConversation(req, res) {
       await client.query("BEGIN");
 
       const createdConversation = await client.query(
-        `INSERT INTO chat_conversations (type, name, description, is_private, created_by)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO chat_conversations (type, name, description, is_private, created_by, organization_id)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id`,
-        [type, name, description, isPrivate, req.userId]
+        [type, name, description, isPrivate, req.userId, req.auth.organization.id]
       );
 
       conversationId = Number(createdConversation.rows[0].id);
@@ -252,7 +293,7 @@ export async function createConversation(req, res) {
       client.release();
     }
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.status(201).json(payload);
   } catch (err) {
     console.error("Erro ao criar conversa:", err);
@@ -269,6 +310,8 @@ export async function getConversationDetails(req, res) {
   try {
     const access = await getConversationAccess(req.userId, conversationId, {
       autoJoinPublicChannel: true,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     if (!access.found) {
@@ -279,7 +322,7 @@ export async function getConversationDetails(req, res) {
       return res.status(403).json({ error: "Sem acesso a esta conversa." });
     }
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.json(payload);
   } catch (err) {
     console.error("Erro ao buscar detalhes da conversa:", err);
@@ -294,7 +337,7 @@ export async function updateConversation(req, res) {
   }
 
   try {
-    const roleCheck = await ensureRoleForConversation(req.userId, conversationId);
+    const roleCheck = await ensureRoleForConversation(req.auth, conversationId);
     if (!roleCheck.ok) {
       return res.status(roleCheck.status).json({ error: roleCheck.error });
     }
@@ -334,7 +377,7 @@ export async function updateConversation(req, res) {
       ]
     );
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.json(payload);
   } catch (err) {
     console.error("Erro ao atualizar conversa:", err);
@@ -354,7 +397,7 @@ export async function addConversationMembers(req, res) {
   }
 
   try {
-    const roleCheck = await ensureRoleForConversation(req.userId, conversationId);
+    const roleCheck = await ensureRoleForConversation(req.auth, conversationId);
     if (!roleCheck.ok) {
       return res.status(roleCheck.status).json({ error: roleCheck.error });
     }
@@ -364,7 +407,7 @@ export async function addConversationMembers(req, res) {
     }
 
     for (const userId of userIds) {
-      if (!(await userExists(userId))) {
+      if (!(await userExists(userId, req.auth.organization.id))) {
         return res.status(400).json({ error: "Um dos usuarios informados nao existe." });
       }
     }
@@ -386,7 +429,7 @@ export async function addConversationMembers(req, res) {
       values
     );
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.json(payload);
   } catch (err) {
     console.error("Erro ao adicionar membros:", err);
@@ -409,6 +452,8 @@ export async function removeConversationMember(req, res) {
   try {
     const access = await getConversationAccess(req.userId, conversationId, {
       autoJoinPublicChannel: false,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     if (!access.found) {
@@ -464,7 +509,7 @@ export async function removeConversationMember(req, res) {
       return res.json({ success: true, removed_self: true });
     }
 
-    const payload = await buildConversationPayload(req.userId, conversationId);
+    const payload = await buildConversationPayload(req.auth, conversationId);
     return res.json(payload);
   } catch (err) {
     console.error("Erro ao remover membro:", err);

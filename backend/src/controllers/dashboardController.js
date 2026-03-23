@@ -3,7 +3,7 @@ import pool from "../db.js";
 export async function getDashboardStats(req, res) {
   try {
     const totalStudentsResult = await pool.query(
-      "SELECT COUNT(*)::int AS count FROM users WHERE role = 'aluno'"
+      "SELECT COUNT(*)::int AS count FROM users WHERE role = 'student'"
     );
 
     const activeCoursesResult = await pool.query(
