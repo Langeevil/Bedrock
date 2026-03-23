@@ -1,10 +1,12 @@
 import { ensureAppSchema } from "./src/dbInit.js";
 import pool from "./src/db.js";
+import { runMigrations } from "./src/migrationRunner.js";
 
 async function run() {
   try {
     console.log("Starting schema update...");
     await ensureAppSchema();
+    await runMigrations(pool);
     console.log("Schema update completed successfully.");
     process.exit(0);
   } catch (err) {
