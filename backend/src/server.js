@@ -9,7 +9,12 @@ import disciplinesRoutes from "./routes/disciplines.js";
 import chatRoutes from "./routes/chat.js";
 import projectRoutes from "./routes/projects.js";
 import organizationRoutes from "./routes/organizations.js";
+<<<<<<< HEAD
 import adminRoutes from "./routes/admin.js";
+=======
+import livroRoutes from "./Biblioteca/Livro/routes/livroRoute.js";
+import emprestimoRoutes from "./Biblioteca/Emprestimo/routes/emprestimoRoute.js";
+>>>>>>> f0909a0c039269dd5b1be5d346765b0a8ef5e8eb
 
 import { ensureAppSchema } from "./dbInit.js";
 import { initChatSocket } from "./chatSocket.js";
@@ -30,7 +35,12 @@ app.use("/api/disciplines", disciplinesRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/organizations", organizationRoutes);
+<<<<<<< HEAD
 app.use("/api/admin", adminRoutes);
+=======
+app.use("/api/livros", livroRoutes);
+app.use("/api/emprestimos", emprestimoRoutes);
+>>>>>>> f0909a0c039269dd5b1be5d346765b0a8ef5e8eb
 app.use("/uploads", express.static("uploads"));
 /* SERVER HTTP */
 const PORT = process.env.PORT || 4000;
