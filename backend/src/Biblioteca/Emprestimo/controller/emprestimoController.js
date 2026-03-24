@@ -2,7 +2,11 @@ import emprestimoService from "../services/emprestimoService.js";
 
 export async function criar(req, res) {
     try {
-        const emprestimo = await emprestimoService.criarEmprestimo(req.body);
+        const dados = {
+            ...req.body,
+            usuarioId: req.userId // Puxa o ID do usuário autenticado
+        };
+        const emprestimo = await emprestimoService.criarEmprestimo(dados);
         res.status(201).json(emprestimo);
     } catch (error) {
         res.status(500).json({ error: error.message });
