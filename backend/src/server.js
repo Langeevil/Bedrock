@@ -32,12 +32,9 @@ app.use("/api/disciplines", disciplinesRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/organizations", organizationRoutes);
-<<<<<<< HEAD
 app.use("/api/admin", adminRoutes);
-=======
 app.use("/api/livros", livroRoutes);
 app.use("/api/emprestimos", emprestimoRoutes);
->>>>>>> f0909a0c039269dd5b1be5d346765b0a8ef5e8eb
 app.use("/uploads", express.static("uploads"));
 /* SERVER HTTP */
 const PORT = process.env.PORT || 4000;
