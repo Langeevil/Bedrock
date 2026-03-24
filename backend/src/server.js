@@ -9,12 +9,9 @@ import disciplinesRoutes from "./routes/disciplines.js";
 import chatRoutes from "./routes/chat.js";
 import projectRoutes from "./routes/projects.js";
 import organizationRoutes from "./routes/organizations.js";
-<<<<<<< HEAD
 import adminRoutes from "./routes/admin.js";
-=======
 import livroRoutes from "./Biblioteca/Livro/routes/livroRoute.js";
 import emprestimoRoutes from "./Biblioteca/Emprestimo/routes/emprestimoRoute.js";
->>>>>>> f0909a0c039269dd5b1be5d346765b0a8ef5e8eb
 
 import { ensureAppSchema } from "./dbInit.js";
 import { initChatSocket } from "./chatSocket.js";
