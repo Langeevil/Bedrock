@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { completeProfile } from "../../features/auth/services/authService";
+import { storeSessionUser } from "../authSession";
 
 interface Props {
   readonly onClose: () => void;
@@ -23,7 +24,7 @@ export default function ProfileModal({ onClose }: Props) {
     try {
       setLoading(true);
       const user = await completeProfile(role);
-      localStorage.setItem("user_role", user.role || role);
+      storeSessionUser(user);
       alert(`Perfil atualizado para: ${role}`);
       onClose();
     } catch (err) {

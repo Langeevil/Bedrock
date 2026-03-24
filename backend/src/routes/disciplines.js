@@ -22,6 +22,10 @@ import {
   atualizarPost,
   deletarPost,
 } from "../controllers/disciplinePostsController.js";
+import {
+  listarMembros,
+  adicionarMembro,
+} from "../controllers/disciplineMembersController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/uploadMiddleware.js";
 import validateDto from "../middlewares/validateDto.js";
@@ -54,5 +58,9 @@ router.get("/:id/posts/:postId", authMiddleware, buscarPost);
 router.post("/:id/posts", authMiddleware, criarPost);
 router.put("/:id/posts/:postId", authMiddleware, atualizarPost);
 router.delete("/:id/posts/:postId", authMiddleware, deletarPost);
+
+// Rotas para membros
+router.get("/:id/members", authMiddleware, listarMembros);
+router.post("/:id/members", authMiddleware, adicionarMembro);
 
 export default router;

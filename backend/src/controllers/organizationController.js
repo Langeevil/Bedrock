@@ -164,3 +164,85 @@ export async function updateCurrentOrganizationMemberRole(req, res) {
     return res.status(500).json({ error: "Erro ao atualizar papel." });
   }
 }
+
+export async function addCurrentOrganizationMember(req, res) {
+  if (!req.auth?.organization?.id) {
+    return res.status(404).json({ error: "Organizacao ativa nao encontrada." });
+  }
+
+  if (!hasPermission(req.auth, PERMISSIONS.ORGANIZATION_MANAGE_MEMBERS)) {
+    return res.status(403).json({ error: "Sem permissao para gerenciar membros." });
+  }
+
+  const email = String(req.body?.email || "").trim().toLowerCase();
+  const nextRole = normalizeOrganizationRole(req.body?.role) || ORGANIZATION_ROLES.STUDENT;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email obrigatorio." });
+  }
+
+  if (!canAssignOrganizationRole(req.auth, nextRole)) {
+    return res.status(403).json({ error: "Sem permissao para atribuir este papel." });
+  }
+
+  try {
+    const userResult = await pool.query(
+      `SELECT id, primary_organization_id
+       FROM users
+       WHERE LOWER(email) = $1`,
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario nao encontrado." });
+    }
+
+    const user = userResult.rows[0];
+    const primaryOrganizationId = Number(user.primary_organization_id || 0);
+
+    if (
+      primaryOrganizationId > 0 &&
+      primaryOrganizationId !== req.auth.organization.id
+    ) {
+      return res.status(400).json({
+        error: "Usuario ja possui outra organizacao primaria. Migracao de organizacao ainda nao suportada.",
+      });
+    }
+
+    await pool.query(
+      `INSERT INTO organization_memberships (organization_id, user_id, role, status)
+       VALUES ($1, $2, $3, 'active')
+       ON CONFLICT (organization_id, user_id)
+       DO UPDATE SET role = EXCLUDED.role, status = EXCLUDED.status`,
+      [req.auth.organization.id, user.id, nextRole]
+    );
+
+    await pool.query(
+      `UPDATE users
+       SET role = $2,
+           primary_organization_id = COALESCE(primary_organization_id, $3)
+       WHERE id = $1`,
+      [user.id, nextRole, req.auth.organization.id]
+    );
+
+    const auth = await resolveAuthContext(user.id);
+
+    return res.status(201).json({
+      message: "Membro adicionado com sucesso.",
+      usuario: auth
+        ? {
+            id: auth.userId,
+            nome: auth.nome,
+            email: auth.email,
+            role: auth.effectiveRole,
+            system_role: auth.systemRole,
+            organization: auth.organization,
+            membership: auth.membership,
+          }
+        : null,
+    });
+  } catch (err) {
+    console.error("Erro ao adicionar membro da organizacao:", err);
+    return res.status(500).json({ error: "Erro ao adicionar membro." });
+  }
+}

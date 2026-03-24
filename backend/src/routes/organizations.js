@@ -2,6 +2,7 @@ import express from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import requirePermission from "../middlewares/requirePermission.js";
 import {
+  addCurrentOrganizationMember,
   getCurrentOrganization,
   listCurrentOrganizationMembers,
   updateCurrentOrganizationMemberRole,
@@ -17,6 +18,11 @@ router.get(
   "/current/members",
   requirePermission(PERMISSIONS.ORGANIZATION_VIEW),
   listCurrentOrganizationMembers
+);
+router.post(
+  "/current/members",
+  requirePermission(PERMISSIONS.ORGANIZATION_MANAGE_MEMBERS),
+  addCurrentOrganizationMember
 );
 router.patch(
   "/current/members/:userId/role",

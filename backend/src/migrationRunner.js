@@ -1,10 +1,16 @@
 import { id as migration001Id, description as migration001Description, up as migration001Up } from "./migrations/001_institution_foundation.js";
+import { id as migration002Id, description as migration002Description, up as migration002Up } from "./migrations/002_discipline_memberships.js";
 
 const migrations = [
   {
     id: migration001Id,
     description: migration001Description,
     up: migration001Up,
+  },
+  {
+    id: migration002Id,
+    description: migration002Description,
+    up: migration002Up,
   },
 ];
 

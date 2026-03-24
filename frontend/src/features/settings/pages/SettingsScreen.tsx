@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarSimple } from "../../../components/sidebar-simple";
 import { completeProfile, getMe } from "../../auth/services/authService";
+import { storeSessionUser } from "../../../shared/authSession";
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function SettingsScreen() {
     try {
       setLoading(true);
       const user = await completeProfile(role);
-      localStorage.setItem("user_role", user.role || role);
+      storeSessionUser(user);
       alert("Perfil atualizado com sucesso.");
     } catch (err: any) {
       alert(err.message || "Erro ao atualizar perfil.");
@@ -52,6 +53,9 @@ export default function SettingsScreen() {
     localStorage.removeItem("user_nome");
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_role");
+    localStorage.removeItem("user_system_role");
+    localStorage.removeItem("user_org_name");
+    localStorage.removeItem("user_org_slug");
     navigate("/login");
   }
 

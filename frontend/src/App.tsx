@@ -17,7 +17,8 @@ import {
   RegisterNameScreen, 
   RegisterEmailScreen, 
   RegisterPasswordScreen, 
-  PrivateRoute 
+  PrivateRoute,
+  AdminOnlyRoute,
 } from "./features/auth";
 import { DashboardScreen } from "./features/dashboard";
 import { ProjectsScreen } from "./features/projects";
@@ -26,6 +27,7 @@ import { ChatScreen } from "./features/chat";
 import { LibraryScreen } from "./features/library";
 import { StatisticsScreen } from "./features/statistics";
 import { SettingsScreen } from "./features/settings";
+import { AdminScreen } from "./features/admin";
 
 function App() {
   return (
@@ -124,6 +126,14 @@ function App() {
             <PrivateRoute>
               <SettingsScreen />
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminOnlyRoute>
+              <AdminScreen />
+            </AdminOnlyRoute>
           }
         />
       </Routes>

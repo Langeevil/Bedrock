@@ -1,6 +1,6 @@
 // controllers/disciplinePostsController.js
 import * as repository from "../repositories/disciplinePostsRepository.js";
-import * as disciplineRepository from "../repositories/disciplineRepository.js";
+import { getDiscipline as getAuthorizedDiscipline } from "../services/disciplineService.js";
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -15,8 +15,7 @@ class HttpError extends Error {
 export async function listarPosts(req, res) {
   try {
     const { id } = req.params;
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const page = req.query.page ? parseInt(req.query.page, 10) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 20;
@@ -53,8 +52,7 @@ export async function buscarPost(req, res) {
   try {
     const { id, postId } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const post = await repository.findPostById(postId);
     if (!post || post.discipline_id !== parseInt(id, 10)) {
@@ -81,8 +79,7 @@ export async function criarPost(req, res) {
       throw new HttpError(400, "Campo obrigatório: content ou fileId");
     }
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const post = await repository.createPost({
       discipline_id: id,
@@ -109,8 +106,7 @@ export async function atualizarPost(req, res) {
     const { id, postId } = req.params;
     const { content, pinned } = req.body;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const post = await repository.findPostById(postId);
     if (!post || post.discipline_id !== parseInt(id, 10)) {
@@ -147,8 +143,7 @@ export async function deletarPost(req, res) {
   try {
     const { id, postId } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const post = await repository.findPostById(postId);
     if (!post || post.discipline_id !== parseInt(id, 10)) {
