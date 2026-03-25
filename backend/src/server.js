@@ -30,6 +30,7 @@ app.use("/api/disciplines", disciplinesRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/livros", livroRoutes);
 app.use("/api/emprestimos", emprestimoRoutes);
 app.use("/uploads", express.static("uploads"));
