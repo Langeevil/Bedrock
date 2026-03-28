@@ -6,6 +6,7 @@ import {
   setThemePreference,
   type ThemePreference,
 } from "../shared/theme";
+import { getMe } from "../features/auth/services/authService";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -13,6 +14,7 @@ import Chat from "../assets/icons/DashBoardIcons/Chat.png";
 import Biblioteca from "../assets/icons/DashBoardIcons/Biblioteca.png";
 import Estatica from "../assets/icons/DashBoardIcons/Estatica.png";
 
+type Role = "admin" | "professor" | "aluno";
 type Props = { children?: React.ReactNode };
 
 const SIDEBAR_KEY = "bedrock_sidebar_collapsed";
@@ -23,6 +25,7 @@ const navItems = [
     label: "Home",
     icon: Home,
     alt: "Icone da Home",
+    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["dashboard", "inicio", "painel", "home"],
   },
   {
@@ -30,6 +33,7 @@ const navItems = [
     label: "Projetos",
     icon: Projects,
     alt: "Icone de Projetos",
+    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["projetos", "project", "tarefas", "planejamento"],
   },
   {
@@ -38,6 +42,7 @@ const navItems = [
     icon: Disciplinas,
     alt: "Icone de Disciplinas",
     badge: "14",
+    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["disciplinas", "materias", "turmas", "aulas"],
   },
   {
@@ -46,6 +51,7 @@ const navItems = [
     icon: Chat,
     alt: "Icone de Chat",
     topGap: true,
+    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["chat", "mensagens", "conversas", "dm", "grupos", "canais"],
   },
   {
@@ -53,6 +59,7 @@ const navItems = [
     label: "Biblioteca",
     icon: Biblioteca,
     alt: "Icone de Biblioteca",
+    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["biblioteca", "livros", "documentos", "conteudo"],
   },
   {
@@ -60,6 +67,7 @@ const navItems = [
     label: "Estatistica",
     icon: Estatica,
     alt: "Icone de Estatistica",
+    roles: ["admin", "professor"] as Role[], // aluno NÃO tem acesso
     keywords: ["estatistica", "metricas", "dados", "indicadores"],
   },
 ];
@@ -67,6 +75,7 @@ const navItems = [
 const settingsItem = {
   to: "/settings",
   label: "Settings",
+  roles: ["admin", "professor", "aluno"] as Role[],
   keywords: ["settings", "configuracoes", "perfil", "ajustes"],
 };
 
@@ -123,6 +132,14 @@ function NavItem({
 export function SidebarSimple({ children }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [role, setRole] = React.useState<Role>("aluno");
+
+  React.useEffect(() => {
+    getMe()
+      .then((me) => setRole((me.role as Role) ?? "aluno"))
+      .catch(() => setRole("aluno"));
+  }, []);
+
   const [openAlert, setOpenAlert] = React.useState(true);
   const [collapsed, setCollapsed] = React.useState(() => {
     if (typeof window === "undefined") return false;
@@ -133,6 +150,12 @@ export function SidebarSimple({ children }: Props) {
     if (typeof window === "undefined") return "system";
     return getStoredThemePreference();
   });
+
+  // Filtra os itens de navegação com base no role do usuário
+  const visibleNavItems = React.useMemo(
+    () => navItems.filter((item) => item.roles.includes(role)),
+    [role]
+  );
 
   React.useEffect(() => {
     window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
@@ -148,8 +171,11 @@ export function SidebarSimple({ children }: Props) {
   }, []);
 
   const searchableItems = React.useMemo(
-    () => [...navItems, { ...settingsItem, icon: "", alt: "" }],
-    []
+    () =>
+      [...visibleNavItems, { ...settingsItem, icon: "", alt: "" }].filter((item) =>
+        item.roles.includes(role)
+      ),
+    [visibleNavItems, role]
   );
 
   const searchResults = React.useMemo(() => {
@@ -323,22 +349,22 @@ export function SidebarSimple({ children }: Props) {
         ) : (
           <div className="relative">
             <form onSubmit={handleSearchSubmit}>
-            <input
-              type="text"
-              placeholder="Buscar"
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className="w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] px-3 py-2 pr-10 text-sm text-[var(--app-sidebar-contrast)] placeholder:text-[color:var(--app-sidebar-contrast)]/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            />
-            <button
-              type="submit"
-              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[color:var(--app-sidebar-contrast)]/80 hover:text-[var(--app-sidebar-contrast)]"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="6" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </button>
+              <input
+                type="text"
+                placeholder="Buscar"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                className="w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] px-3 py-2 pr-10 text-sm text-[var(--app-sidebar-contrast)] placeholder:text-[color:var(--app-sidebar-contrast)]/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
+              <button
+                type="submit"
+                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[color:var(--app-sidebar-contrast)]/80 hover:text-[var(--app-sidebar-contrast)]"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="6" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </button>
             </form>
 
             {searchValue.trim() && (
@@ -366,7 +392,7 @@ export function SidebarSimple({ children }: Props) {
 
       <nav className="flex-1 overflow-y-auto px-1">
         <ul className="flex flex-col gap-1">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavItem
               key={item.to}
               to={item.to}
@@ -380,14 +406,16 @@ export function SidebarSimple({ children }: Props) {
             </NavItem>
           ))}
 
-          <NavItem
-            to={settingsItem.to}
-            label={settingsItem.label}
-            collapsed={collapsed}
-            active={location.pathname === settingsItem.to}
-          >
-            <SettingsIcon />
-          </NavItem>
+          {settingsItem.roles.includes(role) && (
+            <NavItem
+              to={settingsItem.to}
+              label={settingsItem.label}
+              collapsed={collapsed}
+              active={location.pathname === settingsItem.to}
+            >
+              <SettingsIcon />
+            </NavItem>
+          )}
         </ul>
       </nav>
 
