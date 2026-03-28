@@ -1,18 +1,14 @@
 import pool from "../db.js";
 import { Project } from "../models/projectModel.js";
 
-/**
- * Busca um projeto completo com tarefas (incluindo tag_ids) e tags
- */
-export async function findById(id) {
+export async function findById(id, organizationId = null) {
   const query = `
-    SELECT 
+    SELECT
       p.id,
       p.name,
       p.user_id,
+      p.organization_id,
       p.created_at,
-
-      -- Tasks com seus tag_ids embutidos
       COALESCE(
         (
           SELECT json_agg(
@@ -33,8 +29,6 @@ export async function findById(id) {
         ),
         '[]'
       ) AS tasks,
-
-      -- Tags únicas do projeto (deduplicated)
       COALESCE(
         (
           SELECT json_agg(DISTINCT jsonb_build_object(
@@ -48,41 +42,57 @@ export async function findById(id) {
         ),
         '[]'
       ) AS tags
-
     FROM projects p
-    WHERE p.id = $1;
+    WHERE p.id = $1
+      AND ($2::int IS NULL OR p.organization_id = $2);
   `;
 
-  const res = await pool.query(query, [id]);
+  const res = await pool.query(query, [id, organizationId]);
   if (res.rows.length === 0) return null;
   return new Project(res.rows[0]);
 }
 
-/**
- * Busca todos os projetos de um usuário
- */
-export async function findByUserId(userId) {
+export async function findByUserId(userId, organizationId = null) {
   const res = await pool.query(
-    `SELECT id, name, user_id, created_at
+    `SELECT id, name, user_id, organization_id, created_at
      FROM projects
      WHERE user_id = $1
+       AND ($2::int IS NULL OR organization_id = $2)
      ORDER BY created_at DESC`,
-    [userId]
+    [userId, organizationId]
   );
-  return res.rows.map(row => new Project(row));
+  return res.rows.map((row) => new Project(row));
 }
 
-/**
- * Cria um novo projeto
- */
-export async function create({ name, user_id }) {
+export async function findByOrganizationId(organizationId) {
   const res = await pool.query(
-    `INSERT INTO projects (name, user_id)
-     VALUES ($1, $2)
-     RETURNING id, name, user_id, created_at`,
-    [name, user_id]
+    `SELECT id, name, user_id, organization_id, created_at
+     FROM projects
+     WHERE organization_id = $1
+     ORDER BY created_at DESC`,
+    [organizationId]
+  );
+  return res.rows.map((row) => new Project(row));
+}
+
+export async function create({ name, user_id, organization_id }) {
+  const res = await pool.query(
+    `INSERT INTO projects (name, user_id, organization_id)
+     VALUES ($1, $2, $3)
+     RETURNING id, name, user_id, organization_id, created_at`,
+    [name, user_id, organization_id]
   );
   return new Project(res.rows[0]);
 }
 
-export default { findById, findByUserId, create };
+export async function remove(id) {
+  const res = await pool.query(
+    `DELETE FROM projects
+     WHERE id = $1
+     RETURNING id`,
+    [id]
+  );
+  return res.rows[0] || null;
+}
+
+export default { findById, findByUserId, findByOrganizationId, create, remove };

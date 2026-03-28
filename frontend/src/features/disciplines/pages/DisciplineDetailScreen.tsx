@@ -1,5 +1,3 @@
-// src/features/disciplines/pages/DisciplineDetailScreen.tsx
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,6 +9,7 @@ import { DisciplineHeader } from "../components/DisciplineHeader";
 import { OverviewTab } from "../components/tabs/OverviewTab";
 import { MaterialsTab } from "../components/tabs/MaterialsTab";
 import { ChatTab } from "../components/tabs/ChatTab";
+import { MembersTab } from "../components/tabs/MembersTab";
 import { SettingsTab } from "../components/tabs/SettingsTab";
 
 function getLoggedUserName(): string {
@@ -32,29 +31,29 @@ export default function DisciplineDetailScreen() {
     getDiscipline(Number(id))
       .then((d) => {
         setDiscipline(d);
-        document.title = d.name + " - Disciplina";
+        document.title = `${d.name} - Disciplina`;
       })
       .catch((err: Error) => setError(err.message || "Erro ao carregar disciplina."))
       .finally(() => setLoading(false));
   }, [id]);
 
   return (
-    <div className="flex h-screen bg-[#F5F5F5] font-sans overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#F5F5F5] font-sans">
       <SidebarSimple />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {loading && (
-          <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+          <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
               <span>Carregando disciplina...</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="m-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
+          <div className="m-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            <div className="h-2 w-2 rounded-full bg-red-500" />
             {error}
           </div>
         )}
@@ -68,7 +67,7 @@ export default function DisciplineDetailScreen() {
             />
 
             <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-              <div className="max-w-7xl mx-auto">
+              <div className="mx-auto max-w-7xl">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={tab}
@@ -78,14 +77,11 @@ export default function DisciplineDetailScreen() {
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     {tab === "overview" && <OverviewTab discipline={discipline} />}
-
-                    {/* MENU DE MATERIAS/ARQUIVOS */}
                     {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
-                    
-                    {/* MENU DE CHAT/POSTAGEM */}
                     {tab === "chat" && (
                       <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
                     )}
+                    {tab === "members" && <MembersTab disciplineId={discipline.id} />}
                     {tab === "settings" && <SettingsTab discipline={discipline} />}
                   </motion.div>
                 </AnimatePresence>

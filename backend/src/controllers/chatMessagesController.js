@@ -5,6 +5,7 @@ import {
   getConversationSummary,
   markConversationRead,
 } from "../chatCore.js";
+import { PERMISSIONS, hasPermission } from "../auth/accessControl.js";
 
 export async function listConversationMessages(req, res) {
   const conversationId = Number(req.params.id);
@@ -22,8 +23,14 @@ export async function listConversationMessages(req, res) {
   }
 
   try {
+    if (!hasPermission(req.auth, PERMISSIONS.CHAT_ACCESS)) {
+      return res.status(403).json({ error: "Sem permissao para acessar o chat." });
+    }
+
     const access = await getConversationAccess(req.userId, conversationId, {
       autoJoinPublicChannel: true,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     if (!access.found) {
@@ -83,7 +90,10 @@ export async function listConversationMessages(req, res) {
         attachments: [],
       }));
 
-    const summary = await getConversationSummary(req.userId, conversationId);
+    const summary = await getConversationSummary(req.userId, conversationId, {
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
+    });
 
     return res.json({
       items: messages,
@@ -110,8 +120,14 @@ export async function createMessage(req, res) {
   }
 
   try {
+    if (!hasPermission(req.auth, PERMISSIONS.CHAT_ACCESS)) {
+      return res.status(403).json({ error: "Sem permissao para acessar o chat." });
+    }
+
     const access = await getConversationAccess(req.userId, conversationId, {
       autoJoinPublicChannel: true,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     if (!access.found) {
@@ -147,6 +163,8 @@ export async function markConversationAsRead(req, res) {
   try {
     const access = await getConversationAccess(req.userId, conversationId, {
       autoJoinPublicChannel: true,
+      organizationId: req.auth?.organization?.id || null,
+      isSystemAdmin: req.auth?.systemRole === "system_admin",
     });
 
     if (!access.found) {

@@ -15,6 +15,7 @@ router.use(autenticar);
 router.get("/",    projectController.listUserProjects);
 router.post("/",   validateDto(validateCreateProject), projectController.createProject);
 router.get("/:id/graph", projectController.getProjectDetails);
+router.delete("/:id", projectController.deleteProject);
 
 // ── Tarefas ───────────────────────────────────────────────────────────────────
 router.get( "/:projectId/tasks",          taskController.listTasks);

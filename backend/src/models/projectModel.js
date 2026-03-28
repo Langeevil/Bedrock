@@ -1,8 +1,9 @@
 export class Project {
-  constructor({ id, name, user_id, created_at, tasks = [], tags = [] }) {
+  constructor({ id, name, user_id, organization_id, created_at, tasks = [], tags = [] }) {
     this.id = id;
     this.name = name;
     this.user_id = user_id;
+    this.organization_id = organization_id;
     this.created_at = created_at;
     
     // Lista de objetos Task { id, title, status, tags: [] }

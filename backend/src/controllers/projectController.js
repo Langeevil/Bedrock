@@ -1,66 +1,106 @@
 import projectRepository from "../repositories/projectRepository.js";
+import {
+  canAccessProject,
+  canCreateProject,
+  canListAllProjects,
+  canMutateProject,
+} from "../services/resourceAccessService.js";
 
-/**
- * Cria um novo projeto associado ao usuário logado
- */
+async function getAuthorizedProject(req, { requireMutation = false } = {}) {
+  const project = await projectRepository.findById(
+    req.params.id || req.params.projectId,
+    req.auth?.organization?.id || null
+  );
+
+  if (!project) {
+    return { error: { status: 404, message: "Projeto nao encontrado." } };
+  }
+
+  const allowed = requireMutation
+    ? canMutateProject(req.auth, project)
+    : canAccessProject(req.auth, project);
+
+  if (!allowed) {
+    return { error: { status: 403, message: "Sem permissao para acessar este projeto." } };
+  }
+
+  return { project };
+}
+
 export async function createProject(req, res) {
   try {
     const { name } = req.body;
-    const userId = req.userId; // Definido pelo authMiddleware
 
-    const project = await projectRepository.create({ name, user_id: userId });
-    
-    res.status(201).json({
+    if (!canCreateProject(req.auth)) {
+      return res.status(403).json({ error: "Sem permissao para criar projetos." });
+    }
+
+    const project = await projectRepository.create({
+      name,
+      user_id: req.userId,
+      organization_id: req.auth.organization.id,
+    });
+
+    return res.status(201).json({
       message: "Projeto criado com sucesso!",
-      project
+      project,
     });
   } catch (error) {
     console.error("Erro ao criar projeto:", error);
-    res.status(500).json({ error: "Erro interno ao criar projeto." });
+    return res.status(500).json({ error: "Erro interno ao criar projeto." });
   }
 }
 
-/**
- * Retorna os dados completos do projeto, incluindo tarefas e tags para o grafo
- */
 export async function getProjectDetails(req, res) {
   try {
-    const { id } = req.params;
-    const project = await projectRepository.findById(id);
-
-    if (!project) {
-      return res.status(404).json({ error: "Projeto não encontrado." });
+    const { project, error } = await getAuthorizedProject(req);
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
     }
 
-    // Gera os dados formatados para o grafo usando o método da Model
     const graphData = project.toGraphData();
 
-    res.json({
+    return res.json({
       project,
-      graphData
+      graphData,
     });
   } catch (error) {
     console.error("Erro ao buscar detalhes do projeto:", error);
-    res.status(500).json({ error: "Erro ao processar dados do projeto." });
+    return res.status(500).json({ error: "Erro ao processar dados do projeto." });
   }
 }
 
-/**
- * Busca todos os projetos do usuário logado
- */
 export async function listUserProjects(req, res) {
   try {
-    const userId = req.userId;
-    const projects = await projectRepository.findByUserId(userId);
-    res.json(projects);
+    const projects = canListAllProjects(req.auth)
+      ? await projectRepository.findByOrganizationId(req.auth.organization.id)
+      : await projectRepository.findByUserId(req.userId, req.auth.organization.id);
+
+    return res.json(projects);
   } catch (error) {
     console.error("Erro ao listar projetos:", error);
-    res.status(500).json({ error: "Erro ao listar projetos." });
+    return res.status(500).json({ error: "Erro ao listar projetos." });
+  }
+}
+
+export async function deleteProject(req, res) {
+  try {
+    const { project, error } = await getAuthorizedProject(req, { requireMutation: true });
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
+    }
+
+    await projectRepository.remove(project.id);
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Erro ao remover projeto:", error);
+    return res.status(500).json({ error: "Erro ao remover projeto." });
   }
 }
 
 export default {
   createProject,
   getProjectDetails,
-  listUserProjects
+  listUserProjects,
+  deleteProject,
 };

@@ -1,5 +1,5 @@
 import * as repository from "../repositories/disciplineFilesRepository.js";
-import * as disciplineRepository from "../repositories/disciplineRepository.js";
+import { getDiscipline as getAuthorizedDiscipline } from "../services/disciplineService.js";
 
 import path from "node:path";
 import fs from "node:fs";
@@ -63,8 +63,7 @@ export async function listarArquivos(req, res) {
   try {
     const { id } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const page = req.query.page
       ? Number.parseInt(req.query.page, 10)
@@ -109,8 +108,7 @@ export async function buscarArquivo(req, res) {
   try {
     const { id, fileId } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const arquivo = await repository.findFileById(fileId);
 
@@ -154,8 +152,7 @@ export async function criarArquivo(req, res) {
       );
     }
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const existente = await repository.findFileByName(id, file_name);
     if (existente)
@@ -190,8 +187,7 @@ export async function deletarArquivo(req, res) {
   try {
     const { id, fileId } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     const arquivo = await repository.findFileById(fileId);
 
@@ -221,8 +217,7 @@ export async function uploadArquivo(req, res) {
   try {
     const { id } = req.params;
 
-    const disciplina = await disciplineRepository.findDisciplineById(id);
-    if (!disciplina) throw new HttpError(404, "Disciplina não encontrada.");
+    await getAuthorizedDiscipline(id, req.auth);
 
     if (!req.file)
       throw new HttpError(400, "Arquivo não enviado.");

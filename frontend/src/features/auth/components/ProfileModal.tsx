@@ -1,6 +1,7 @@
 // components/ProfileModal.tsx
 import { useState } from "react";
 import { completeProfile } from "../services/authService";
+import { storeSessionUser } from "../../../shared/authSession";
 
 interface Props {
   readonly onClose: () => void;
@@ -9,6 +10,11 @@ interface Props {
 export default function ProfileModal({ onClose }: Props) {
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
+  const options = [
+    { value: "student", label: "Aluno" },
+    { value: "professor", label: "Professor" },
+    { value: "external_partner", label: "Parceiro Externo" },
+  ];
 
   const handleSave = async () => {
     if (!role) {
@@ -18,7 +24,8 @@ export default function ProfileModal({ onClose }: Props) {
 
     try {
       setLoading(true);
-      await completeProfile(role);
+      const user = await completeProfile(role);
+      storeSessionUser(user);
       alert(`Perfil atualizado para: ${role}`); // mensagem temporária
       onClose();
     } catch (err: any) {
@@ -36,17 +43,17 @@ export default function ProfileModal({ onClose }: Props) {
         </h2>
 
         <div className="space-y-3">
-          {["professor", "aluno", "empresa"].map((item) => (
+          {options.map((item) => (
             <button
-              key={item}
-              onClick={() => setRole(item)}
+              key={item.value}
+              onClick={() => setRole(item.value)}
               className={`btn w-full ${
-                role === item
+                role === item.value
                   ? "btn-primary text-white"
                   : "btn-outline border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
-              {item.charAt(0).toUpperCase() + item.slice(1)}
+              {item.label}
             </button>
           ))}
         </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import fundo from "../../../assets/degrade-fundo-azul.jpg";
 import { loginUser } from "../services/authService";
 import { useNavigate, Link } from "react-router-dom";
+import { storeSessionUser } from "../../../shared/authSession";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -27,9 +28,7 @@ export default function LoginScreen() {
       const data = await loginUser(email, senha);
 
       localStorage.setItem("auth_token", data.token);
-      localStorage.setItem("user_nome", data.usuario.nome);
-      localStorage.setItem("user_email", data.usuario.email);
-      localStorage.setItem("user_role", data.usuario.role || "");
+      storeSessionUser(data.usuario);
 
       navigate("/dashboard", { replace: true });
     } catch (err: any) {

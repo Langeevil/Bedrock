@@ -1,6 +1,6 @@
-// components/ProfileModal.tsx
 import { useState } from "react";
-import { completeProfile } from "../../services/userService";
+import { completeProfile } from "../../features/auth/services/authService";
+import { storeSessionUser } from "../authSession";
 
 interface Props {
   readonly onClose: () => void;
@@ -9,6 +9,11 @@ interface Props {
 export default function ProfileModal({ onClose }: Props) {
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
+  const options = [
+    { value: "student", label: "Aluno" },
+    { value: "professor", label: "Professor" },
+    { value: "external_partner", label: "Parceiro Externo" },
+  ];
 
   const handleSave = async () => {
     if (!role) {
@@ -18,42 +23,44 @@ export default function ProfileModal({ onClose }: Props) {
 
     try {
       setLoading(true);
-      await completeProfile(role);
-      alert(`Perfil atualizado para: ${role}`); // mensagem temporária
+      const user = await completeProfile(role);
+      storeSessionUser(user);
+      alert(`Perfil atualizado para: ${role}`);
       onClose();
-    } catch (err: any) {
-      alert(err.message || "Erro ao atualizar perfil");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao atualizar perfil";
+      alert(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border border-blue-100">
-        <h2 className="text-2xl font-semibold text-slate-900 text-center mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-md rounded-xl border border-blue-100 bg-white p-8 shadow-2xl">
+        <h2 className="mb-4 text-center text-2xl font-semibold text-slate-900">
           Complete seu perfil
         </h2>
 
         <div className="space-y-3">
-          {["professor", "aluno", "empresa"].map((item) => (
+          {options.map((item) => (
             <button
-              key={item}
-              onClick={() => setRole(item)}
+              key={item.value}
+              onClick={() => setRole(item.value)}
               className={`btn w-full ${
-                role === item
+                role === item.value
                   ? "btn-primary text-white"
                   : "btn-outline border-slate-300 text-slate-700 hover:bg-slate-100"
               }`}
             >
-              {item.charAt(0).toUpperCase() + item.slice(1)}
+              {item.label}
             </button>
           ))}
         </div>
 
         <button
           onClick={handleSave}
-          className="btn btn-primary w-full mt-6"
+          className="btn btn-primary mt-6 w-full"
           disabled={loading}
         >
           {loading ? "Salvando..." : "Confirmar"}

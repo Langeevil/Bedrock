@@ -1,25 +1,36 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
+import { resolveAuthContext } from "../auth/authContext.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "segredo_super_forte";
 
-export function autenticar(req, res, next) {
+export async function autenticar(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token não fornecido." });
+    return res.status(401).json({ error: "Token nao fornecido." });
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.id;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: "Token inválido ou expirado." });
+    const userId = Number(decoded.id || decoded.sub);
+    const auth = await resolveAuthContext(userId);
+
+    if (!auth) {
+      return res.status(401).json({ error: "Usuario nao encontrado." });
+    }
+
+    if (auth.accountStatus !== "active") {
+      return res.status(403).json({ error: "Conta inativa." });
+    }
+
+    req.userId = auth.userId;
+    req.auth = auth;
+    return next();
+  } catch {
+    return res.status(401).json({ error: "Token invalido ou expirado." });
   }
 }
 
-// default export for convenience
 export default autenticar;

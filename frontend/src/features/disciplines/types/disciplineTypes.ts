@@ -1,6 +1,15 @@
-// src/features/disciplines/types/disciplineTypes.ts
+export type TabKey = "overview" | "materials" | "chat" | "members" | "settings";
 
-export type TabKey = "overview" | "materials" | "chat" | "settings";
+export interface DisciplineMember {
+  id: number;
+  nome: string;
+  email: string;
+  organization_role?: string;
+  discipline_role: string;
+  system_role?: string | null;
+  status: string;
+  joined_at: string;
+}
 
 export interface Post {
   id: number;
@@ -14,7 +23,6 @@ export interface Post {
   updatedAt?: string;
   likes: number;
   comments: number;
-  // Campos de anexo (opcionais)
   fileId?: number;
   fileName?: string;
   fileType?: string;
@@ -41,17 +49,13 @@ export interface RecentActivity {
   timestamp: Date;
 }
 
-
 export interface Material {
   id: number;
   discipline_id: number;
-
   original_name: string;
   mime_type: string;
   size_bytes: number;
-
   created_at: string;
   updated_at?: string;
-
   url?: string;
 }
