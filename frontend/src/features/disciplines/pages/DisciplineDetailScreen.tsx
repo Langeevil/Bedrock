@@ -11,19 +11,26 @@ import { MaterialsTab } from "../components/tabs/MaterialsTab";
 import { ChatTab } from "../components/tabs/ChatTab";
 import { MembersTab } from "../components/tabs/MembersTab";
 import { SettingsTab } from "../components/tabs/SettingsTab";
+import { MeetingTab } from "../components/tabs/MeetingTab";
+import { TaskTab } from "../components/tasks/TaskTab";
 
 function getLoggedUserName(): string {
   return localStorage.getItem("user_nome") ?? "";
+}
+
+function getLoggedUserEmail(): string {
+  return localStorage.getItem("user_email") ?? "";
 }
 
 export default function DisciplineDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const [discipline, setDiscipline] = useState<Discipline | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUserEmail = getLoggedUserEmail();
+  const currentUserName = getLoggedUserName();
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
-
-  const currentUserName = getLoggedUserName();
+  const userRole = (localStorage.getItem("user_role") as "professor" | "student") || "student";
 
   useEffect(() => {
     if (!id) return;
@@ -77,9 +84,23 @@ export default function DisciplineDetailScreen() {
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     {tab === "overview" && <OverviewTab discipline={discipline} />}
+                    {tab === "posts" && <OverviewTab discipline={discipline} />}
                     {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
                     {tab === "chat" && (
                       <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
+                    )}
+                    {tab === "tasks" && (
+                      <TaskTab
+                        discipline={discipline}
+                        userRole={userRole}
+                      />
+                    )}
+                    {tab === "meeting" && (
+                      <MeetingTab
+                        discipline={discipline}
+                        currentUserEmail={currentUserEmail}
+                        currentUserName={currentUserName}
+                      />
                     )}
                     {tab === "members" && <MembersTab disciplineId={discipline.id} />}
                     {tab === "settings" && <SettingsTab discipline={discipline} />}

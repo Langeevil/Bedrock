@@ -18,6 +18,7 @@ const TABS: { id: TabKey; label: string }[] = [
   { id: "materials", label: "Arquivos" },
   { id: "chat", label: "Publicacoes" },
   { id: "members", label: "Membros" },
+  { id: "meeting", label: "Reuniao" },
   { id: "settings", label: "Configuracoes" },
 ];
 
@@ -102,19 +103,33 @@ export function DisciplineHeader({ discipline, activeTab, onTabChange }: Readonl
             <button
               key={id}
               title={label}
+              onClick={() => {
+                if (id === "meeting") {
+                  onTabChange("meeting");
+                }
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
                 background: "transparent",
                 border: "none",
-                cursor: "pointer",
+                cursor: id === "meeting" ? "pointer" : "default",
                 color: TEAMS.textSecondary,
                 padding: "6px 10px",
                 borderRadius: 4,
                 transition: "background 0.15s",
+                opacity: id === "meeting" ? 1 : 0.5,
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F3F2F1")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+              onMouseEnter={(e) => {
+                if (id === "meeting") {
+                  (e.currentTarget as HTMLElement).style.background = "#F3F2F1";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (id === "meeting") {
+                  (e.currentTarget as HTMLElement).style.background = "transparent";
+                }
+              }}
             >
               <Icon size={16} />
             </button>

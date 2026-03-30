@@ -1,12 +1,13 @@
 // components/DisciplineTabs.tsx
 
-import { LayoutDashboard, FileText, FolderOpen, MessageSquare, Users, Settings } from "lucide-react";
+import { LayoutDashboard, FileText, FolderOpen, MessageSquare, Users, Settings, CheckSquare } from "lucide-react";
 import type { TabKey } from "../types/disciplineTypes";
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: "overview", label: "Visão Geral", icon: LayoutDashboard },
   { key: "posts", label: "Posts", icon: FileText },
   { key: "materials", label: "Materiais", icon: FolderOpen },
+  { key: "tasks", label: "Tarefas", icon: CheckSquare },
   { key: "chat", label: "Chat", icon: MessageSquare },
   { key: "members", label: "Membros", icon: Users },
   { key: "settings", label: "Config.", icon: Settings },

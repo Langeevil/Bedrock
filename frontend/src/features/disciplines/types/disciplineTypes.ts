@@ -1,4 +1,4 @@
-export type TabKey = "overview" | "materials" | "chat" | "members" | "settings";
+export type TabKey = "overview" | "posts" | "materials" | "chat" | "tasks" | "members" | "meeting" | "settings";
 
 export interface DisciplineMember {
   id: number;

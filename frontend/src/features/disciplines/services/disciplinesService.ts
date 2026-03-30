@@ -70,3 +70,13 @@ export async function getDiscipline(id: number): Promise<Discipline> {
   if (!res.ok) throw new Error(data.error || "Erro ao carregar disciplina");
   return data as Discipline;
 }
+
+// Fetch members of a discipline
+export async function getMembersOfDiscipline(disciplineId: number) {
+  const res = await fetch(`${API_URL}/${disciplineId}/members`, {
+    headers: getAuthHeaders(false),
+  });
+  const data = await parseJsonOrThrow(res);
+  if (!res.ok) throw new Error(data.error || "Erro ao carregar membros da disciplina");
+  return (Array.isArray(data) ? data : data.data || []);
+}

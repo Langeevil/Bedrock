@@ -179,3 +179,12 @@ export async function addDisciplineMember(disciplineId, userId, role) {
   );
   return res.rows[0] || null;
 }
+
+export async function findMembershipByDisciplineAndUser(disciplineId, userId) {
+  const res = await pool.query(
+    `SELECT * FROM discipline_memberships
+     WHERE discipline_id = $1 AND user_id = $2`,
+    [disciplineId, userId]
+  );
+  return res.rows[0] || null;
+}

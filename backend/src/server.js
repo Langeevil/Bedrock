@@ -11,6 +11,7 @@ import projectRoutes from "./routes/projects.js";
 import organizationRoutes from "./routes/organizations.js";
 import adminRoutes from "./routes/admin.js";
 import statisticsRoutes from "./routes/statistics.js";
+import taskRoutes from "./routes/tasks.js";
 
 import livroRoutes from "./Biblioteca/Livro/routes/livroRoute.js";
 import emprestimoRoutes from "./Biblioteca/Emprestimo/routes/emprestimoRoute.js";
@@ -32,6 +33,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/disciplines", disciplinesRoutes);
+app.use("/api/disciplines", taskRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/organizations", organizationRoutes);
