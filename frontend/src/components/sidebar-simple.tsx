@@ -7,6 +7,7 @@ import {
   type ThemePreference,
 } from "../shared/theme";
 import { getMe } from "../features/auth/services/authService";
+import { subscribeAuthSession } from "../shared/authSession";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -135,9 +136,17 @@ export function SidebarSimple({ children }: Props) {
   const [role, setRole] = React.useState<Role>("aluno");
 
   React.useEffect(() => {
-    getMe()
-      .then((me) => setRole((me.role as Role) ?? "aluno"))
-      .catch(() => setRole("aluno"));
+    const loadRole = () => {
+      getMe()
+        .then((me) => setRole((me.role as Role) ?? "aluno"))
+        .catch(() => setRole("aluno"));
+    };
+
+    loadRole();
+
+    // Subscribe to auth session changes to update role
+    const unsubscribe = subscribeAuthSession(loadRole);
+    return () => unsubscribe();
   }, []);
 
   const [openAlert, setOpenAlert] = React.useState(true);

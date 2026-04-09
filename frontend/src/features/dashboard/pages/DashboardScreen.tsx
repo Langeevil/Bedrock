@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ProfileModal from "../../auth/components/ProfileModal";
 import { getMe } from "../../auth/services/authService";
+import { subscribeAuthSession } from "../../../shared/authSession";
 import { SidebarSimple } from "../../../components/sidebar-simple";
 import { getDashboardStats } from "../services/dashboardService";
 import type { DashboardStats } from "../types/dashboardTypes";
@@ -14,17 +15,25 @@ export default function DashboardScreen() {
   });
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const user = await getMe();
-        if (!user.role) setShowModal(true);
-      } catch {
+  const checkUserRole = async () => {
+    try {
+      const user = await getMe();
+      if (!user.role) {
         setShowModal(true);
+      } else {
+        setShowModal(false);
       }
+    } catch {
+      setShowModal(true);
     }
+  };
 
-    loadUser();
+  useEffect(() => {
+    checkUserRole();
+
+    // Subscribe to auth changes to re-check if role was updated
+    const unsubscribe = subscribeAuthSession(checkUserRole);
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {

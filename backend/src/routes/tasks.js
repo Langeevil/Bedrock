@@ -1,7 +1,7 @@
 import express from "express";
 import * as controller from "../controllers/disciplineTaskController.js";
-import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { uploadMiddleware } from "../middlewares/uploadMiddleware.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
+import { upload } from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.delete("/:disciplineId/tasks/:taskId", controller.deleteTask);
 // POST /api/disciplines/:disciplineId/tasks/:taskId/files
 router.post(
   "/:disciplineId/tasks/:taskId/files",
-  uploadMiddleware.single("file"),
+  upload.single("file"),
   controller.addTaskFile
 );
 
@@ -50,7 +50,7 @@ router.post("/:disciplineId/tasks/:taskId/complete", controller.completeTask);
 // POST /api/disciplines/:disciplineId/tasks/:taskId/submissions/:submissionId/files
 router.post(
   "/:disciplineId/tasks/:taskId/submissions/:submissionId/files",
-  uploadMiddleware.single("file"),
+  upload.single("file"),
   controller.addSubmissionFile
 );
 

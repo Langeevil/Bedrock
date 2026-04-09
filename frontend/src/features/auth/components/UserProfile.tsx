@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
+import { subscribeAuthSession } from "../../../shared/authSession";
 
 export default function UserProfile({ collapsed }: { readonly collapsed: boolean }) {
   const [userName, setUserName] = useState<string | null>(null);
@@ -9,10 +10,18 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   const navigate = useNavigate();
 
   useEffect(() => {
-    const nome = localStorage.getItem("user_nome");
-    const email = localStorage.getItem("user_email");
-    setUserName(nome);
-    setUserEmail(email);
+    const updateUserData = () => {
+      const nome = localStorage.getItem("user_nome");
+      const email = localStorage.getItem("user_email");
+      setUserName(nome);
+      setUserEmail(email);
+    };
+
+    updateUserData();
+
+    // Subscribe to auth session changes
+    const unsubscribe = subscribeAuthSession(updateUserData);
+    return () => unsubscribe();
   }, []);
 
   const handleLogout = () => {

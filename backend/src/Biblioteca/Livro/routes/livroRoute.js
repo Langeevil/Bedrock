@@ -1,7 +1,11 @@
 import { Router } from "express";
 import livroController from "../controller/livroController.js";
+import authMiddleware from "../../../middlewares/authMiddleware.js";
 
 const router = Router();
+
+// Aplicar autenticação em todas as rotas de livros
+router.use(authMiddleware);
 
 router.post("/", livroController.criar);
 router.get("/", livroController.listar);
