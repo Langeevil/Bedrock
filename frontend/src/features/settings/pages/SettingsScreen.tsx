@@ -60,10 +60,10 @@ export default function SettingsScreen() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <SidebarSimple />
 
-      <div className="app-page flex-grow overflow-y-auto px-6 py-8 sm:px-8">
+      <div className="app-page min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
           <h1 className="text-3xl font-semibold text-[var(--app-text)]">Configurações</h1>
 
@@ -80,6 +80,7 @@ export default function SettingsScreen() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-[var(--app-text)]">Nome</span>
                   <input
+                    aria-label="Nome"
                     className="input input-bordered app-input min-h-12"
                     value={nome}
                     onChange={(event) => setNome(event.target.value)}
@@ -89,6 +90,7 @@ export default function SettingsScreen() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-[var(--app-text)]">E-mail</span>
                   <input
+                    aria-label="E-mail"
                     className="input input-bordered app-input min-h-12"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}

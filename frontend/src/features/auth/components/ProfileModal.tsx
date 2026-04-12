@@ -36,9 +36,14 @@ export default function ProfileModal({ onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border border-blue-100">
-        <h2 className="text-2xl font-semibold text-slate-900 text-center mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-profile-modal-title"
+        className="w-full max-w-md rounded-xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-8 text-[var(--app-text)] shadow-2xl"
+      >
+        <h2 id="auth-profile-modal-title" className="mb-4 text-center text-2xl font-semibold text-[var(--app-text)]">
           Complete seu perfil
         </h2>
 
@@ -47,10 +52,11 @@ export default function ProfileModal({ onClose }: Props) {
             <button
               key={item.value}
               onClick={() => setRole(item.value)}
+              aria-pressed={role === item.value}
               className={`btn w-full ${
                 role === item.value
                   ? "btn-primary text-white"
-                  : "btn-outline border-slate-300 text-slate-700 hover:bg-slate-100"
+                  : "btn-outline border-[var(--app-border)] text-[var(--app-text)] hover:bg-[var(--app-bg-muted)]"
               }`}
             >
               {item.label}

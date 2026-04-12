@@ -108,10 +108,10 @@ export default function LibraryScreen() {
   );
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <SidebarSimple />
 
-      <div className="app-page flex-grow overflow-y-auto p-8">
+      <div className="app-page min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">📚 Biblioteca</h1>
 
         {/* Tabs */}
@@ -138,6 +138,7 @@ export default function LibraryScreen() {
             {/* Search e botão novo */}
             <div className="card app-panel mb-6 flex flex-col gap-3 p-4 shadow md:flex-row md:items-center md:justify-between">
               <input
+                aria-label="Buscar livro por titulo, autor ou editora"
                 className="input input-bordered app-input flex-1"
                 placeholder="Buscar livro por título, autor ou editora"
                 value={searchTerm}

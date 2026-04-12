@@ -104,6 +104,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated,
             <h2 className="text-2xl font-bold">Nova Tarefa</h2>
             <button
               type="button"
+              aria-label="Fechar formulario de tarefa"
               onClick={onCancel}
               className="btn btn-ghost btn-sm btn-square"
             >
@@ -124,6 +125,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated,
               <span className="label-text font-medium">Título *</span>
             </label>
             <input
+              aria-label="Titulo da tarefa"
               type="text"
               placeholder="Digite o título da tarefa"
               value={title}
@@ -155,6 +157,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated,
               <span className="label-text font-medium">Prazo</span>
             </label>
             <input
+              aria-label="Prazo da tarefa"
               type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
@@ -169,6 +172,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated,
               <span className="label-text font-medium">Arquivos</span>
             </label>
             <input
+              aria-label="Arquivos da tarefa"
               type="file"
               onChange={handleFileUpload}
               disabled={uploading || loading}

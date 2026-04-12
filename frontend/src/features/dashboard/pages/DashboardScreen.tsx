@@ -51,12 +51,12 @@ export default function DashboardScreen() {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <SidebarSimple />
 
       {showModal && <ProfileModal onClose={() => setShowModal(false)} />}
 
-      <div className="app-page flex-grow overflow-y-auto p-8">
+      <div className="app-page min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <h1 className="mb-8 text-3xl font-semibold text-[var(--app-text)]">Dashboard Overview</h1>
 
         {error && (

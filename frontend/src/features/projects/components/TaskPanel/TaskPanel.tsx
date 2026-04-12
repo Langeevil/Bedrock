@@ -84,6 +84,7 @@ export function TaskPanel({
       {/* Title */}
       <span style={{ ...labelStyle, marginTop: 0 }}>Título</span>
       <input
+        aria-label="Nome da tarefa"
         value={title}
         onChange={e => setTitle(e.target.value)}
         onKeyDown={e => e.key === "Enter" && handleSave()}

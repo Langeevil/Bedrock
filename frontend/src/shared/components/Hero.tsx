@@ -7,8 +7,8 @@ const Hero: React.FC = () => {
       {/* Lado Esquerdo - Textos */}
       <div className="flex-1 text-center md:text-left">
         <h1 className="font-poppins font-semibold text-3xl 2xl:text-6xl md:text-4xl lg:text-5xl text-white leading-snug">
-          Sistema com controle e <br />
-          eficiência para <br />
+          Sistema com controle <br />
+          e eficiência para <br />
           instituição acadêmica
         </h1>
 

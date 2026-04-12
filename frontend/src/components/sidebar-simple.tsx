@@ -2,11 +2,6 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserProfile from "../shared/components/UserProfile";
 import { canAccessAdminArea, subscribeAuthSession } from "../shared/authSession";
-import {
-  getStoredThemePreference,
-  setThemePreference,
-  type ThemePreference,
-} from "../shared/theme";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -64,12 +59,6 @@ const navItems = [
     keywords: ["estatistica", "metricas", "dados", "indicadores"],
   },
 ];
-
-const settingsItem = {
-  to: "/settings",
-  label: "Settings",
-  keywords: ["settings", "configuracoes", "perfil", "ajustes"],
-};
 
 const adminItem = {
   to: "/admin",
@@ -142,14 +131,25 @@ export function SidebarSimple({ children }: Props) {
     return window.localStorage.getItem(SIDEBAR_KEY) === "true";
   });
   const [searchValue, setSearchValue] = React.useState("");
-  const [themePreference, setThemePreferenceState] = React.useState<ThemePreference>(() => {
-    if (typeof window === "undefined") return "system";
-    return getStoredThemePreference();
-  });
 
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
   }, [collapsed]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 1024px)");
+    const syncCollapsed = () => {
+      if (media.matches) {
+        setCollapsed(true);
+      }
+    };
+
+    syncCollapsed();
+    media.addEventListener("change", syncCollapsed);
+    return () => media.removeEventListener("change", syncCollapsed);
+  }, []);
 
   React.useEffect(() => {
     return subscribeAuthSession(() => {
@@ -157,20 +157,11 @@ export function SidebarSimple({ children }: Props) {
     });
   }, []);
 
-  React.useEffect(() => {
-    function handleThemeChange() {
-      setThemePreferenceState(getStoredThemePreference());
-    }
-
-    window.addEventListener("bedrock-theme-change", handleThemeChange);
-    return () => window.removeEventListener("bedrock-theme-change", handleThemeChange);
-  }, []);
-
   const searchableItems = React.useMemo(
     () =>
       hasAdminAccess
-        ? [...navItems, { ...settingsItem, icon: "", alt: "" }, { ...adminItem, icon: "", alt: "" }]
-        : [...navItems, { ...settingsItem, icon: "", alt: "" }],
+        ? [...navItems, { ...adminItem, icon: "", alt: "" }]
+        : navItems,
     [hasAdminAccess]
   );
 
@@ -195,73 +186,46 @@ export function SidebarSimple({ children }: Props) {
     handleNavigate(searchResults[0].to);
   }
 
-  function cycleTheme() {
-    const nextTheme: ThemePreference =
-      themePreference === "system"
-        ? "bedrocklight"
-        : themePreference === "bedrocklight"
-          ? "bedrockdark"
-          : "system";
-    setThemePreference(nextTheme);
-    setThemePreferenceState(nextTheme);
-  }
-
-  function themeLabel() {
-    if (themePreference === "system") return "Tema: sistema";
-    if (themePreference === "bedrocklight") return "Tema: claro";
-    return "Tema: escuro";
-  }
-
   return (
     <aside
-      className={`z-20 flex h-screen flex-col gap-4 bg-[var(--app-sidebar)] p-4 text-[var(--app-sidebar-contrast)] shadow-2xl transition-all duration-300 ease-out ${
-        collapsed ? "w-24 min-w-[6rem]" : "w-80 min-w-[20rem]"
+      className={`z-20 flex h-screen shrink-0 flex-col gap-4 bg-[var(--app-sidebar)] p-3 text-[var(--app-sidebar-contrast)] shadow-2xl transition-all duration-300 ease-out sm:p-4 ${
+        collapsed ? "w-20 min-w-20 sm:w-24 sm:min-w-[6rem]" : "w-72 min-w-72 xl:w-80 xl:min-w-[20rem]"
       }`}
     >
       {children}
 
       <div className={`mb-2 flex items-center ${collapsed ? "flex-col justify-center gap-3" : "gap-4"} p-2`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-4"} min-w-0`}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)]">
-            B
-          </div>
+          {collapsed ? (
+            <button
+              type="button"
+              aria-label="Expandir menu lateral"
+              title="Expandir menu lateral"
+              onClick={() => setCollapsed(false)}
+              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)] transition hover:bg-[var(--app-sidebar-surface)]"
+            >
+              <span className="transition group-hover:hidden group-focus-visible:hidden">B</span>
+              <svg
+                aria-hidden="true"
+                className="hidden h-5 w-5 transition group-hover:block group-focus-visible:block"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)]">
+              B
+            </div>
+          )}
           {!collapsed && <h3 className="truncate text-lg font-semibold text-[var(--app-sidebar-contrast)]">Menu Lateral</h3>}
         </div>
 
         {!collapsed && (
           <div className="ml-auto flex items-center gap-2">
-            <button
-              type="button"
-              onClick={cycleTheme}
-              title={themeLabel()}
-              aria-label={themeLabel()}
-              className="rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
-            >
-              {themePreference === "bedrockdark" ? (
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2.5" />
-                  <path d="M12 19.5V22" />
-                  <path d="M4.93 4.93l1.77 1.77" />
-                  <path d="M17.3 17.3l1.77 1.77" />
-                  <path d="M2 12h2.5" />
-                  <path d="M19.5 12H22" />
-                  <path d="M4.93 19.07l1.77-1.77" />
-                  <path d="M17.3 6.7l1.77-1.77" />
-                </svg>
-              ) : themePreference === "bedrocklight" ? (
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="14" rx="2" />
-                  <path d="M8 20h8" />
-                  <path d="M12 18v2" />
-                </svg>
-              )}
-            </button>
-
             <button
               type="button"
               onClick={() => setCollapsed(true)}
@@ -281,49 +245,6 @@ export function SidebarSimple({ children }: Props) {
           <div className="flex flex-col items-center gap-3">
             <button
               type="button"
-              aria-label={themeLabel()}
-              title={themeLabel()}
-              onClick={cycleTheme}
-              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
-            >
-              {themePreference === "bedrockdark" ? (
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2.5" />
-                  <path d="M12 19.5V22" />
-                  <path d="M4.93 4.93l1.77 1.77" />
-                  <path d="M17.3 17.3l1.77 1.77" />
-                  <path d="M2 12h2.5" />
-                  <path d="M19.5 12H22" />
-                  <path d="M4.93 19.07l1.77-1.77" />
-                  <path d="M17.3 6.7l1.77-1.77" />
-                </svg>
-              ) : themePreference === "bedrocklight" ? (
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="14" rx="2" />
-                  <path d="M8 20h8" />
-                  <path d="M12 18v2" />
-                </svg>
-              )}
-            </button>
-
-            <button
-              type="button"
-              aria-label="Reabrir menu lateral"
-              onClick={() => setCollapsed(false)}
-              className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
               aria-label="Buscar"
               onClick={() => setCollapsed(false)}
               className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] text-[color:var(--app-sidebar-contrast)]/80 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
@@ -338,6 +259,7 @@ export function SidebarSimple({ children }: Props) {
           <div className="relative">
             <form onSubmit={handleSearchSubmit}>
               <input
+                aria-label="Buscar pagina no menu lateral"
                 type="text"
                 placeholder="Buscar"
                 value={searchValue}
@@ -346,6 +268,7 @@ export function SidebarSimple({ children }: Props) {
               />
               <button
                 type="submit"
+                aria-label="Executar busca no menu lateral"
                 className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[color:var(--app-sidebar-contrast)]/80 hover:text-[var(--app-sidebar-contrast)]"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -393,15 +316,6 @@ export function SidebarSimple({ children }: Props) {
               <img src={item.icon} alt={item.alt} className="h-6 w-6 shrink-0 object-contain" />
             </NavItem>
           ))}
-
-          <NavItem
-            to={settingsItem.to}
-            label={settingsItem.label}
-            collapsed={collapsed}
-            active={location.pathname === settingsItem.to}
-          >
-            <SettingsIcon />
-          </NavItem>
 
           {hasAdminAccess && (
             <NavItem

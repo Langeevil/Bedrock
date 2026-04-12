@@ -208,6 +208,7 @@ export function MeetingSidebar({
               }}
             >
               <input
+                aria-label="Mensagem da reuniao"
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
@@ -225,6 +226,7 @@ export function MeetingSidebar({
               />
               <button
                 type="submit"
+                aria-label="Enviar mensagem da reuniao"
                 disabled={!isMeetingActive || sending || !messageText.trim()}
                 style={{
                   padding: "6px 10px",

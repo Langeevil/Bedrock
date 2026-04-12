@@ -48,7 +48,7 @@ export default function DisciplineDetailScreen() {
     <div className="flex h-screen overflow-hidden bg-[#F5F5F5] font-sans">
       <SidebarSimple />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {loading && (
           <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
             <div className="flex flex-col items-center gap-3">

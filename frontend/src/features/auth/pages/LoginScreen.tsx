@@ -56,6 +56,7 @@ export default function LoginScreen() {
               <label className="w-full block">
                 <span className="label-text text-sm text-gray-700">E-mail</span>
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -68,6 +69,7 @@ export default function LoginScreen() {
               <label className="w-full block">
                 <span className="label-text text-sm text-gray-700">Senha</span>
                 <input
+                  id="login-password"
                   type="password"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}

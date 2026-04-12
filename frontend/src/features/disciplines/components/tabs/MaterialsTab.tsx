@@ -147,6 +147,7 @@ export function MaterialsTab({ disciplineId }: Readonly<Props>) {
         </button>
 
         <input
+          aria-label="Selecionar arquivo para material"
           type="file"
           ref={fileInputRef}
           style={{ display: "none" }}

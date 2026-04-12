@@ -37,7 +37,7 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
         onClick={e => e.stopPropagation()}
         style={{
           background: "#fff", borderRadius: 12,
-          padding: "32px 28px", width: 420,
+          padding: "32px 28px", width: "min(420px, calc(100vw - 32px))",
           border: "0.5px solid #e2e0d8",
           boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
           fontFamily: "'DM Sans', system-ui, sans-serif",
@@ -52,6 +52,7 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
 
         <form onSubmit={handleSubmit}>
           <input
+            aria-label="Nome do novo projeto"
             autoFocus
             value={name}
             onChange={e => setName(e.target.value)}
@@ -105,6 +106,7 @@ function EmptyProjects({ onCreate }: { onCreate: () => void }) {
       flex: 1, display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       background: "#f4f3ef", gap: 16,
+      minWidth: 0,
       fontFamily: "'DM Sans', system-ui, sans-serif",
     }}>
       <div style={{
@@ -155,7 +157,7 @@ interface ContentWithPanelProps {
 
 function ContentWithPanel({ panel, tags, onClose, onSave, onDelete, children }: ContentWithPanelProps) {
   return (
-    <div style={{ flex: 1, position: "relative", overflow: "hidden", display: "flex" }}>
+    <div style={{ flex: 1, minWidth: 0, position: "relative", overflow: "hidden", display: "flex" }}>
       {children}
       <TaskPanel
         open={panel.open}
@@ -279,7 +281,7 @@ export default function ProjectsScreen() {
       <SidebarSimple />
 
       {/* Feature column */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <ProjectHeader
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -290,7 +292,7 @@ export default function ProjectsScreen() {
           onCreateProject={() => setShowModal(true)}
         />
 
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <div style={{ display: "flex", flex: 1, minWidth: 0, overflow: "hidden" }}>
           {activeProject && (
             <ProjectSidebar
               tasks={tasks}

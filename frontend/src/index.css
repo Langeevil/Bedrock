@@ -56,6 +56,11 @@ body {
   transition: background-color 160ms ease, color 160ms ease;
 }
 
+*:focus-visible {
+  outline: 3px solid var(--app-accent) !important;
+  outline-offset: 2px !important;
+}
+
 .app-page {
   background-color: var(--app-bg);
   color: var(--app-text);
@@ -148,19 +153,32 @@ body {
 
 [data-theme="bedrockdark"] .bg-slate-50,
 [data-theme="bedrockdark"] .bg-slate-100,
+[data-theme="bedrockdark"] .bg-slate-200,
+[data-theme="bedrockdark"] .bg-slate-300,
 [data-theme="bedrockdark"] .bg-slate-50\/70,
+[data-theme="bedrockdark"] .bg-slate-50\/80,
 [data-theme="bedrockdark"] .bg-\[\#f4f7fc\],
 [data-theme="bedrockdark"] .bg-\[\#F5F5F5\] {
   background-color: var(--app-bg-muted) !important;
 }
 
+[data-theme="bedrockdark"] .bg-blue-50,
+[data-theme="bedrockdark"] .bg-indigo-50,
+[data-theme="bedrockdark"] .bg-emerald-50,
+[data-theme="bedrockdark"] .bg-fuchsia-100 {
+  background-color: color-mix(in srgb, var(--app-accent) 16%, var(--app-bg-elevated)) !important;
+}
+
 [data-theme="bedrockdark"] .text-slate-900,
 [data-theme="bedrockdark"] .text-slate-800,
 [data-theme="bedrockdark"] .text-slate-700,
+[data-theme="bedrockdark"] .text-slate-950,
 [data-theme="bedrockdark"] .text-black {
   color: var(--app-text) !important;
 }
 
+[data-theme="bedrockdark"] .text-slate-200,
+[data-theme="bedrockdark"] .text-slate-300,
 [data-theme="bedrockdark"] .text-slate-600,
 [data-theme="bedrockdark"] .text-slate-500,
 [data-theme="bedrockdark"] .text-slate-400 {
@@ -170,12 +188,17 @@ body {
 [data-theme="bedrockdark"] .border-slate-100,
 [data-theme="bedrockdark"] .border-slate-200,
 [data-theme="bedrockdark"] .border-slate-300,
+[data-theme="bedrockdark"] .border-slate-400,
 [data-theme="bedrockdark"] .border-gray-200,
 [data-theme="bedrockdark"] .border-blue-100 {
   border-color: var(--app-border) !important;
 }
 
 [data-theme="bedrockdark"] .hover\:bg-slate-50:hover,
+[data-theme="bedrockdark"] .hover\:bg-slate-100:hover,
+[data-theme="bedrockdark"] .hover\:bg-slate-200:hover,
+[data-theme="bedrockdark"] .hover\:bg-blue-50:hover,
+[data-theme="bedrockdark"] .hover\:bg-indigo-50:hover,
 [data-theme="bedrockdark"] .hover\:bg-white:hover {
   background-color: var(--app-bg-muted) !important;
 }

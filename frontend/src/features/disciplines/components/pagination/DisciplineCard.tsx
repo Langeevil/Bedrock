@@ -54,7 +54,7 @@ export function DisciplineCard({ discipline, index, onEdit, onDelete, onClick }:
             <Tooltip.Provider delayDuration={200}>
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button onClick={(e) => { e.stopPropagation(); onEdit(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">
+                  <button type="button" aria-label={`Editar disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onEdit(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">
                     <Pencil className="w-4 h-4" />
                   </button>
                 </Tooltip.Trigger>
@@ -63,7 +63,7 @@ export function DisciplineCard({ discipline, index, onEdit, onDelete, onClick }:
               
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button onClick={(e) => { e.stopPropagation(); onDelete(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm">
+                  <button type="button" aria-label={`Excluir disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onDelete(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </Tooltip.Trigger>

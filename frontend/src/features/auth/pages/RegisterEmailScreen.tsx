@@ -46,8 +46,9 @@ export default function RegisterEmailScreen() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <label className="floating-label block w-full">
+              <label className="floating-label block w-full" htmlFor="register-email">
                 <input
+                  id="register-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

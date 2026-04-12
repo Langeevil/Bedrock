@@ -111,7 +111,7 @@ export function ChatTab({ disciplineId, currentUserName }: Readonly<Props>) {
         <div style={{ padding: "8px 12px", display: "flex", gap: 8, borderBottom: `1px solid ${TEAMS.border}` }}>
           <label style={{ display: "flex", alignItems: "center", border: "none", background: "transparent", cursor: "pointer", color: TEAMS.textSecondary, padding: 4, borderRadius: 4 }} title="Anexar arquivo">
             <Paperclip size={16} />
-            <input type="file" onChange={handleFileUpload} disabled={sending} style={{ display: "none" }} />
+            <input aria-label="Anexar arquivo ao chat" type="file" onChange={handleFileUpload} disabled={sending} style={{ display: "none" }} />
           </label>
           <button style={{ border: "none", background: "transparent", cursor: "pointer", color: TEAMS.textSecondary, padding: 4, borderRadius: 4, display: "flex" }} title="Emoji">
             <Smile size={16} />
@@ -119,6 +119,7 @@ export function ChatTab({ disciplineId, currentUserName }: Readonly<Props>) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px" }}>
           <input
+            aria-label="Mensagem do chat"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !sending && send()}

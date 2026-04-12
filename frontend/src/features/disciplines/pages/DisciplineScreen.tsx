@@ -200,7 +200,7 @@ export default function DisciplineScreen() {
         <SidebarSimple />
       </div>
 
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200/60 bg-[#f4f7fc]/90 px-4 py-3 backdrop-blur-sm lg:hidden">
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -224,6 +224,7 @@ export default function DisciplineScreen() {
               <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
+                  aria-label="Buscar disciplina"
                   type="text"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
@@ -324,6 +325,8 @@ export default function DisciplineScreen() {
                   {editingDiscipline ? "Editar disciplina" : "Nova disciplina"}
                 </Dialog.Title>
                 <button
+                  type="button"
+                  aria-label="Fechar formulario de disciplina"
                   onClick={closeModal}
                   className="shrink-0 rounded-xl border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50"
                 >

@@ -21,6 +21,7 @@ export function ChatInput({ onSend, disabled }: Readonly<Props>) {
   return (
     <div className="flex items-center gap-2 p-3 bg-white border-t border-slate-100">
       <input
+        aria-label="Mensagem do chat da disciplina"
         type="text"
         placeholder="Digite uma mensagem..."
         value={value}
@@ -30,6 +31,8 @@ export function ChatInput({ onSend, disabled }: Readonly<Props>) {
         className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
       />
       <button
+        type="button"
+        aria-label="Enviar mensagem"
         onClick={submit}
         disabled={!value.trim() || disabled}
         className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 text-white hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"

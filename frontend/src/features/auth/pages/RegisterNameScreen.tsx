@@ -56,8 +56,9 @@ export default function RegisterNameScreen() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <label className="floating-label block w-full">
+              <label className="floating-label block w-full" htmlFor="register-name">
                 <input
+                  id="register-name"
                   type="text"
                   placeholder="Digite seu nome"
                   value={nome}

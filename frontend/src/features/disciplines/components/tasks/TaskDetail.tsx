@@ -252,6 +252,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                     <span className="label-text">Enviar arquivo</span>
                   </div>
                   <input
+                    aria-label="Enviar arquivo da tarefa"
                     type="file"
                     onChange={handleFileUpload}
                     disabled={uploading}

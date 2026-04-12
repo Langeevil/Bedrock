@@ -94,6 +94,7 @@ function CreateTagForm({ onAdd }: CreateTagFormProps) {
 
       <span style={labelStyle}>Nome</span>
       <input
+        aria-label="Nome da nova tag"
         value={name}
         onChange={e => setName(e.target.value)}
         onKeyDown={e => e.key === "Enter" && handleAdd()}

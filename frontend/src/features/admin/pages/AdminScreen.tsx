@@ -420,6 +420,7 @@ export default function AdminScreen() {
             <p className="text-sm text-slate-500">Gerencie status, papel institucional e privilegio global.</p>
           </div>
           <input
+            aria-label="Buscar usuario por nome ou email"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar usuario por nome ou email"
@@ -541,6 +542,7 @@ export default function AdminScreen() {
             </p>
             <div className="space-y-3">
               <input
+                aria-label="Nome da instituicao"
                 value={orgForm.name}
                 onChange={(event) =>
                   setOrgForm((current) => ({ ...current, name: event.target.value }))
@@ -549,6 +551,7 @@ export default function AdminScreen() {
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-400"
               />
               <input
+                aria-label="Slug da instituicao"
                 value={orgForm.slug}
                 onChange={(event) =>
                   setOrgForm((current) => ({ ...current, slug: event.target.value }))
@@ -580,6 +583,7 @@ export default function AdminScreen() {
             </p>
             <div className="space-y-3">
               <input
+                aria-label="Email do membro da instituicao"
                 value={memberForm.email}
                 onChange={(event) =>
                   setMemberForm((current) => ({ ...current, email: event.target.value }))
@@ -708,7 +712,7 @@ export default function AdminScreen() {
   return (
     <div className="flex h-screen overflow-hidden bg-[#f4f7fc]">
       <SidebarSimple />
-      <main className="flex-1 overflow-y-auto p-6 sm:p-8">
+      <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-8">
           <header className="rounded-[2rem] bg-slate-950 px-6 py-7 text-white shadow-xl">
             <div className="max-w-3xl">

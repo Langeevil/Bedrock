@@ -67,6 +67,7 @@ export const BorrowForm: React.FC<BorrowFormProps> = ({
               <span className="label-text">Livro</span>
             </label>
             <input
+              aria-label="Livro selecionado"
               type="text"
               value={book.nome}
               className="input input-bordered"
@@ -79,6 +80,7 @@ export const BorrowForm: React.FC<BorrowFormProps> = ({
               <span className="label-text">Data Prevista de Devolução</span>
             </label>
             <input
+              aria-label="Data prevista de devolucao"
               type="date"
               name="dataPrevistaDevolucao"
               value={formData.dataPrevistaDevolucao || defaultDate}
@@ -113,7 +115,7 @@ export const BorrowForm: React.FC<BorrowFormProps> = ({
           </div>
         </form>
       </div>
-      <div className="modal-backdrop" onClick={onCancel} />
+      <button type="button" className="modal-backdrop" aria-label="Fechar formulario de emprestimo" onClick={onCancel} />
     </div>
   );
 };

@@ -47,8 +47,9 @@ export default function RegisterPasswordScreen() {
             </h1>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <label className="floating-label block w-full">
+              <label className="floating-label block w-full" htmlFor="register-password">
                 <input
+                  id="register-password"
                   type="password"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}

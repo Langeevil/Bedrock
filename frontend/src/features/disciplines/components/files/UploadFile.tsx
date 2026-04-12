@@ -44,7 +44,7 @@ export function UploadFile({ onUpload, uploading }: Readonly<Props>) {
         </p>
         <p className="text-xs text-slate-400 mt-0.5">PDF, DOC, imagens, vídeos e mais</p>
       </div>
-      <input ref={inputRef} type="file" className="hidden" onChange={handleChange} />
+      <input ref={inputRef} aria-label="Selecionar arquivo para envio" type="file" className="hidden" onChange={handleChange} />
     </div>
   );
 }

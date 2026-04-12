@@ -72,6 +72,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Título</span>
             </label>
             <input
+              aria-label="Titulo do livro"
               type="text"
               name="nome"
               value={formData.nome}
@@ -87,6 +88,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Autor</span>
             </label>
             <input
+              aria-label="Autor do livro"
               type="text"
               name="autor"
               value={formData.autor}
@@ -102,6 +104,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Editora</span>
             </label>
             <input
+              aria-label="Editora do livro"
               type="text"
               name="editora"
               value={formData.editora}
@@ -117,6 +120,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Data de Publicação</span>
             </label>
             <input
+              aria-label="Data de publicacao do livro"
               type="date"
               name="datapubli"
               value={formData.datapubli}
@@ -145,7 +149,7 @@ export const BookForm: React.FC<BookFormProps> = ({
           </div>
         </form>
       </div>
-      <div className="modal-backdrop" onClick={onCancel} />
+      <button type="button" className="modal-backdrop" aria-label="Fechar formulario de livro" onClick={onCancel} />
     </div>
   );
 };

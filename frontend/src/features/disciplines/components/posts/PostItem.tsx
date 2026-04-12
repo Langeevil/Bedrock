@@ -47,6 +47,8 @@ export function PostItem({ post, onDelete }: Readonly<Props>) {
         </div>
         {onDelete && (
           <button
+            type="button"
+            aria-label="Excluir publicacao"
             onClick={() => onDelete(post.id)}
             className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
           >
@@ -59,8 +61,10 @@ export function PostItem({ post, onDelete }: Readonly<Props>) {
 
       {post.fileName && (
         <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group">
-          <div 
-            className="flex items-center gap-3 cursor-pointer flex-1"
+          <button
+            type="button"
+            aria-label={`Baixar arquivo ${post.fileName}`}
+            className="flex flex-1 cursor-pointer items-center gap-3 text-left"
             onClick={handleDownload}
           >
             <div className="p-2 rounded-lg bg-white border border-slate-200 text-blue-600">
@@ -76,8 +80,10 @@ export function PostItem({ post, onDelete }: Readonly<Props>) {
                   : `${Math.round((post.fileSize || 0) / 1024 / 1024)} MB`}
               </span>
             </div>
-          </div>
+          </button>
           <button 
+            type="button"
+            aria-label={`Baixar arquivo ${post.fileName}`}
             onClick={handleDownload}
             className="p-2 rounded-lg hover:bg-white text-slate-400 hover:text-blue-600 transition-all"
           >
@@ -87,11 +93,11 @@ export function PostItem({ post, onDelete }: Readonly<Props>) {
       )}
 
       <div className="flex items-center gap-4 pt-1 border-t border-slate-50">
-        <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-500 transition-colors">
+        <button type="button" aria-label={`Curtir publicacao, ${post.likes} curtidas`} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-500 transition-colors">
           <Heart className="w-3.5 h-3.5" />
           {post.likes}
         </button>
-        <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-500 transition-colors">
+        <button type="button" aria-label={`Ver comentarios, ${post.comments} comentarios`} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-500 transition-colors">
           <MessageCircle className="w-3.5 h-3.5" />
           {post.comments}
         </button>
