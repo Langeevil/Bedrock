@@ -115,7 +115,7 @@ export async function updateDiscipline(id, payload, auth) {
     }
   }
 
-  return model.updateDiscipline(id, {
+  return model.updateDiscipline(id, auth.organization.id, {
     name: payload.name ?? existing.name,
     code: payload.code ?? existing.code,
     professor: payload.professor ?? existing.professor,
@@ -129,7 +129,7 @@ export async function removeDiscipline(id, auth) {
     throw new HttpError(403, "Sem permissao para remover esta disciplina.");
   }
 
-  const deleted = await model.deleteDiscipline(id);
+  const deleted = await model.deleteDiscipline(id, auth.organization.id);
   if (!deleted) throw new HttpError(404, "Disciplina nao encontrada.");
   return deleted;
 }

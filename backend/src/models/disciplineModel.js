@@ -112,21 +112,22 @@ export async function createDiscipline({
   return res.rows[0];
 }
 
-export async function updateDiscipline(id, { name, code, professor }) {
+export async function updateDiscipline(id, organizationId, { name, code, professor }) {
   const res = await pool.query(
     `UPDATE disciplines
      SET name = $1, code = $2, professor = $3, updated_at = NOW()
      WHERE id = $4
+       AND organization_id = $5
      RETURNING *`,
-    [name, code, professor, id]
+    [name, code, professor, id, organizationId]
   );
   return res.rows[0] || null;
 }
 
-export async function deleteDiscipline(id) {
+export async function deleteDiscipline(id, organizationId) {
   const res = await pool.query(
-    "DELETE FROM disciplines WHERE id = $1 RETURNING id",
-    [id]
+    "DELETE FROM disciplines WHERE id = $1 AND organization_id = $2 RETURNING id",
+    [id, organizationId]
   );
   return res.rows[0] || null;
 }

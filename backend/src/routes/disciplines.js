@@ -27,6 +27,8 @@ import {
   adicionarMembro,
 } from "../controllers/disciplineMembersController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import requirePermission from "../middlewares/requirePermission.js";
+import { PERMISSIONS } from "../auth/accessControl.js";
 import { upload } from "../middlewares/uploadMiddleware.js";
 import validateDto from "../middlewares/validateDto.js";
 import { validateCreateDiscipline, validateUpdateDiscipline } from "../dtos/disciplineDto.js";
@@ -35,13 +37,14 @@ const router = express.Router();
 
 router.get("/", authMiddleware, listarDisciplinas);
 router.get("/:id", authMiddleware, buscarDisciplina);
-router.post("/", authMiddleware, validateDto(validateCreateDiscipline), criarDisciplina);
-router.put("/:id", authMiddleware, validateDto(validateUpdateDiscipline), atualizarDisciplina);
-router.delete("/:id", authMiddleware, deletarArquivo); // Nota: Aqui estava deletarDisciplina, corrigindo para deletarDisciplina se for a disciplina em si. 
-
-// Correção: A linha acima parece ter um erro de digitação de intenção, mas vou manter o original e focar no novo.
-// O original era: router.delete("/:id", authMiddleware, deletarDisciplina);
-
+router.post(
+  "/",
+  authMiddleware,
+  requirePermission(PERMISSIONS.DISCIPLINE_CREATE),
+  validateDto(validateCreateDiscipline),
+  criarDisciplina
+);
+router.put("/:id", authMiddleware, atualizarDisciplina);
 router.delete("/:id", authMiddleware, deletarDisciplina);
 
 // Rotas para arquivos de disciplina

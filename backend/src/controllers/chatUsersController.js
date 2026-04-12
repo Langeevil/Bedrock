@@ -40,7 +40,9 @@ export async function searchUsers(req, res) {
       return res.json([]);
     }
 
+    const isEmailSearch = query.includes("@");
     const pattern = `%${query}%`;
+    const domainPattern = isEmailSearch ? null : `%@${query}%`;
 
     const result = await pool.query(
       `SELECT
@@ -59,6 +61,7 @@ export async function searchUsers(req, res) {
          AND (
            LOWER(u.email) LIKE $3
            OR LOWER(u.nome) LIKE $3
+           OR ($6::text IS NOT NULL AND LOWER(u.email) LIKE $6)
          )
        ORDER BY
          CASE
@@ -69,7 +72,7 @@ export async function searchUsers(req, res) {
          LOWER(u.nome),
          LOWER(u.email)
        LIMIT 20`,
-      [req.userId, req.auth.organization.id, pattern, query, `${query}%`]
+      [req.userId, req.auth.organization.id, pattern, query, `${query}%`, domainPattern]
     );
 
     return res.json(

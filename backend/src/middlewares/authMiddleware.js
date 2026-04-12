@@ -26,6 +26,8 @@ export async function autenticar(req, res, next) {
     }
 
     req.userId = auth.userId;
+    req.orgId = auth.organization?.id || null;
+    req.systemRole = auth.systemRole || null;
     req.auth = auth;
     return next();
   } catch {

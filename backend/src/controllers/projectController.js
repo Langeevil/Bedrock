@@ -31,10 +31,6 @@ export async function createProject(req, res) {
   try {
     const { name } = req.body;
 
-    if (!canCreateProject(req.auth)) {
-      return res.status(403).json({ error: "Sem permissao para criar projetos." });
-    }
-
     const project = await projectRepository.create({
       name,
       user_id: req.userId,
@@ -90,7 +86,7 @@ export async function deleteProject(req, res) {
       return res.status(error.status).json({ error: error.message });
     }
 
-    await projectRepository.remove(project.id);
+    await projectRepository.remove(project.id, req.auth.organization.id);
     return res.status(204).send();
   } catch (error) {
     console.error("Erro ao remover projeto:", error);

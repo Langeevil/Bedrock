@@ -47,12 +47,21 @@ export function initChatSocket(httpServer) {
   io.on("connection", async (socket) => {
     const userId = socket.data.userId;
     const auth = socket.data.auth;
+    const orgId = auth.organization?.id;
+    const orgRoom = orgId ? `org:${orgId}` : null;
+
     const currentConnections = activeConnections.get(userId) || 0;
     activeConnections.set(userId, currentConnections + 1);
 
+    if (orgRoom) {
+      socket.join(orgRoom);
+    }
+
     try {
       await upsertPresence(userId, "online");
-      io.emit("presence:changed", { user_id: userId, status: "online" });
+      if (orgRoom) {
+        io.to(orgRoom).emit("presence:changed", { user_id: userId, status: "online" });
+      }
 
       const conversationIds = await listJoinedConversationIds(userId);
       conversationIds.forEach((conversationId) =>

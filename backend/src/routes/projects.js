@@ -3,6 +3,8 @@ import projectController from "../controllers/projectController.js";
 import taskController from "../controllers/taskController.js";
 import tagController from "../controllers/tagController.js";
 import autenticar from "../middlewares/authMiddleware.js";
+import requirePermission from "../middlewares/requirePermission.js";
+import { PERMISSIONS } from "../auth/accessControl.js";
 import validateDto from "../middlewares/validateDto.js";
 import { validateCreateProject } from "../dtos/projectDto.js";
 
@@ -13,7 +15,12 @@ router.use(autenticar);
 
 // ── Projetos ──────────────────────────────────────────────────────────────────
 router.get("/",    projectController.listUserProjects);
-router.post("/",   validateDto(validateCreateProject), projectController.createProject);
+router.post(
+  "/",
+  requirePermission(PERMISSIONS.PROJECT_CREATE),
+  validateDto(validateCreateProject),
+  projectController.createProject
+);
 router.get("/:id/graph", projectController.getProjectDetails);
 router.delete("/:id", projectController.deleteProject);
 

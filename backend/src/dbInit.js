@@ -493,31 +493,6 @@ export async function ensureAppSchema() {
     `);
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS livros (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        autor VARCHAR(255),
-        editora VARCHAR(255),
-        datapubli VARCHAR(20),
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS emprestimos (
-        id SERIAL PRIMARY KEY,
-        usuario_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        livro_id INTEGER REFERENCES livros(id) ON DELETE CASCADE,
-        data_emprestimo TIMESTAMP NOT NULL DEFAULT NOW(),
-        data_prevista_devolucao TIMESTAMP NOT NULL,
-        data_devolucao TIMESTAMP,
-        status VARCHAR(20) DEFAULT 'ativo',
-        multa DECIMAL(10, 2) DEFAULT 0.00,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `);
-
-    await pool.query(`
       INSERT INTO chat_conversation_members (conversation_id, user_id, role)
       SELECT geral.id, u.id, CASE WHEN u.id = geral.created_by THEN 'owner' ELSE 'member' END
       FROM chat_conversations geral

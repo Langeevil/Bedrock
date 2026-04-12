@@ -1,5 +1,7 @@
 import { id as migration001Id, description as migration001Description, up as migration001Up } from "./migrations/001_institution_foundation.js";
 import { id as migration002Id, description as migration002Description, up as migration002Up } from "./migrations/002_discipline_memberships.js";
+import { id as migration003Id, description as migration003Description, up as migration003Up } from "./migrations/003_discipline_tasks.js";
+import { id as migration004Id, description as migration004Description, up as migration004Up } from "./migrations/004_legacy_cleanup.js";
 
 const migrations = [
   {
@@ -11,6 +13,16 @@ const migrations = [
     id: migration002Id,
     description: migration002Description,
     up: migration002Up,
+  },
+  {
+    id: migration003Id,
+    description: migration003Description,
+    up: migration003Up,
+  },
+  {
+    id: migration004Id,
+    description: migration004Description,
+    up: migration004Up,
   },
 ];
 

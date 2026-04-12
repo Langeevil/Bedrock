@@ -1,13 +1,12 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserProfile from "../shared/components/UserProfile";
+import { canAccessAdminArea, subscribeAuthSession } from "../shared/authSession";
 import {
   getStoredThemePreference,
   setThemePreference,
   type ThemePreference,
 } from "../shared/theme";
-import { getMe } from "../features/auth/services/authService";
-import { subscribeAuthSession } from "../shared/authSession";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -15,7 +14,6 @@ import Chat from "../assets/icons/DashBoardIcons/Chat.png";
 import Biblioteca from "../assets/icons/DashBoardIcons/Biblioteca.png";
 import Estatica from "../assets/icons/DashBoardIcons/Estatica.png";
 
-type Role = "admin" | "professor" | "aluno";
 type Props = { children?: React.ReactNode };
 
 const SIDEBAR_KEY = "bedrock_sidebar_collapsed";
@@ -26,7 +24,6 @@ const navItems = [
     label: "Home",
     icon: Home,
     alt: "Icone da Home",
-    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["dashboard", "inicio", "painel", "home"],
   },
   {
@@ -34,7 +31,6 @@ const navItems = [
     label: "Projetos",
     icon: Projects,
     alt: "Icone de Projetos",
-    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["projetos", "project", "tarefas", "planejamento"],
   },
   {
@@ -43,7 +39,6 @@ const navItems = [
     icon: Disciplinas,
     alt: "Icone de Disciplinas",
     badge: "14",
-    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["disciplinas", "materias", "turmas", "aulas"],
   },
   {
@@ -52,7 +47,6 @@ const navItems = [
     icon: Chat,
     alt: "Icone de Chat",
     topGap: true,
-    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["chat", "mensagens", "conversas", "dm", "grupos", "canais"],
   },
   {
@@ -60,7 +54,6 @@ const navItems = [
     label: "Biblioteca",
     icon: Biblioteca,
     alt: "Icone de Biblioteca",
-    roles: ["admin", "professor", "aluno"] as Role[],
     keywords: ["biblioteca", "livros", "documentos", "conteudo"],
   },
   {
@@ -68,7 +61,6 @@ const navItems = [
     label: "Estatistica",
     icon: Estatica,
     alt: "Icone de Estatistica",
-    roles: ["admin", "professor"] as Role[], // aluno NÃO tem acesso
     keywords: ["estatistica", "metricas", "dados", "indicadores"],
   },
 ];
@@ -76,14 +68,27 @@ const navItems = [
 const settingsItem = {
   to: "/settings",
   label: "Settings",
-  roles: ["admin", "professor", "aluno"] as Role[],
   keywords: ["settings", "configuracoes", "perfil", "ajustes"],
+};
+
+const adminItem = {
+  to: "/admin",
+  label: "Administracao",
+  keywords: ["admin", "administracao", "usuarios", "instituicoes", "permissoes"],
 };
 
 function SettingsIcon() {
   return (
     <svg className="h-6 w-6 text-[color:var(--app-sidebar-contrast)]/80" viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.4 12.9c.04-.3.06-.6.06-.9s-.02-.6-.06-.9l2.1-1.6c.19-.14.24-.42.12-.63l-2-3.4c-.12-.21-.38-.3-.61-.22l-2.5 1c-.52-.4-1.08-.73-1.69-.98L14.5 2h-5l-.38 2.2c-.61-.25-1.17.57-1.69-.98l-2.5-1c-.23-.09-.49.01-.61.22l-2 3.4c-.12.21-.07.49.12.63L4.6 11.1c-.04.3-.06.6-.06.9s.02.6.06.9L2.5 14.6c-.19-.14-.24-.42-.12-.63l2 3.4c.12.21.38.3.61-.22l2.5-1c.52.4 1.08.73 1.69-.98L9.5 22h5l.38-2.2c.61-.25 1.17-.57 1.69-.98l2.5 1c.23-.09.49-.01-.61-.22l2-3.4c-.12-.21-.07-.49-.12-.63L19.4 13.9z" />
+    </svg>
+  );
+}
+
+function AdminIcon() {
+  return (
+    <svg className="h-6 w-6 text-[color:var(--app-sidebar-contrast)]/80" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2l7 4v6c0 5-3.5 8.74-7 10-3.5-1.26-7-5-7-10V6l7-4Zm0 5a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm-3 8h6v-1.5c0-1.38-1.79-2.5-3-2.5s-3 1.12-3 2.5V15Z" />
     </svg>
   );
 }
@@ -114,9 +119,7 @@ function NavItem({
           active
             ? "bg-[var(--app-sidebar-hover)] text-[var(--app-sidebar-hover-text)]"
             : "text-[color:var(--app-sidebar-contrast)]/95 hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
-        } ${
-          collapsed ? "justify-center" : "gap-3"
-        }`}
+        } ${collapsed ? "justify-center" : "gap-3"}`}
       >
         {children}
         {!collapsed && <span className="truncate">{label}</span>}
@@ -133,23 +136,7 @@ function NavItem({
 export function SidebarSimple({ children }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [role, setRole] = React.useState<Role>("aluno");
-
-  React.useEffect(() => {
-    const loadRole = () => {
-      getMe()
-        .then((me) => setRole((me.role as Role) ?? "aluno"))
-        .catch(() => setRole("aluno"));
-    };
-
-    loadRole();
-
-    // Subscribe to auth session changes to update role
-    const unsubscribe = subscribeAuthSession(loadRole);
-    return () => unsubscribe();
-  }, []);
-
-  const [openAlert, setOpenAlert] = React.useState(true);
+  const [hasAdminAccess, setHasAdminAccess] = React.useState(() => canAccessAdminArea());
   const [collapsed, setCollapsed] = React.useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(SIDEBAR_KEY) === "true";
@@ -160,15 +147,15 @@ export function SidebarSimple({ children }: Props) {
     return getStoredThemePreference();
   });
 
-  // Filtra os itens de navegação com base no role do usuário
-  const visibleNavItems = React.useMemo(
-    () => navItems.filter((item) => item.roles.includes(role)),
-    [role]
-  );
-
   React.useEffect(() => {
     window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
   }, [collapsed]);
+
+  React.useEffect(() => {
+    return subscribeAuthSession(() => {
+      setHasAdminAccess(canAccessAdminArea());
+    });
+  }, []);
 
   React.useEffect(() => {
     function handleThemeChange() {
@@ -181,10 +168,10 @@ export function SidebarSimple({ children }: Props) {
 
   const searchableItems = React.useMemo(
     () =>
-      [...visibleNavItems, { ...settingsItem, icon: "", alt: "" }].filter((item) =>
-        item.roles.includes(role)
-      ),
-    [visibleNavItems, role]
+      hasAdminAccess
+        ? [...navItems, { ...settingsItem, icon: "", alt: "" }, { ...adminItem, icon: "", alt: "" }]
+        : [...navItems, { ...settingsItem, icon: "", alt: "" }],
+    [hasAdminAccess]
   );
 
   const searchResults = React.useMemo(() => {
@@ -235,11 +222,9 @@ export function SidebarSimple({ children }: Props) {
 
       <div className={`mb-2 flex items-center ${collapsed ? "flex-col justify-center gap-3" : "gap-4"} p-2`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-4"} min-w-0`}>
-          <img
-            src="https://docs.material-tailwind.com/img/logo-ct-dark.png"
-            alt="Logo"
-            className="h-8 w-8 shrink-0"
-          />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)]">
+            B
+          </div>
           {!collapsed && <h3 className="truncate text-lg font-semibold text-[var(--app-sidebar-contrast)]">Menu Lateral</h3>}
         </div>
 
@@ -266,7 +251,7 @@ export function SidebarSimple({ children }: Props) {
                 </svg>
               ) : themePreference === "bedrocklight" ? (
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79z" />
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               ) : (
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -283,13 +268,7 @@ export function SidebarSimple({ children }: Props) {
               aria-label="Recolher menu lateral"
               className="rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
             >
-              <svg
-                className="h-4 w-4 transition-transform duration-300"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
+              <svg className="h-4 w-4 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>
@@ -401,7 +380,7 @@ export function SidebarSimple({ children }: Props) {
 
       <nav className="flex-1 overflow-y-auto px-1">
         <ul className="flex flex-col gap-1">
-          {visibleNavItems.map((item) => (
+          {navItems.map((item) => (
             <NavItem
               key={item.to}
               to={item.to}
@@ -415,46 +394,27 @@ export function SidebarSimple({ children }: Props) {
             </NavItem>
           ))}
 
-          {settingsItem.roles.includes(role) && (
+          <NavItem
+            to={settingsItem.to}
+            label={settingsItem.label}
+            collapsed={collapsed}
+            active={location.pathname === settingsItem.to}
+          >
+            <SettingsIcon />
+          </NavItem>
+
+          {hasAdminAccess && (
             <NavItem
-              to={settingsItem.to}
-              label={settingsItem.label}
+              to={adminItem.to}
+              label={adminItem.label}
               collapsed={collapsed}
-              active={location.pathname === settingsItem.to}
+              active={location.pathname === adminItem.to}
             >
-              <SettingsIcon />
+              <AdminIcon />
             </NavItem>
           )}
         </ul>
       </nav>
-
-      {openAlert && !collapsed && (
-        <div className="mt-4 rounded-md border-l-4 border-blue-300 bg-white/90 p-3 text-[var(--app-text)] transition-opacity">
-          <div className="flex items-start gap-3">
-            <svg className="h-8 w-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            </svg>
-            <div>
-              <h4 className="font-semibold text-[var(--app-text)]">Upgrade to PRO</h4>
-              <p className="text-sm text-[var(--app-text-muted)]">
-                Upgrade to Material Tailwind PRO and get more components, plugins and premium features.
-              </p>
-            </div>
-          </div>
-          <div className="mt-3 flex gap-3">
-            <button
-              type="button"
-              className="rounded-md bg-transparent px-3 py-1 text-sm text-blue-700 hover:underline"
-              onClick={() => setOpenAlert(false)}
-            >
-              Dismiss
-            </button>
-            <a className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white" href="#">
-              Upgrade Now
-            </a>
-          </div>
-        </div>
-      )}
 
       <UserProfile collapsed={collapsed} />
     </aside>

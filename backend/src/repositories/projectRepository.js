@@ -85,12 +85,13 @@ export async function create({ name, user_id, organization_id }) {
   return new Project(res.rows[0]);
 }
 
-export async function remove(id) {
+export async function remove(id, organizationId) {
   const res = await pool.query(
     `DELETE FROM projects
      WHERE id = $1
+       AND organization_id = $2
      RETURNING id`,
-    [id]
+    [id, organizationId]
   );
   return res.rows[0] || null;
 }
