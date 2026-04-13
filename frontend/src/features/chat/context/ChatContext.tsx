@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import {
   addConversationMembers,
   createConversation,
@@ -78,6 +78,7 @@ interface ChatContextType {
   sendMessage: (content: string) => void;
   loadOlderMessages: () => Promise<void>;
   openDirectConversation: (user: ChatUserSearchResult) => Promise<void>;
+  startConversationWithUsers: (users: ChatUserSearchResult[]) => Promise<void>;
   addMember: (user: ChatUserSearchResult) => Promise<void>;
   setManageSearch: (search: string) => void;
 }
@@ -395,6 +396,40 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function groupNameFromUsers(users: ChatUserSearchResult[]) {
+    const names = users.map((user) => user.nome || user.email).filter(Boolean);
+    if (names.length <= 2) return names.join(", ");
+    return `${names.slice(0, 2).join(", ")} e mais ${names.length - 2}`;
+  }
+
+  async function startConversationWithUsers(users: ChatUserSearchResult[]) {
+    const uniqueUsers = users.filter(
+      (user, index, list) => list.findIndex((item) => item.id === user.id) === index
+    );
+
+    if (uniqueUsers.length === 0) return;
+
+    try {
+      const conversation =
+        uniqueUsers.length === 1
+          ? await createDirectConversation(uniqueUsers[0].id)
+          : await createConversation({
+              type: "group",
+              name: groupNameFromUsers(uniqueUsers),
+              is_private: true,
+              memberIds: uniqueUsers.map((user) => user.id),
+            });
+
+      setConversations((prev) => upsertConversation(prev, conversation));
+      setActiveId(conversation.id);
+      setUserSearch("");
+      setUserResults([]);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao iniciar conversa.");
+    }
+  }
+
   async function loadOlderMessages() {
     if (!activeId || messages.length === 0) return;
     try {
@@ -483,6 +518,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     sendMessage,
     loadOlderMessages,
     openDirectConversation,
+    startConversationWithUsers,
     addMember,
     setManageSearch,
   };
