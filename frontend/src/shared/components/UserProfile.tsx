@@ -53,9 +53,9 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   }
 
   function themeLabel() {
-    if (themePreference === "system") return "Tema: sistema";
-    if (themePreference === "bedrocklight") return "Tema: claro";
-    return "Tema: escuro";
+    if (themePreference === "system") return "Tema: Sistema";
+    if (themePreference === "bedrocklight") return "Tema: Claro";
+    return "Tema: Escuro";
   }
 
   function handleMenuToggle() {
