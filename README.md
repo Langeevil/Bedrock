@@ -282,15 +282,15 @@ PORT=4000
 
 ### 3. Iniciar aplicacao
 
-Na raiz:
+Na raiz do projeto, use apenas:
 
 ```bash
 npm start
 ```
 
-Esse comando inicia backend e frontend.
+Esse comando ja inicia backend e frontend ao mesmo tempo.
 
-Tambem e possivel iniciar separadamente:
+Se precisar depurar um lado especifico, tambem e possivel iniciar separadamente:
 
 ```bash
 npm run start:backend
