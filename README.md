@@ -1,71 +1,28 @@
 # Bedrock
 
-Bedrock e uma plataforma web voltada para organizacao academica e colaboracao entre usuarios. O projeto combina autenticacao, gerenciamento de disciplinas, organizacao de projetos com tarefas e tags, chat em tempo real e uma camada de dashboard para acompanhar indicadores do sistema.
+Bedrock e uma plataforma web institucional para comunicacao, organizacao academica e gestao de atividades colaborativas. O projeto reune autenticacao, instituicoes, papeis de usuario, area administrativa, disciplinas, projetos, biblioteca, indicadores e chat em tempo real.
 
-O repositorio esta estruturado como um monorepo com frontend e backend separados, permitindo evolucao independente da interface e da API.
+O sistema ainda esta em evolucao, mas ja possui uma base funcional para uso local e para consolidacao gradual rumo a uma arquitetura mais robusta. O foco atual e fortalecer a fundacao do produto antes de avancar para hospedagem em nuvem ou arquitetura hibrida.
 
 ## Visao Geral
 
-O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou colaborativo em uma unica aplicacao:
+O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou institucional:
 
-- cadastro e autenticacao de usuarios
-- definicao de perfil no sistema
-- acompanhamento de disciplinas
-- publicacao de posts e envio de arquivos por disciplina
-- organizacao de projetos com tarefas e tags
-- conversas diretas, grupos e canais em tempo real
-- dashboard e indicadores de uso
+- cadastro, login e sessao autenticada com JWT
+- organizacao de usuarios por instituicao
+- papeis globais e papeis institucionais
+- area administrativa para usuarios, instituicoes e governanca
+- disciplinas com posts, arquivos, membros e tarefas
+- projetos com tarefas, tags e visualizacao em grafo
+- biblioteca com livros e emprestimos
+- estatisticas e dashboard
+- chat com DMs, grupos e canais em tempo real
 
-## Principais Funcionalidades
-
-### Autenticacao e conta
-
-- cadastro de usuario
-- login com JWT
-- rota protegida no frontend
-- consulta do usuario autenticado
-- atualizacao de perfil e definicao de papel no sistema
-
-### Dashboard
-
-- exibicao de estatisticas gerais
-- acompanhamento de disciplinas ativas
-- indicador de completude de perfil
-
-### Disciplinas
-
-- criacao, edicao, listagem e exclusao de disciplinas
-- busca por nome, codigo e professor
-- paginacao
-- publicacao de posts por disciplina
-- upload, listagem, download e remocao de arquivos
-
-### Projetos
-
-- criacao de projetos por usuario
-- cadastro de tarefas com status
-- organizacao por tags
-- visualizacao em lista e em grafo
-
-### Chat
-
-- conversas diretas entre usuarios
-- criacao de grupos privados
-- criacao de canais
-- notificacoes e atualizacao em tempo real via Socket.IO
-- controle de presenca e leitura
-
-### Outras areas da interface
-
-- biblioteca com filtros por tipo e assunto
-- tela de estatisticas consolidando dados do sistema
-- pagina publica de apresentacao do produto
-
-## Arquitetura
+## Stack
 
 ### Frontend
 
-- React 19
+- React
 - TypeScript
 - Vite
 - React Router
@@ -73,8 +30,6 @@ O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou c
 - DaisyUI
 - Radix UI
 - Framer Motion
-- React Hook Form
-- Zod
 - Socket.IO Client
 
 ### Backend
@@ -82,57 +37,218 @@ O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou c
 - Node.js
 - Express
 - PostgreSQL
-- pg
 - JWT
 - bcrypt
 - Multer
 - Socket.IO
+- pg
 
-### Estrutura geral
+## Estrutura
 
 ```text
 Bedrock/
-|- backend/   # API, banco, regras de negocio e sockets
-|- frontend/  # aplicacao React
-|- scripts/   # scripts utilitarios do monorepo
+|- backend/                  # API, banco, autenticacao, regras e sockets
+|  |- src/
+|  |  |- auth/               # papeis, permissoes e contexto de autorizacao
+|  |  |- controllers/        # entrada das rotas HTTP
+|  |  |- middlewares/        # autenticacao, autorizacao, upload e validacao
+|  |  |- migrations/         # migrations versionadas
+|  |  |- repositories/       # acesso a dados
+|  |  |- routes/             # rotas da API
+|  |  |- services/           # regras de negocio compartilhadas
+|  |  |- chatCore.js         # regras centrais do chat
+|  |  |- chatSocket.js       # Socket.IO do chat
+|  |  |- db.js               # conexao PostgreSQL
+|  |  |- dbInit.js           # bootstrap legado do schema
+|  |  |- migrationRunner.js  # execucao de migrations
+|  |  |- server.js           # servidor Express
+|
+|- frontend/
+|  |- src/
+|  |  |- features/
+|  |  |  |- admin/           # area administrativa
+|  |  |  |- auth/            # login, cadastro e rotas protegidas
+|  |  |  |- chat/            # conversas em tempo real
+|  |  |  |- dashboard/       # visao geral
+|  |  |  |- disciplines/     # disciplinas, posts, arquivos e tarefas
+|  |  |  |- library/         # livros e emprestimos
+|  |  |  |- organizations/   # servicos de instituicao
+|  |  |  |- projects/        # projetos, tarefas, tags e grafo
+|  |  |  |- settings/        # perfil e configuracoes de conta
+|  |  |  |- statistics/      # indicadores
+|  |  |- shared/             # componentes e servicos compartilhados
+|
+|- scripts/                  # scripts utilitarios do monorepo
 |- README.md
 ```
 
-## Estrutura do Projeto
+## Modulos Principais
 
-### `frontend/src/features`
+### Autenticacao e Sessao
 
-- `auth`: login, cadastro e protecao de rotas
-- `dashboard`: indicadores principais
-- `disciplines`: cadastro, posts, arquivos e detalhes de disciplina
-- `projects`: projetos, tarefas, tags e visualizacao em grafo
-- `chat`: mensageria e conversas em tempo real
-- `library`: biblioteca e filtros de materiais
-- `statistics`: consolidacao de indicadores
-- `settings`: dados da conta e perfil do usuario
+- cadastro e login de usuarios
+- autenticacao com JWT
+- rotas privadas no frontend
+- sincronizacao do usuario autenticado
+- armazenamento local da sessao no frontend
 
-### `backend/src`
+### Organizacoes, Papeis e Permissoes
 
-- `routes`: definicao das rotas da API
-- `controllers`: entrada das requisicoes HTTP
-- `repositories`: acesso aos dados
-- `middlewares`: autenticacao, upload e validacoes
-- `dtos`: validacao de payloads
-- `db.js`: conexao com PostgreSQL
-- `dbInit.js`: criacao e ajuste automatico do schema
-- `chatSocket.js` e `chatCore.js`: camada de comunicacao em tempo real
+O projeto possui base institucional com organizacoes, memberships e papeis separados entre escopo global e escopo institucional.
 
-## Como Executar
+Papel global atual:
+
+- `system_admin`
+
+Papeis institucionais atuais:
+
+- `organization_owner`
+- `organization_admin`
+- `coordinator`
+- `professor`
+- `student`
+- `external_partner`
+
+A autorizacao centralizada fica em `backend/src/auth/accessControl.js`, com permissoes como:
+
+- `system:admin`
+- `organization:view`
+- `organization:manage`
+- `organization:manage_members`
+- `user:view_directory`
+- `discipline:create`
+- `project:create`
+- `chat:access`
+- `chat:create_direct`
+- `chat:create_group`
+- `chat:create_channel`
+- `chat:manage_all`
+
+### Area Administrativa
+
+A area administrativa fica em `/admin` no frontend e usa rotas protegidas. Ela contempla:
+
+- resumo administrativo
+- listagem e atualizacao de usuarios
+- listagem e criacao de instituicoes
+- governanca por papeis e permissoes
+
+O acesso depende do papel e das permissoes efetivas do usuario autenticado.
+
+### Disciplinas
+
+- criacao, edicao, listagem e exclusao de disciplinas
+- posts por disciplina
+- upload, listagem, download e remocao de arquivos
+- membros por disciplina
+- tarefas vinculadas a disciplina
+- abas internas para visao geral, materiais, posts, membros, tarefas e chat
+
+### Projetos
+
+- criacao e listagem de projetos
+- tarefas por projeto
+- tags por projeto
+- visualizacao de grafo
+- painel lateral e componentes de apoio para organizar o fluxo
+
+### Biblioteca
+
+- cadastro e listagem de livros
+- emprestimos
+- telas e componentes dedicados para livros e emprestimos
+
+### Chat
+
+O chat usa HTTP para operacoes de consulta/criacao e Socket.IO para mensagens e presenca em tempo real.
+
+Funcionalidades atuais:
+
+- listagem de conversas
+- filtros por todas, DMs, grupos e canais
+- conversas diretas
+- grupos privados
+- canais
+- envio e recebimento de mensagens em tempo real
+- leitura de mensagens
+- presenca de usuarios
+- painel de membros e detalhes
+- busca para iniciar conversas por nome ou e-mail
+- selecao de usuarios por chips/tokens na busca
+- criacao de DM com 1 usuario selecionado
+- criacao de grupo privado com 2 ou mais usuarios selecionados
+
+Observacao: a criacao de canais foi removida do topo da busca do chat para simplificar o fluxo atual. Se for necessario criar canais pela interface, a acao deve ser reposicionada em um local especifico futuramente.
+
+## Rotas Principais
+
+Base local da API:
+
+```text
+http://localhost:4000/api
+```
+
+### Autenticacao
+
+- `POST /auth/cadastrar`
+- `POST /auth/entrar`
+- `GET /auth/eu`
+- `PUT /auth/atualizar-perfil`
+- `DELETE /auth/deletar`
+
+### Administracao
+
+- `GET /admin/summary`
+- `GET /admin/users`
+- `PATCH /admin/users/:userId`
+- `GET /admin/organizations`
+- `POST /admin/organizations`
+
+### Organizacoes
+
+- `GET /organizations/current`
+- `GET /organizations/current/members`
+- `POST /organizations/current/members`
+- `PATCH /organizations/current/members/:userId/role`
+
+### Chat
+
+- `GET /chat/users/search`
+- `GET /chat/presence`
+- `GET /chat/conversations`
+- `POST /chat/conversations/direct`
+- `POST /chat/conversations`
+- `GET /chat/conversations/:id`
+- `PATCH /chat/conversations/:id`
+- `POST /chat/conversations/:id/members`
+- `DELETE /chat/conversations/:id/members/:userId`
+- `GET /chat/conversations/:id/messages`
+- `POST /chat/conversations/:id/messages`
+- `POST /chat/conversations/:id/read`
+
+### Disciplinas, Projetos e Indicadores
+
+O backend tambem expoe rotas para:
+
+- `/dashboard`
+- `/disciplines`
+- `/projects`
+- `/statistics`
+- `/livros`
+- `/emprestimos`
+- `/estatisticas`
+
+## Como Executar Localmente
 
 ### Pre-requisitos
 
-- Node.js instalado
-- PostgreSQL disponivel
+- Node.js
 - npm
+- PostgreSQL
 
-### 1. Instale as dependencias
+### 1. Instalar dependencias
 
-Na raiz:
+Na raiz do projeto:
 
 ```bash
 npm install
@@ -152,9 +268,11 @@ cd backend
 npm install
 ```
 
-### 2. Configure as variaveis de ambiente
+### 2. Configurar ambiente do backend
 
-Crie um arquivo `.env` dentro de `backend/` com valores equivalentes a estes:
+Crie um arquivo `backend/.env` com valores locais. Nao use credenciais reais no repositorio.
+
+Exemplo:
 
 ```env
 DATABASE_URL=postgres://usuario:senha@localhost:5432/bedrock
@@ -162,24 +280,15 @@ JWT_SECRET=defina_um_segredo_forte
 PORT=4000
 ```
 
-Observacoes:
+### 3. Iniciar aplicacao
 
-- `DATABASE_URL` e obrigatoria para a conexao com o PostgreSQL
-- `JWT_SECRET` deve ser alterada em qualquer ambiente real
-- se `PORT` nao for definida, o backend sobe na porta `4000`
-
-### 3. Inicie o projeto
-
-Na raiz do repositorio:
+Na raiz:
 
 ```bash
 npm start
 ```
 
-Esse comando sobe:
-
-- backend em `http://localhost:4000`
-- frontend em ambiente Vite, normalmente em `http://localhost:5173`
+Esse comando inicia backend e frontend.
 
 Tambem e possivel iniciar separadamente:
 
@@ -188,80 +297,12 @@ npm run start:backend
 npm run start:frontend
 ```
 
-## Banco de Dados
+Por padrao local:
 
-O backend executa uma rotina de bootstrap ao iniciar a aplicacao. Isso significa que as tabelas principais sao criadas automaticamente, incluindo entidades de:
+- backend: `http://localhost:4000`
+- frontend Vite: `http://localhost:5173`
 
-- usuarios
-- disciplinas
-- arquivos e posts de disciplinas
-- conversas, membros, mensagens e presenca no chat
-- projetos, tarefas, tags e relacionamento entre tarefas e tags
-
-Tambem existe exposicao publica de arquivos enviados pela pasta `/uploads`.
-
-## Rotas Principais da API
-
-Base da API: `http://localhost:4000/api`
-
-### Autenticacao
-
-- `POST /auth/cadastrar`
-- `POST /auth/entrar`
-- `GET /auth/eu`
-- `PUT /auth/atualizar-perfil`
-- `DELETE /auth/deletar`
-
-### Dashboard
-
-- `GET /dashboard/stats`
-
-### Disciplinas
-
-- `GET /disciplines`
-- `POST /disciplines`
-- `GET /disciplines/:id`
-- `PUT /disciplines/:id`
-- `DELETE /disciplines/:id`
-- `GET /disciplines/:id/posts`
-- `POST /disciplines/:id/posts`
-- `GET /disciplines/:id/arquivos`
-- `POST /disciplines/:id/arquivos/upload`
-
-### Projetos
-
-- `GET /projects`
-- `POST /projects`
-- `GET /projects/:id/graph`
-- `GET /projects/:projectId/tasks`
-- `POST /projects/:projectId/tasks`
-- `PUT /projects/:projectId/tasks/:taskId`
-- `DELETE /projects/:projectId/tasks/:taskId`
-- `GET /projects/:projectId/tags`
-- `POST /projects/:projectId/tags`
-
-### Chat
-
-- `GET /chat/conversations`
-- `POST /chat/conversations`
-- `POST /chat/conversations/direct`
-- `GET /chat/conversations/:id/messages`
-- `POST /chat/conversations/:id/messages`
-- `GET /chat/users/search`
-
-## Seguranca e Boas Praticas
-
-- nao publique credenciais reais no repositorio
-- utilize uma `JWT_SECRET` forte fora do ambiente local
-- revise a politica de `cors()` antes de publicar em producao
-- trate a pasta `backend/uploads` como armazenamento local de desenvolvimento
-- considere adicionar logs, testes automatizados e variaveis de ambiente por ambiente
-
-## Estado Atual
-
-O projeto ja apresenta uma base funcional completa para autenticacao, disciplinas, projetos e chat. Algumas areas da interface, como biblioteca e parte dos indicadores, ainda podem ser expandidas com integracoes e dados mais robustos.
-
-## Scripts Disponiveis
+## Scripts
 
 ### Raiz
 
@@ -287,15 +328,51 @@ npm start
 npm run dev
 ```
 
-## Possiveis Evolucoes
+## Banco de Dados e Migrations
 
-- testes automatizados no frontend e backend
-- pipeline de CI
-- controle de permissao por papel
-- armazenamento externo de arquivos
-- observabilidade e monitoramento
-- deploy com configuracao por ambiente
+O backend executa duas etapas ao iniciar:
+
+1. `ensureAppSchema()` em `backend/src/dbInit.js`, que ainda faz bootstrap legado de tabelas.
+2. `runMigrations()` em `backend/src/migrationRunner.js`, que executa migrations versionadas em `backend/src/migrations`.
+
+Migrations atuais:
+
+- `001_institution_foundation`
+- `002_discipline_memberships`
+- `003_discipline_tasks`
+- `004_legacy_cleanup`
+
+Diretriz do projeto: novas alteracoes de schema devem ir para migrations versionadas. O `dbInit.js` ainda existe por compatibilidade, mas nao deve continuar crescendo indefinidamente.
+
+## Seguranca
+
+- nao commitar arquivos `.env` com credenciais reais
+- usar `JWT_SECRET` forte fora do ambiente local
+- revisar CORS antes de producao
+- tratar `backend/uploads` como armazenamento local de desenvolvimento
+- revisar permissoes antes de expor rotas administrativas
+- substituir URLs fixas de localhost por variaveis de ambiente antes de publicar
+
+## Estado Atual e Limitacoes
+
+O projeto esta funcional em ambiente local, mas ainda existem pontos em transicao:
+
+- frontend ainda possui algumas URLs locais fixas para API e Socket.IO
+- banco ainda combina bootstrap legado com migrations
+- permissoes existem, mas ainda devem ser aplicadas de forma mais uniforme em todos os modulos
+- chat ja foi reorganizado em componentes, mas ainda pode evoluir em anexos, replies, reacoes e regras mais finas de canal
+- modelo multi-instituicao ja foi iniciado, mas ainda precisa amadurecer isolamento, interacao entre instituicoes e configuracao por dominio/subdominio
+
+## Roadmap Tecnico
+
+- consolidar configuracao por ambiente no frontend e backend
+- migrar novas mudancas de schema exclusivamente por migrations
+- ampliar aplicacao das permissoes em disciplinas, projetos, tarefas, arquivos, posts e chat
+- evoluir diretorio de usuarios por escopo institucional
+- revisar UX do chat para anexos, respostas e reacoes
+- adicionar testes automatizados no frontend e backend
+- preparar deploy com CORS, logs e armazenamento externo de arquivos
 
 ## Licenca
 
-Defina aqui a licenca adotada para o projeto, caso deseje publicar ou distribuir o sistema formalmente.
+Defina a licenca antes de distribuir ou publicar o projeto formalmente.
