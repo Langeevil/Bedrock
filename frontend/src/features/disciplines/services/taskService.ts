@@ -1,6 +1,7 @@
 import type { DisciplineTask, CreateTaskRequest, GradeSubmissionRequest } from "../types/taskTypes.ts";
+import { apiUrl } from "../../../shared/services/config";
 
-const API_URL = "http://localhost:4000/api/disciplines";
+const API_URL = apiUrl("/disciplines");
 
 // ===== TAREFAS =====
 

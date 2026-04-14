@@ -2,7 +2,7 @@ import agenda from "../../../assets/agenda.png";
 
 export default function Agenda() {
   return (
-   <div className="hero bg-zinc-50  min-h-screen">
+   <div id="demo" className="hero bg-zinc-50  min-h-screen">
   <div className="hero-content flex-col lg:flex-row">
     <img
       src={agenda}

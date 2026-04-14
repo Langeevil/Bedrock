@@ -2,9 +2,10 @@
 
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
 import { loginUser as apiLoginUser, registerUser as apiRegisterUser } from "../../../shared/services/api";
+import { apiUrl } from "../../../shared/services/config";
 import type { User, LoginResponse, RegisterResponse } from "../types/authTypes";
 
-const API_URL = "http://localhost:4000/api/auth";
+const API_URL = apiUrl("/auth");
 
 export async function loginUser(email: string, senha: string): Promise<LoginResponse> {
   return apiLoginUser(email, senha);

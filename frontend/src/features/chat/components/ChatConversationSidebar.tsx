@@ -208,7 +208,7 @@ export function ChatConversationSidebar() {
                 onClick={confirmSelectedUsers}
                 className="rounded-lg bg-[var(--app-accent)] px-2 py-1 text-xs font-semibold text-white"
               >
-                Enter
+                Iniciar
               </button>
             )}
           </div>
@@ -246,7 +246,9 @@ export function ChatConversationSidebar() {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-[var(--app-text)]">{user.nome}</p>
-                    <p className="truncate text-[11px] text-[var(--app-text-muted)]">{user.email}</p>
+                    <p className="truncate text-[11px] text-[var(--app-text-muted)]">
+                      {user.organization_name ? `${user.email} - ${user.organization_name}` : user.email}
+                    </p>
                   </div>
                 </button>
               ))}

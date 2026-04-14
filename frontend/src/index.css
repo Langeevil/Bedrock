@@ -212,3 +212,53 @@ body {
   color: #fca5a5 !important;
   border-color: #7f1d1d !important;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+.landing-page {
+  color-scheme: light;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.landing-page .bg-white,
+.landing-page .bg-zinc-50,
+.landing-page .bg-gradient-to-t,
+.landing-page .hero.bg-white,
+.landing-page .hero.bg-zinc-50 {
+  color: #0f172a;
+}
+
+.landing-page-dark {
+  background: #071426;
+  color: #e5eefc;
+}
+
+.landing-page-dark .bg-white,
+.landing-page-dark .bg-zinc-50,
+.landing-page-dark .hero.bg-white,
+.landing-page-dark .hero.bg-zinc-50 {
+  background-color: #0f1f38 !important;
+  color: #e5eefc !important;
+}
+
+.landing-page-dark .bg-gradient-to-t {
+  background-image: linear-gradient(to top, #0f1f38, #18396f) !important;
+  color: #e5eefc !important;
+}
+
+.landing-page-dark .text-black,
+.landing-page-dark .text-slate-900,
+.landing-page-dark .text-gray-500,
+.landing-page-dark .text-slate-600,
+.landing-page-dark .text-slate-700,
+.landing-page-dark .text-neutral-content {
+  color: #e5eefc !important;
+}
+
+.landing-page-dark .card.bg-white {
+  background-color: #142844 !important;
+  border: 1px solid rgba(191, 219, 254, 0.18);
+}

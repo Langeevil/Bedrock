@@ -78,6 +78,8 @@ export interface ChatUserSearchResult {
   nome: string;
   email: string;
   role?: string;
+  organization_name?: string | null;
+  scope?: "current_organization" | "external_organization";
   presence_status?: PresenceStatus;
 }
 

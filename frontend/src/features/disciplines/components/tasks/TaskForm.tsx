@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { createTask } from "../../services/taskService.ts";
 import type { TaskFile } from "../../types/taskTypes.ts";
 import { Trash2, Loader, Plus, X } from "lucide-react";
 
@@ -9,7 +8,7 @@ interface TaskFormProps {
   onCancel: () => void;
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated, onCancel }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId: _disciplineId, onTaskCreated, onCancel }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");

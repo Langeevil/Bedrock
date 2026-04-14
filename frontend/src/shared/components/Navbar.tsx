@@ -2,7 +2,19 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function Navbar() {
+type NavbarProps = {
+  landingDark?: boolean;
+  onToggleLandingTheme?: () => void;
+};
+
+const navLinks = [
+  { href: "#features", label: "Produtos" },
+  { href: "#segments", label: "Planos" },
+  { href: "#scale", label: "Solucoes" },
+  { href: "#about", label: "Sobre Nos" },
+];
+
+export default function Navbar({ landingDark = false, onToggleLandingTheme }: Readonly<NavbarProps>) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -11,18 +23,18 @@ export default function Navbar() {
         <div className="text-2xl font-bold text-white">Logo</div>
 
         <div className="hidden items-center space-x-8 md:flex">
-          <a href="#" className="font-semibold text-white hover:text-blue-200">
-            Produtos
-          </a>
-          <a href="#" className="font-semibold text-white hover:text-blue-200">
-            Planos
-          </a>
-          <a href="#" className="font-semibold text-white hover:text-blue-200">
-            Solucoes
-          </a>
-          <a href="#" className="font-semibold text-white hover:text-blue-200">
-            Sobre Nos
-          </a>
+          {navLinks.map((link) => (
+            <a key={link.href} href={link.href} className="font-semibold text-white hover:text-blue-200">
+              {link.label}
+            </a>
+          ))}
+          <button
+            type="button"
+            onClick={onToggleLandingTheme}
+            className="rounded-3xl border border-white/30 px-4 py-1 font-semibold text-white transition hover:bg-white/10"
+          >
+            {landingDark ? "Modo claro" : "Modo escuro"}
+          </button>
           <Link to="/login" className="rounded-3xl bg-white px-6 py-1 font-semibold text-black transition hover:bg-blue-100">
             Entrar
           </Link>
@@ -41,18 +53,26 @@ export default function Navbar() {
 
       {menuOpen && (
         <div className="flex flex-col space-y-4 bg-white px-6 py-4 shadow-md md:hidden">
-          <a href="#" className="text-gray-700 hover:text-blue-600">
-            Produtos
-          </a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">
-            Planos
-          </a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">
-            Solucoes
-          </a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">
-            Sobre Nos
-          </a>
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="text-gray-700 hover:text-blue-600"
+            >
+              {link.label}
+            </a>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              onToggleLandingTheme?.();
+              setMenuOpen(false);
+            }}
+            className="rounded-xl border border-blue-200 px-4 py-2 text-left font-semibold text-blue-700 transition hover:bg-blue-50"
+          >
+            {landingDark ? "Modo claro" : "Modo escuro"}
+          </button>
           <Link
             to="/login"
             onClick={() => setMenuOpen(false)}

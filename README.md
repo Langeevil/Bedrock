@@ -17,6 +17,7 @@ O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou i
 - biblioteca com livros e emprestimos
 - estatisticas e dashboard
 - chat com DMs, grupos e canais em tempo real
+- landing page publica com tema proprio, separado do tema interno da aplicacao
 
 ## Stack
 
@@ -177,8 +178,32 @@ Funcionalidades atuais:
 - selecao de usuarios por chips/tokens na busca
 - criacao de DM com 1 usuario selecionado
 - criacao de grupo privado com 2 ou mais usuarios selecionados
+- diretorio de usuarios limitado a instituicao ativa por padrao
+- escopo global controlado para busca de usuarios por `system_admin`
 
 Observacao: a criacao de canais foi removida do topo da busca do chat para simplificar o fluxo atual. Se for necessario criar canais pela interface, a acao deve ser reposicionada em um local especifico futuramente.
+
+### Landing Page
+
+A pagina publica inicial usa tema proprio, separado do tema do app autenticado. O modo escuro interno do sistema nao altera automaticamente a landing page.
+
+Funcionalidades atuais:
+
+- navegacao por anchors da navbar para secoes da pagina
+- menu mobile com os mesmos destinos da navbar desktop
+- botao de modo claro/escuro exclusivo da landing page
+- contraste revisado para leitura nos estados claro e escuro da landing
+
+### Frontend Autenticado
+
+A area autenticada usa a `SidebarSimple` como navegacao principal e temas globais por variaveis CSS.
+
+Ajustes recentes:
+
+- contador fixo de disciplinas removido da sidebar
+- cards de disciplinas ajustados para largura fluida, borda e melhor suporte a modo escuro
+- area de projetos passou a usar variaveis de tema em pontos que ainda tinham cores fixas
+- tela de chat teve o modal legado de criacao manual desconectado da tela principal, mantendo o fluxo de busca com chips
 
 ## Rotas Principais
 
@@ -280,7 +305,18 @@ JWT_SECRET=defina_um_segredo_forte
 PORT=4000
 ```
 
-### 3. Iniciar aplicacao
+### 3. Configurar ambiente do frontend
+
+O frontend usa valores locais por padrao, mas pode ser configurado por ambiente com variaveis Vite.
+
+Exemplo opcional em `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:4000/api
+VITE_SOCKET_URL=http://localhost:4000
+```
+
+### 4. Iniciar aplicacao
 
 Na raiz do projeto, use apenas:
 
@@ -351,21 +387,22 @@ Diretriz do projeto: novas alteracoes de schema devem ir para migrations version
 - revisar CORS antes de producao
 - tratar `backend/uploads` como armazenamento local de desenvolvimento
 - revisar permissoes antes de expor rotas administrativas
-- substituir URLs fixas de localhost por variaveis de ambiente antes de publicar
+- configurar `VITE_API_URL` e `VITE_SOCKET_URL` corretamente antes de publicar
 
 ## Estado Atual e Limitacoes
 
 O projeto esta funcional em ambiente local, mas ainda existem pontos em transicao:
 
-- frontend ainda possui algumas URLs locais fixas para API e Socket.IO
+- frontend ja possui configuracao por ambiente para API e Socket.IO, com fallback local para desenvolvimento
 - banco ainda combina bootstrap legado com migrations
 - permissoes existem, mas ainda devem ser aplicadas de forma mais uniforme em todos os modulos
 - chat ja foi reorganizado em componentes, mas ainda pode evoluir em anexos, replies, reacoes e regras mais finas de canal
-- modelo multi-instituicao ja foi iniciado, mas ainda precisa amadurecer isolamento, interacao entre instituicoes e configuracao por dominio/subdominio
+- diretorio de usuarios ja busca na instituicao ativa e possui escopo global controlado para `system_admin`; ainda precisa amadurecer regras por dominio e visibilidade entre instituicoes
+- modelo multi-instituicao ja foi iniciado, mas ainda precisa amadurecer isolamento, associacao automatica por dominio e configuracao por dominio/subdominio
 
 ## Roadmap Tecnico
 
-- consolidar configuracao por ambiente no frontend e backend
+- consolidar configuracao por ambiente tambem no backend, incluindo CORS por ambiente
 - migrar novas mudancas de schema exclusivamente por migrations
 - ampliar aplicacao das permissoes em disciplinas, projetos, tarefas, arquivos, posts e chat
 - evoluir diretorio de usuarios por escopo institucional

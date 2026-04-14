@@ -13,7 +13,17 @@ type Props = { children?: React.ReactNode };
 
 const SIDEBAR_KEY = "bedrock_sidebar_collapsed";
 
-const navItems = [
+type SidebarNavItem = {
+  to: string;
+  label: string;
+  icon: string;
+  alt: string;
+  keywords: string[];
+  badge?: string;
+  topGap?: boolean;
+};
+
+const navItems: SidebarNavItem[] = [
   {
     to: "/dashboard",
     label: "Home",
@@ -33,7 +43,6 @@ const navItems = [
     label: "Disciplinas",
     icon: Disciplinas,
     alt: "Icone de Disciplinas",
-    badge: "14",
     keywords: ["disciplinas", "materias", "turmas", "aulas"],
   },
   {
@@ -65,14 +74,6 @@ const adminItem = {
   label: "Administracao",
   keywords: ["admin", "administracao", "usuarios", "instituicoes", "permissoes"],
 };
-
-function SettingsIcon() {
-  return (
-    <svg className="h-6 w-6 text-[color:var(--app-sidebar-contrast)]/80" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.4 12.9c.04-.3.06-.6.06-.9s-.02-.6-.06-.9l2.1-1.6c.19-.14.24-.42.12-.63l-2-3.4c-.12-.21-.38-.3-.61-.22l-2.5 1c-.52-.4-1.08-.73-1.69-.98L14.5 2h-5l-.38 2.2c-.61-.25-1.17.57-1.69-.98l-2.5-1c-.23-.09-.49.01-.61.22l-2 3.4c-.12.21-.07.49.12.63L4.6 11.1c-.04.3-.06.6-.06.9s.02.6.06.9L2.5 14.6c-.19-.14-.24-.42-.12-.63l2 3.4c.12.21.38.3.61-.22l2.5-1c.52.4 1.08.73 1.69-.98L9.5 22h5l.38-2.2c.61-.25 1.17-.57 1.69-.98l2.5 1c.23-.09.49-.01-.61-.22l2-3.4c-.12-.21-.07-.49-.12-.63L19.4 13.9z" />
-    </svg>
-  );
-}
 
 function AdminIcon() {
   return (

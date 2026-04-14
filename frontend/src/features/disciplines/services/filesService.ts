@@ -1,7 +1,15 @@
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type { Material } from "../types/disciplineTypes";
 
-const API_URL = "http://localhost:4000/api/disciplines";
+const API_URL = apiUrl("/disciplines");
+
+export function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
 
 export interface FileListPage {
   data: Material[];
@@ -50,7 +58,7 @@ export async function uploadFile(
   const token = localStorage.getItem("auth_token");
 
   const res = await fetch(
-    `http://localhost:4000/api/disciplines/${disciplineId}/arquivos/upload`,
+    `${API_URL}/${disciplineId}/arquivos/upload`,
     {
       method: "POST",
       headers: token

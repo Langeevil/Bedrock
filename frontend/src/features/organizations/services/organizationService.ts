@@ -1,10 +1,17 @@
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 
 export interface OrganizationMember {
   id: number;
   nome: string;
   email: string;
+  role: string;
   system_role?: string | null;
+  membership?: {
+    organization_id: number;
+    role: string;
+    status: string;
+  } | null;
   effective_role: string;
   organization_role: string;
   account_status: string;
@@ -12,7 +19,7 @@ export interface OrganizationMember {
   joined_at: string;
 }
 
-const API_URL = "http://localhost:4000/api/organizations";
+const API_URL = apiUrl("/organizations");
 
 export async function listCurrentOrganizationMembers(): Promise<OrganizationMember[]> {
   const res = await fetch(`${API_URL}/current/members`, {

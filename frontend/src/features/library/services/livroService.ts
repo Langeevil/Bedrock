@@ -1,6 +1,7 @@
 import type { Livro, CreateLivroInput } from '../types/libraryTypes';
+import { API_BASE_URL } from '../../../shared/services/config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = API_BASE_URL;
 
 export const livroService = {
   // Listar todos os livros

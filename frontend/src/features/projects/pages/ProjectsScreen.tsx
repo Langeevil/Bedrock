@@ -36,17 +36,17 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: "#fff", borderRadius: 12,
+          background: "var(--app-bg-elevated)", borderRadius: 12,
           padding: "32px 28px", width: "min(420px, calc(100vw - 32px))",
-          border: "0.5px solid #e2e0d8",
+          border: "0.5px solid var(--app-border)",
           boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
           fontFamily: "'DM Sans', system-ui, sans-serif",
         }}
       >
-        <div style={{ fontSize: 11, color: "#9c9a8e", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace", marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: "var(--app-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace", marginBottom: 6 }}>
           novo projeto
         </div>
-        <div style={{ fontSize: 20, fontWeight: 600, color: "#1a1a18", marginBottom: 20 }}>
+        <div style={{ fontSize: 20, fontWeight: 600, color: "var(--app-text)", marginBottom: 20 }}>
           Como vai chamar?
         </div>
 
@@ -60,9 +60,9 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
             maxLength={60}
             style={{
               width: "100%", padding: "10px 13px",
-              border: "0.5px solid #ccc9bf", borderRadius: 8,
-              fontSize: 14, fontFamily: "inherit", color: "#1a1a18",
-              background: "#f4f3ef", outline: "none", boxSizing: "border-box",
+              border: "0.5px solid var(--app-border)", borderRadius: 8,
+              fontSize: 14, fontFamily: "inherit", color: "var(--app-text)",
+              background: "var(--app-bg-muted)", outline: "none", boxSizing: "border-box",
               marginBottom: 20,
             }}
           />
@@ -72,8 +72,8 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
               onClick={onCancel}
               style={{
                 padding: "9px 18px", borderRadius: 8, fontSize: 14,
-                cursor: "pointer", border: "0.5px solid #e2e0d8",
-                background: "#fff", color: "#6b6960", fontFamily: "inherit",
+                cursor: "pointer", border: "0.5px solid var(--app-border)",
+                background: "var(--app-bg-elevated)", color: "var(--app-text-muted)", fontFamily: "inherit",
               }}
             >
               Cancelar
@@ -84,9 +84,9 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
               style={{
                 padding: "9px 22px", borderRadius: 8, fontSize: 14,
                 cursor: name.trim() ? "pointer" : "not-allowed",
-                border: "0.5px solid #1a1a18",
-                background: name.trim() ? "#1a1a18" : "#e2e0d8",
-                color: name.trim() ? "#f4f3ef" : "#9c9a8e",
+                border: "0.5px solid var(--app-text)",
+                background: name.trim() ? "var(--app-text)" : "var(--app-bg-muted)",
+                color: name.trim() ? "var(--app-bg)" : "var(--app-text-muted)",
                 fontFamily: "inherit", fontWeight: 500, transition: "all .15s",
               }}
             >
@@ -105,13 +105,13 @@ function EmptyProjects({ onCreate }: { onCreate: () => void }) {
     <div style={{
       flex: 1, display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      background: "#f4f3ef", gap: 16,
+      background: "var(--app-bg)", gap: 16,
       minWidth: 0,
       fontFamily: "'DM Sans', system-ui, sans-serif",
     }}>
       <div style={{
         width: 64, height: 64, borderRadius: 16,
-        background: "#fff", border: "0.5px solid #e2e0d8",
+        background: "var(--app-bg-elevated)", border: "0.5px solid var(--app-border)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9c9a8e" strokeWidth="1.5">
@@ -121,10 +121,10 @@ function EmptyProjects({ onCreate }: { onCreate: () => void }) {
       </div>
 
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 16, fontWeight: 600, color: "#1a1a18", marginBottom: 6 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: "var(--app-text)", marginBottom: 6 }}>
           Nenhum projeto ainda
         </div>
-        <div style={{ fontSize: 13, color: "#9c9a8e", maxWidth: 260 }}>
+        <div style={{ fontSize: 13, color: "var(--app-text-muted)", maxWidth: 260 }}>
           Crie um projeto para começar a organizar tarefas agrupadas por tags no grafo.
         </div>
       </div>
@@ -134,8 +134,8 @@ function EmptyProjects({ onCreate }: { onCreate: () => void }) {
         style={{
           marginTop: 8, padding: "10px 24px", borderRadius: 8,
           fontSize: 14, fontWeight: 500, cursor: "pointer",
-          border: "0.5px solid #1a1a18",
-          background: "#1a1a18", color: "#f4f3ef",
+          border: "0.5px solid var(--app-text)",
+          background: "var(--app-text)", color: "var(--app-bg)",
           fontFamily: "inherit",
         }}
       >
@@ -227,8 +227,8 @@ export default function ProjectsScreen() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#f4f3ef" }}>
-          <div style={{ fontSize: 13, color: "#9c9a8e" }}>Carregando...</div>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--app-bg)" }}>
+          <div style={{ fontSize: 13, color: "var(--app-text-muted)" }}>Carregando...</div>
         </div>
       );
     }
@@ -272,7 +272,7 @@ export default function ProjectsScreen() {
   return (
     <div style={{
       fontFamily: "'DM Sans', system-ui, sans-serif",
-      background: "#f4f3ef",
+      background: "var(--app-bg)",
       height: "100vh",
       display: "flex",
       overflow: "hidden",

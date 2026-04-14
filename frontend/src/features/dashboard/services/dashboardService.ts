@@ -1,9 +1,10 @@
 // src/features/dashboard/services/dashboardService.ts
 
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type { DashboardStats } from "../types/dashboardTypes";
 
-const API_URL = "http://localhost:4000/api/dashboard";
+const API_URL = apiUrl("/dashboard");
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const res = await fetch(`${API_URL}/stats`, {

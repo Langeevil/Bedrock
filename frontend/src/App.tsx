@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Hero from "./shared/components/Hero";
 import Navbar from "./shared/components/Navbar";
@@ -29,27 +30,33 @@ import { StatisticsScreen } from "./features/statistics";
 import { SettingsScreen } from "./features/settings";
 import { AdminScreen } from "./features/admin";
 
+function LandingPage() {
+  const [landingDark, setLandingDark] = useState(false);
+
+  return (
+    <div className={landingDark ? "landing-page landing-page-dark" : "landing-page"}>
+      <Navbar
+        landingDark={landingDark}
+        onToggleLandingTheme={() => setLandingDark((current) => !current)}
+      />
+      <Hero />
+      <SobreSistema />
+      <Icones />
+      <Escalavel />
+      <Hero2 />
+      <Agenda />
+      <ContainerCollapse />
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Página inicial pública */}
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <Hero />
-              <SobreSistema />
-              <Icones />
-              <Escalavel />
-              <Hero2 />
-              <Agenda />
-              <ContainerCollapse />
-              <Footer />
-            </>
-          }
-        />
+        <Route path="/" element={<LandingPage />} />
 
         {/* Páginas públicas */}
         <Route path="/login" element={<LoginScreen />} />

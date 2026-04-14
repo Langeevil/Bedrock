@@ -1,8 +1,9 @@
 // src/features/disciplines/services/postsService.ts
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type { Post } from "../types/disciplineTypes";
 
-const API_URL = "http://localhost:4000/api/disciplines";
+const API_URL = apiUrl("/disciplines");
 
 export interface PostsPaginationResponse {
   data: Post[];

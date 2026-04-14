@@ -14,7 +14,7 @@ export function useFiles(disciplineId: number) {
     try {
       setLoading(true);
       const data = await listFiles(disciplineId);
-      setFiles(data);
+      setFiles(data.data);
       setError(null);
     } catch (e: any) {
       setError(e.message);
@@ -39,7 +39,7 @@ export function useFiles(disciplineId: number) {
   };
 
   const remove = async (fileId: number) => {
-    await deleteFile(fileId);
+    await deleteFile(disciplineId, fileId);
     setFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 

@@ -13,7 +13,7 @@ export function usePosts(disciplineId: number) {
     try {
       setLoading(true);
       const data = await listPosts(disciplineId);
-      setPosts(data);
+      setPosts(data.data);
       setError(null);
     } catch (e: any) {
       setError(e.message);
@@ -33,7 +33,7 @@ export function usePosts(disciplineId: number) {
   };
 
   const removePost = async (postId: number) => {
-    await deletePost(postId);
+    await deletePost(disciplineId, postId);
     setPosts((prev) => prev.filter((p) => p.id !== postId));
   };
 

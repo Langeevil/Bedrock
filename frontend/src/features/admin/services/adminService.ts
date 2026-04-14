@@ -1,11 +1,12 @@
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type {
   AdminOrganization,
   AdminSummary,
   AdminUser,
 } from "../types/adminTypes";
 
-const API_URL = "http://localhost:4000/api/admin";
+const API_URL = apiUrl("/admin");
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

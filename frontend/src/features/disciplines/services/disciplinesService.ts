@@ -1,5 +1,6 @@
 // src/services/disciplinesService.ts
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 export interface Discipline {
   id: number;
   name: string;
@@ -19,7 +20,7 @@ export interface DisciplinesResponse {
   data: Discipline[];
   pagination: Pagination;
 }
-const API_URL = "http://localhost:4000/api/disciplines";
+const API_URL = apiUrl("/disciplines");
 export async function listDisciplines(page = 1, limit = 12): Promise<DisciplinesResponse> {
   const res = await fetch(`${API_URL}?page=${page}&limit=${limit}`, {
     headers: getAuthHeaders(false),

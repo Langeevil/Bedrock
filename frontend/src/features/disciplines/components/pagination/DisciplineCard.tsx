@@ -17,11 +17,10 @@ export function DisciplineCard({ discipline, index, onEdit, onDelete, onClick }:
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={onClick}
-      // Tamanho maior (w-72 h-72) e bordas totalmente retas (rounded-none)
-      className="group relative bg-white rounded-none border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col w-72 h-72 cursor-pointer"
+      className="group relative flex min-h-72 w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--app-accent)_45%,var(--app-border))] hover:shadow-xl"
       {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
     >
-      <div className="p-6 flex flex-col h-full justify-between">
+      <div className="flex h-full flex-col justify-between p-6">
         {/* Topo: Ícone e Código */}
         <div className="flex items-start justify-between">
           <div className={`p-2 rounded-none ${color.light}`}>
@@ -38,23 +37,23 @@ export function DisciplineCard({ discipline, index, onEdit, onDelete, onClick }:
              <ProfessorAvatar name={discipline.professor} colorBg={color.bg} />
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="font-bold text-slate-800 text-xl leading-tight px-2">
+            <h3 className="px-2 text-xl font-bold leading-tight text-[var(--app-text)]">
               {discipline.name}
             </h3>
-            <span className="text-sm text-slate-400 font-medium">
+            <span className="text-sm font-medium text-[var(--app-text-muted)]">
               {discipline.professor}
             </span>
           </div>
         </div>
 
         {/* Rodapé: Ações */}
-        <div className="flex items-center justify-between border-t border-slate-50 pt-4">
-          <span className="text-[10px] uppercase tracking-wider text-slate-300 font-bold">Detalhes</span>
+        <div className="flex items-center justify-between border-t border-[var(--app-border)] pt-4">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--app-text-muted)]">Detalhes</span>
           <div className="flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
             <Tooltip.Provider delayDuration={200}>
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button type="button" aria-label={`Editar disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onEdit(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">
+                  <button type="button" aria-label={`Editar disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onEdit(discipline); }} className="rounded-lg border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-2 text-[var(--app-text-muted)] shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600">
                     <Pencil className="w-4 h-4" />
                   </button>
                 </Tooltip.Trigger>
@@ -63,7 +62,7 @@ export function DisciplineCard({ discipline, index, onEdit, onDelete, onClick }:
               
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button type="button" aria-label={`Excluir disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onDelete(discipline); }} className="p-2 rounded-none bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm">
+                  <button type="button" aria-label={`Excluir disciplina ${discipline.name}`} onClick={(e) => { e.stopPropagation(); onDelete(discipline); }} className="rounded-lg border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-2 text-[var(--app-text-muted)] shadow-sm transition-colors hover:border-red-300 hover:text-red-600">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </Tooltip.Trigger>

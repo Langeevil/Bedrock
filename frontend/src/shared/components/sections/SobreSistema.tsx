@@ -1,7 +1,7 @@
 
 export default function SobreSistema() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 px-6 sm:py-20 lg:py-24">
+    <section id="features" className="relative overflow-hidden bg-white py-16 px-6 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Texto */}

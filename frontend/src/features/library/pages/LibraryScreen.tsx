@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useBooks } from '../hooks/useBooks';
 import { useBorrows } from '../hooks/useBorrows';
 import { BookCard } from '../components/BookCard';
@@ -6,7 +6,7 @@ import { BorrowCard } from '../components/BorrowCard';
 import { BookForm } from '../components/BookForm';
 import { BorrowForm } from '../components/BorrowForm';
 import { SidebarSimple } from '../../../components/sidebar-simple';
-import { Livro } from '../types/libraryTypes';
+import type { Livro } from '../types/libraryTypes';
 
 export default function LibraryScreen() {
   const { books, loading: booksLoading, createBook, updateBook, deleteBook } = useBooks();

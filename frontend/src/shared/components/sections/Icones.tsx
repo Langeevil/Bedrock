@@ -4,7 +4,7 @@ import universidade from "../../../assets/icons/universidade.png";
 
 export default function Icones() {
   return (
-    <section className="w-full min-h-screen bg-gradient-to-t from-white to-blue-200 py-12 px-4 flex flex-col items-center justify-center">
+    <section id="segments" className="w-full min-h-screen bg-gradient-to-t from-white to-blue-200 py-12 px-4 flex flex-col items-center justify-center">
       
       {/* TÍTULO */}
       <h2 className="text-black text-center 2xl:text-5xl text-2xl font-poppins mb-12">

@@ -1,7 +1,8 @@
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type { StatisticsData } from "../types/statisticsTypes";
 
-const API_URL = "http://localhost:4000/api/statistics";
+const API_URL = apiUrl("/statistics");
 
 export async function getStatistics(): Promise<StatisticsData> {
   const res = await fetch(`${API_URL}`, {

@@ -31,6 +31,15 @@ export interface Post {
 
 export type DisciplinePost = Post;
 
+export interface ChatMessageType {
+  id: number;
+  disciplineId: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+  isMine: boolean;
+}
+
 export interface DisciplineFile {
   id: number;
   original_name: string;

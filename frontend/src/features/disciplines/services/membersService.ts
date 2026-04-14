@@ -1,7 +1,8 @@
 import { getAuthHeaders, parseJsonOrThrow } from "../../../shared/services/http";
+import { apiUrl } from "../../../shared/services/config";
 import type { DisciplineMember } from "../types/disciplineTypes";
 
-const API_URL = "http://localhost:4000/api/disciplines";
+const API_URL = apiUrl("/disciplines");
 
 export async function listMembers(disciplineId: number): Promise<DisciplineMember[]> {
   const res = await fetch(`${API_URL}/${disciplineId}/members`, {

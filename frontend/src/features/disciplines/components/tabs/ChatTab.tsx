@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Paperclip, Smile, Send } from "lucide-react";
 import { Avatar } from "../Avatar";
 import { TEAMS } from "../../constants/teamsTheme";
-import { Post } from "../../types/disciplineTypes";
+import type { Post } from "../../types/disciplineTypes";
 import { listPosts as getDisciplinePosts, createPost as createDisciplinePost } from "../../services/postsService";
 import { uploadFile, downloadFile } from "../../services/filesService";
 
@@ -122,13 +122,13 @@ export function ChatTab({ disciplineId, currentUserName }: Readonly<Props>) {
             aria-label="Mensagem do chat"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !sending && send()}
+            onKeyDown={(e) => e.key === "Enter" && !sending && send(input)}
             placeholder="Digite uma mensagem..."
             disabled={sending}
             style={{ flex: 1, border: "none", outline: "none", fontSize: 14, color: TEAMS.textPrimary, background: "transparent", fontFamily: "'Segoe UI', sans-serif", opacity: sending ? 0.6 : 1 }}
           />
           <button
-            onClick={send}
+            onClick={() => send(input)}
             disabled={sending || !input.trim()}
             style={{ background: input.trim() && !sending ? TEAMS.purple : TEAMS.border, color: input.trim() && !sending ? "#fff" : TEAMS.textMuted, border: "none", borderRadius: 4, padding: "6px 10px", cursor: input.trim() && !sending ? "pointer" : "default", display: "flex", alignItems: "center", transition: "all 0.15s", opacity: sending ? 0.6 : 1 }}
           >

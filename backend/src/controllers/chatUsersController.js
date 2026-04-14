@@ -1,5 +1,5 @@
 import pool from "../db.js";
-import { PERMISSIONS, hasPermission } from "../auth/accessControl.js";
+import { PERMISSIONS, SYSTEM_ROLES, hasPermission } from "../auth/accessControl.js";
 
 const searchRateLimit = new Map();
 const SEARCH_WINDOW_MS = 60 * 1000;
@@ -40,30 +40,38 @@ export async function searchUsers(req, res) {
       return res.json([]);
     }
 
+    const scope = String(req.query.scope || "organization").trim().toLowerCase();
+    const globalSearch =
+      scope === "global" && req.auth?.systemRole === SYSTEM_ROLES.SYSTEM_ADMIN;
     const isEmailSearch = query.includes("@");
     const pattern = `%${query}%`;
     const domainPattern = isEmailSearch ? null : `%@${query}%`;
 
     const result = await pool.query(
-      `SELECT
+      `SELECT DISTINCT ON (u.id)
          u.id,
          u.nome,
          u.email,
          u.role,
+         o.name AS organization_name,
          COALESCE(p.status, 'offline') AS presence_status
        FROM users u
-       JOIN organization_memberships om
+       LEFT JOIN organization_memberships om
          ON om.user_id = u.id
+        AND om.status = 'active'
+       LEFT JOIN organizations o
+         ON o.id = om.organization_id
        LEFT JOIN chat_user_presence p ON p.user_id = u.id
        WHERE u.id <> $1
-         AND om.organization_id = $2
-         AND om.status = 'active'
+         AND COALESCE(u.account_status, 'active') = 'active'
+         AND ($7::boolean = TRUE OR om.organization_id = $2)
          AND (
            LOWER(u.email) LIKE $3
            OR LOWER(u.nome) LIKE $3
            OR ($6::text IS NOT NULL AND LOWER(u.email) LIKE $6)
          )
        ORDER BY
+         u.id,
          CASE
            WHEN LOWER(u.email) = $4 THEN 0
            WHEN LOWER(u.email) LIKE $5 THEN 1
@@ -72,7 +80,15 @@ export async function searchUsers(req, res) {
          LOWER(u.nome),
          LOWER(u.email)
        LIMIT 20`,
-      [req.userId, req.auth.organization.id, pattern, query, `${query}%`, domainPattern]
+      [
+        req.userId,
+        req.auth.organization.id,
+        pattern,
+        query,
+        `${query}%`,
+        domainPattern,
+        globalSearch,
+      ]
     );
 
     return res.json(
@@ -81,6 +97,10 @@ export async function searchUsers(req, res) {
         nome: row.nome,
         email: row.email,
         role: row.role,
+        organization_name: row.organization_name || null,
+        scope: row.organization_name && row.organization_name !== req.auth.organization.name
+          ? "external_organization"
+          : "current_organization",
         presence_status: row.presence_status,
       }))
     );

@@ -6,7 +6,7 @@ import { TAG_COLORS } from "../../constants/projectConstants";
 interface TagSectionProps {
   tags: Tag[];
   tasks: Task[];
-  onAddTag: (payload: Omit<Tag, "id">) => Promise<void>;
+  onAddTag: (payload: Omit<Tag, "id" | "project_id">) => Promise<void>;
   onDeleteTag: (id: string) => Promise<void>;
 }
 

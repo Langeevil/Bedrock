@@ -3,7 +3,6 @@ import { SidebarSimple } from "../../../components/sidebar-simple";
 import { ChatAddMembersModal } from "../components/ChatAddMembersModal";
 import { ChatComposer } from "../components/ChatComposer";
 import { ChatConversationSidebar } from "../components/ChatConversationSidebar";
-import { ChatCreateConversationModal } from "../components/ChatCreateConversationModal";
 import { ChatDetailsPanel } from "../components/ChatDetailsPanel";
 import { ChatHeader } from "../components/ChatHeader";
 import { ChatLayout } from "../components/ChatLayout";
@@ -18,27 +17,12 @@ function ChatContent() {
     loadingOlder,
     hasMore,
     currentUserEmail,
-    draftMode,
-    draftName,
-    draftDescription,
-    draftIsPrivate,
-    draftSearch,
-    draftSearchResults,
-    draftMembers,
     manageSearch,
     manageResults,
     detailsOpen,
     addMembersOpen,
     setDetailsOpen,
     setAddMembersOpen,
-    setDraftName,
-    setDraftDescription,
-    setDraftIsPrivate,
-    setDraftSearch,
-    resetDraft,
-    addDraftMember,
-    removeDraftMember,
-    submitDraft,
     sendMessage,
     loadOlderMessages,
     addMember,
@@ -125,24 +109,6 @@ function ChatContent() {
           </div>
         </div>
       )}
-
-      <ChatCreateConversationModal
-        mode={draftMode}
-        name={draftName}
-        description={draftDescription}
-        isPrivate={draftIsPrivate}
-        search={draftSearch}
-        searchResults={draftSearchResults}
-        members={draftMembers}
-        onClose={() => resetDraft(null)}
-        onSubmit={submitDraft}
-        onNameChange={setDraftName}
-        onDescriptionChange={setDraftDescription}
-        onPrivateChange={setDraftIsPrivate}
-        onSearchChange={setDraftSearch}
-        onAddMember={addDraftMember}
-        onRemoveMember={removeDraftMember}
-      />
 
       <ChatAddMembersModal
         open={addMembersOpen}

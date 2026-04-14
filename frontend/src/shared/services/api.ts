@@ -1,5 +1,7 @@
 // src/services/api.ts
-const API_URL = "http://localhost:4000/api/auth";
+import { apiUrl } from "./config";
+
+const API_URL = apiUrl("/auth");
 // backend routes use Portuguese verbs: /cadastrar and /entrar
 
 interface RegisterResponse {

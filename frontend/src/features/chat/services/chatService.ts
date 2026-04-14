@@ -1,6 +1,7 @@
 // src/features/chat/services/chatService.ts
 
 import { io, type Socket } from "socket.io-client";
+import { apiUrl, SOCKET_BASE_URL } from "../../../shared/services/config";
 import { getAuthHeaders, getAuthToken, parseJsonOrThrow } from "../../../shared/services/http";
 import type { 
   ChatConversation, 
@@ -12,8 +13,8 @@ import type {
   PresenceEntry 
 } from "../types/chatTypes";
 
-const API_URL = "http://localhost:4000/api/chat";
-const SOCKET_URL = "http://localhost:4000";
+const API_URL = apiUrl("/chat");
+const SOCKET_URL = SOCKET_BASE_URL;
 
 function conversationQuery(type?: ConversationType | "all") {
   if (!type || type === "all") {
