@@ -58,14 +58,14 @@ const navItems: SidebarNavItem[] = [
     label: "Biblioteca",
     icon: Biblioteca,
     alt: "Icone de Biblioteca",
-    keywords: ["biblioteca", "livros", "documentos", "conteudo"],
+    keywords: ["biblioteca", "livros", "emprestimos", "acervo", "leitura"],
   },
   {
-    to: "/estatistica",
-    label: "Estatistica",
+    to: "/diretorio",
+    label: "Diretorio",
     icon: Estatica,
-    alt: "Icone de Estatistica",
-    keywords: ["estatistica", "metricas", "dados", "indicadores"],
+    alt: "Icone de Diretorio",
+    keywords: ["diretorio", "usuarios", "pessoas", "instituicao", "organizacao"],
   },
 ];
 

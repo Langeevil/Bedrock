@@ -2,6 +2,7 @@ import { id as migration001Id, description as migration001Description, up as mig
 import { id as migration002Id, description as migration002Description, up as migration002Up } from "./migrations/002_discipline_memberships.js";
 import { id as migration003Id, description as migration003Description, up as migration003Up } from "./migrations/003_discipline_tasks.js";
 import { id as migration004Id, description as migration004Description, up as migration004Up } from "./migrations/004_legacy_cleanup.js";
+import { id as migration005Id, description as migration005Description, up as migration005Up } from "./migrations/005_directory_tenancy.js";
 
 const migrations = [
   {
@@ -23,6 +24,11 @@ const migrations = [
     id: migration004Id,
     description: migration004Description,
     up: migration004Up,
+  },
+  {
+    id: migration005Id,
+    description: migration005Description,
+    up: migration005Up,
   },
 ];
 

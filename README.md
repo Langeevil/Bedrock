@@ -1,6 +1,6 @@
 # Bedrock
 
-Bedrock e uma plataforma web institucional para comunicacao, organizacao academica e gestao de atividades colaborativas. O projeto reune autenticacao, instituicoes, papeis de usuario, area administrativa, disciplinas, projetos, biblioteca, indicadores e chat em tempo real.
+Bedrock e uma plataforma web institucional para comunicacao, organizacao academica e gestao de atividades colaborativas. O projeto reune autenticacao, instituicoes, papeis de usuario, area administrativa, disciplinas, projetos, diretorio institucional e chat em tempo real.
 
 O sistema ainda esta em evolucao, mas ja possui uma base funcional para uso local e para consolidacao gradual rumo a uma arquitetura mais robusta. O foco atual e fortalecer a fundacao do produto antes de avancar para hospedagem em nuvem ou arquitetura hibrida.
 
@@ -14,8 +14,8 @@ O objetivo do Bedrock e centralizar rotinas comuns de um ambiente academico ou i
 - area administrativa para usuarios, instituicoes e governanca
 - disciplinas com posts, arquivos, membros e tarefas
 - projetos com tarefas, tags e visualizacao em grafo
-- biblioteca com livros e emprestimos
-- estatisticas e dashboard
+- diretorio institucional por organizacao
+- dashboard
 - chat com DMs, grupos e canais em tempo real
 - landing page publica com tema proprio, separado do tema interno da aplicacao
 
@@ -72,11 +72,12 @@ Bedrock/
 |  |  |  |- chat/            # conversas em tempo real
 |  |  |  |- dashboard/       # visao geral
 |  |  |  |- disciplines/     # disciplinas, posts, arquivos e tarefas
-|  |  |  |- library/         # livros e emprestimos
+|  |  |  |- directory/       # diretorio institucional
+|  |  |  |- library/         # placeholder visual para biblioteca
 |  |  |  |- organizations/   # servicos de instituicao
 |  |  |  |- projects/        # projetos, tarefas, tags e grafo
 |  |  |  |- settings/        # perfil e configuracoes de conta
-|  |  |  |- statistics/      # indicadores
+|  |  |  |- statistics/      # placeholder visual para estatisticas avancadas
 |  |  |- shared/             # componentes e servicos compartilhados
 |
 |- scripts/                  # scripts utilitarios do monorepo
@@ -136,6 +137,20 @@ A area administrativa fica em `/admin` no frontend e usa rotas protegidas. Ela c
 
 O acesso depende do papel e das permissoes efetivas do usuario autenticado.
 
+### Diretorio Institucional
+
+- rota dedicada no frontend em `/diretorio`
+- busca por nome, e-mail e dominio
+- filtro por papel institucional
+- escopo por instituicao atual, outras instituicoes e todos os escopos quando permitido
+- resumo de tenancy com dominios vinculados e visibilidade do diretorio
+
+### Multi-instituicao
+
+- tabela de `organization_domains` via migration versionada
+- `directory_visibility` por organizacao
+- endpoint de tenancy institucional para preparar regras futuras de dominio/subdominio
+
 ### Disciplinas
 
 - criacao, edicao, listagem e exclusao de disciplinas
@@ -155,9 +170,8 @@ O acesso depende do papel e das permissoes efetivas do usuario autenticado.
 
 ### Biblioteca
 
-- cadastro e listagem de livros
-- emprestimos
-- telas e componentes dedicados para livros e emprestimos
+- neste momento a rota virou placeholder visual
+- o modulo completo segue no roadmap e nao e prioridade nesta etapa
 
 ### Chat
 
@@ -204,6 +218,7 @@ Ajustes recentes:
 - cards de disciplinas ajustados para largura fluida, borda e melhor suporte a modo escuro
 - area de projetos passou a usar variaveis de tema em pontos que ainda tinham cores fixas
 - tela de chat teve o modal legado de criacao manual desconectado da tela principal, mantendo o fluxo de busca com chips
+- modulos secundarios passaram a exibir placeholder reutilizavel de "Funcionalidade em Desenvolvimento" quando acessados
 
 ## Rotas Principais
 
@@ -232,6 +247,9 @@ http://localhost:4000/api
 ### Organizacoes
 
 - `GET /organizations/current`
+- `GET /organizations/current/directory`
+- `GET /organizations/current/tenancy`
+- `PATCH /organizations/current/tenancy`
 - `GET /organizations/current/members`
 - `POST /organizations/current/members`
 - `PATCH /organizations/current/members/:userId/role`
@@ -377,6 +395,7 @@ Migrations atuais:
 - `002_discipline_memberships`
 - `003_discipline_tasks`
 - `004_legacy_cleanup`
+- `005_directory_tenancy`
 
 Diretriz do projeto: novas alteracoes de schema devem ir para migrations versionadas. O `dbInit.js` ainda existe por compatibilidade, mas nao deve continuar crescendo indefinidamente.
 
@@ -384,7 +403,7 @@ Diretriz do projeto: novas alteracoes de schema devem ir para migrations version
 
 - nao commitar arquivos `.env` com credenciais reais
 - usar `JWT_SECRET` forte fora do ambiente local
-- revisar CORS antes de producao
+- configurar `CORS_ORIGINS` ou `CLIENT_ORIGIN` antes de producao
 - tratar `backend/uploads` como armazenamento local de desenvolvimento
 - revisar permissoes antes de expor rotas administrativas
 - configurar `VITE_API_URL` e `VITE_SOCKET_URL` corretamente antes de publicar
@@ -394,11 +413,13 @@ Diretriz do projeto: novas alteracoes de schema devem ir para migrations version
 O projeto esta funcional em ambiente local, mas ainda existem pontos em transicao:
 
 - frontend ja possui configuracao por ambiente para API e Socket.IO, com fallback local para desenvolvimento
+- backend agora aceita lista de origens por ambiente e expoe `GET /health`
 - banco ainda combina bootstrap legado com migrations
 - permissoes existem, mas ainda devem ser aplicadas de forma mais uniforme em todos os modulos
 - chat ja foi reorganizado em componentes, mas ainda pode evoluir em anexos, replies, reacoes e regras mais finas de canal
-- diretorio de usuarios ja busca na instituicao ativa e possui escopo global controlado para `system_admin`; ainda precisa amadurecer regras por dominio e visibilidade entre instituicoes
-- modelo multi-instituicao ja foi iniciado, mas ainda precisa amadurecer isolamento, associacao automatica por dominio e configuracao por dominio/subdominio
+- diretorio institucional ja possui tela dedicada, filtros por escopo e base de dominios por organizacao; ainda precisa amadurecer regras finas de visibilidade
+- modelo multi-instituicao ja possui tenancy, dominios e visibilidade de diretorio; ainda precisa amadurecer isolamento automatico, associacao por dominio e configuracao por subdominio
+- biblioteca, estatisticas avancadas e reunioes foram reduzidas a placeholders visuais para manter foco no nucleo principal
 
 ## Roadmap Tecnico
 

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { MeetingRoom } from "../meeting/MeetingRoom";
+import FeatureInDevelopmentPage from "../../../../shared/components/FeatureInDevelopmentPage";
 import type { Discipline } from "../../services/disciplinesService";
 
 interface Props {
@@ -9,35 +8,19 @@ interface Props {
 }
 
 export function MeetingTab({
-  discipline,
-  currentUserEmail,
-  currentUserName,
+  discipline: _discipline,
+  currentUserEmail: _currentUserEmail,
+  currentUserName: _currentUserName,
 }: Readonly<Props>) {
-  const [inMeeting, setInMeeting] = useState(true);
-
-  if (!inMeeting) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: 400,
-          color: "#666",
-          fontSize: 14,
-        }}
-      >
-        Reunião encerrada
-      </div>
-    );
-  }
-
   return (
-    <MeetingRoom
-      discipline={discipline}
-      currentUserEmail={currentUserEmail}
-      currentUserName={currentUserName}
-      onLeave={() => setInMeeting(false)}
+    <FeatureInDevelopmentPage
+      title="Reuniões acadêmicas"
+      category="Placeholder"
+      compact
+      notes={[
+        "Reuniões em tempo real, áudio e vídeo continuarão no roadmap.",
+        "Nesta etapa o Bedrock mantém foco em comunicação textual, diretório e governança institucional.",
+      ]}
     />
   );
 }

@@ -1,31 +1,48 @@
-import { useState } from 'react';
-import { useBooks } from '../hooks/useBooks';
-import { useBorrows } from '../hooks/useBorrows';
-import { BookCard } from '../components/BookCard';
-import { BorrowCard } from '../components/BorrowCard';
-import { BookForm } from '../components/BookForm';
-import { BorrowForm } from '../components/BorrowForm';
-import { SidebarSimple } from '../../../components/sidebar-simple';
-import type { Livro } from '../types/libraryTypes';
+import { useState } from "react";
+import { SidebarSimple } from "../../../components/sidebar-simple";
+import { BookCard } from "../components/BookCard";
+import { BookForm } from "../components/BookForm";
+import { BorrowCard } from "../components/BorrowCard";
+import { BorrowForm } from "../components/BorrowForm";
+import { useBooks } from "../hooks/useBooks";
+import { useBorrows } from "../hooks/useBorrows";
+import type {
+  CreateEmprestimoInput,
+  CreateLivroInput,
+  Livro,
+} from "../types/libraryTypes";
 
 export default function LibraryScreen() {
-  const { books, loading: booksLoading, createBook, updateBook, deleteBook } = useBooks();
-  const { borrows, loading: borrowsLoading, createBorrow, renewBorrow, returnBorrow, deleteBorrow } = useBorrows();
+  const {
+    books,
+    loading: booksLoading,
+    createBook,
+    updateBook,
+    deleteBook,
+  } = useBooks();
+  const {
+    borrows,
+    loading: borrowsLoading,
+    createBorrow,
+    renewBorrow,
+    returnBorrow,
+    deleteBorrow,
+  } = useBorrows();
 
-  const [activeTab, setActiveTab] = useState<'books' | 'borrows'>('books');
+  const [activeTab, setActiveTab] = useState<"books" | "borrows">("books");
   const [showBookForm, setShowBookForm] = useState(false);
   const [showBorrowForm, setShowBorrowForm] = useState(false);
   const [editingBook, setEditingBook] = useState<Livro | null>(null);
-  const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<Livro | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBookForBorrow, setSelectedBookForBorrow] =
+    useState<Livro | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Manipuladores para livros
   const handleEditBook = (book: Livro) => {
     setEditingBook(book);
     setShowBookForm(true);
   };
 
-  const handleSaveBook = async (data: any) => {
+  const handleSaveBook = async (data: CreateLivroInput) => {
     try {
       if (editingBook) {
         await updateBook(editingBook.id, data);
@@ -35,16 +52,16 @@ export default function LibraryScreen() {
       setShowBookForm(false);
       setEditingBook(null);
     } catch (error) {
-      console.error('Erro ao salvar livro:', error);
+      console.error("Erro ao salvar livro:", error);
     }
   };
 
   const handleDeleteBook = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja deletar este livro?')) {
+    if (window.confirm("Tem certeza que deseja deletar este livro?")) {
       try {
         await deleteBook(id);
       } catch (error) {
-        console.error('Erro ao deletar livro:', error);
+        console.error("Erro ao deletar livro:", error);
       }
     }
   };
@@ -54,57 +71,56 @@ export default function LibraryScreen() {
     setShowBorrowForm(true);
   };
 
-  // Manipuladores para empréstimos
-  const handleSaveBorrow = async (data: any) => {
+  const handleSaveBorrow = async (data: CreateEmprestimoInput) => {
     try {
       await createBorrow(data);
       setShowBorrowForm(false);
       setSelectedBookForBorrow(null);
     } catch (error) {
-      console.error('Erro ao criar empréstimo:', error);
+      console.error("Erro ao criar empréstimo:", error);
     }
   };
 
   const handleRenewBorrow = async (id: number) => {
-    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
     try {
       await renewBorrow(id, tomorrow);
     } catch (error) {
-      console.error('Erro ao renovar empréstimo:', error);
+      console.error("Erro ao renovar empréstimo:", error);
     }
   };
 
   const handleReturnBorrow = async (id: number) => {
-    if (window.confirm('Registrar devolução deste livro?')) {
+    if (window.confirm("Registrar devolução deste livro?")) {
       try {
         await returnBorrow(id);
       } catch (error) {
-        console.error('Erro ao registrar devolução:', error);
+        console.error("Erro ao registrar devolução:", error);
       }
     }
   };
 
   const handleDeleteBorrow = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja deletar este empréstimo?')) {
+    if (window.confirm("Tem certeza que deseja deletar este empréstimo?")) {
       try {
         await deleteBorrow(id);
       } catch (error) {
-        console.error('Erro ao deletar empréstimo:', error);
+        console.error("Erro ao deletar empréstimo:", error);
       }
     }
   };
 
-  // Mapear ID de livro para nome
   const getBookTitle = (bookId: number): string => {
-    const book = books.find(b => b.id === bookId);
+    const book = books.find((entry) => entry.id === bookId);
     return book?.nome || `Livro #${bookId}`;
   };
 
-  // Filtrar livros por busca
-  const filteredBooks = books.filter(book =>
-    book.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.autor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.editora.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBooks = books.filter((book) =>
+    [book.nome, book.autor, book.editora].some((value) =>
+      value.toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   return (
@@ -112,34 +128,33 @@ export default function LibraryScreen() {
       <SidebarSimple />
 
       <div className="app-page min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">📚 Biblioteca</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-[var(--app-text)] sm:text-3xl">
+          Biblioteca
+        </h1>
 
-        {/* Tabs */}
-        <div role="tablist" className="tabs tabs-boxed mb-6 flex-wrap app-panel p-1">
+        <div role="tablist" className="tabs tabs-boxed app-panel mb-6 p-1">
           <button
             role="tab"
-            className={`tab ${activeTab === 'books' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('books')}
+            className={`tab ${activeTab === "books" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("books")}
           >
-            📖 Livros ({books.length})
+            Livros ({books.length})
           </button>
           <button
             role="tab"
-            className={`tab ${activeTab === 'borrows' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('borrows')}
+            className={`tab ${activeTab === "borrows" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("borrows")}
           >
-            ✋ Empréstimos ({borrows.length})
+            Empréstimos ({borrows.length})
           </button>
         </div>
 
-        {/* TAB: LIVROS */}
-        {activeTab === 'books' && (
+        {activeTab === "books" && (
           <div className="space-y-6">
-            {/* Search e botão novo */}
             <div className="card app-panel mb-6 flex flex-col gap-3 p-4 shadow md:flex-row md:items-center md:justify-between">
               <input
-                aria-label="Buscar livro por titulo, autor ou editora"
-                className="input input-bordered app-input min-h-[44px] flex-1 text-base"
+                aria-label="Buscar livro por título, autor ou editora"
+                className="input input-bordered app-input min-h-[44px] w-full flex-1 text-base"
                 placeholder="Buscar livro por título, autor ou editora"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -149,26 +164,26 @@ export default function LibraryScreen() {
                   setEditingBook(null);
                   setShowBookForm(true);
                 }}
-                className="btn btn-primary min-h-[44px] w-full md:w-auto"
+                className="btn btn-primary btn-sm min-h-[44px] w-full md:w-auto"
               >
-                + Novo Livro
+                Novo Livro
               </button>
             </div>
 
             {booksLoading ? (
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <span className="loading loading-spinner loading-lg"></span>
               </div>
-            ) : filteredBooks.length === 0 && searchTerm === '' ? (
+            ) : filteredBooks.length === 0 && searchTerm === "" ? (
               <div className="alert alert-info">
-                <span>Nenhum livro cadastrado. Comece adicionando novo livro!</span>
+                <span>Nenhum livro cadastrado. Comece adicionando um novo livro.</span>
               </div>
             ) : filteredBooks.length === 0 ? (
               <div className="alert alert-warning">
                 <span>Nenhum livro encontrado com esse critério de busca.</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {filteredBooks.map((book) => (
                   <BookCard
                     key={book.id}
@@ -183,11 +198,10 @@ export default function LibraryScreen() {
           </div>
         )}
 
-        {/* TAB: EMPRÉSTIMOS */}
-        {activeTab === 'borrows' && (
+        {activeTab === "borrows" && (
           <div className="space-y-6">
             {borrowsLoading ? (
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <span className="loading loading-spinner loading-lg"></span>
               </div>
             ) : borrows.length === 0 ? (
@@ -195,7 +209,7 @@ export default function LibraryScreen() {
                 <span>Nenhum empréstimo ativo.</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {borrows.map((borrow) => (
                   <BorrowCard
                     key={borrow.id}
@@ -212,7 +226,6 @@ export default function LibraryScreen() {
         )}
       </div>
 
-      {/* Forms */}
       {showBookForm && (
         <BookForm
           book={editingBook || undefined}

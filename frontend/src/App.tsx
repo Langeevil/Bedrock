@@ -25,6 +25,7 @@ import { DashboardScreen } from "./features/dashboard";
 import { ProjectsScreen } from "./features/projects";
 import { DisciplineScreen, DisciplineDetailScreen } from "./features/disciplines";
 import { ChatScreen } from "./features/chat";
+import { DirectoryScreen } from "./features/directory";
 import { LibraryScreen } from "./features/library";
 import { StatisticsScreen } from "./features/statistics";
 import { SettingsScreen } from "./features/settings";
@@ -108,6 +109,14 @@ function App() {
           element={
             <PrivateRoute>
               <ChatScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diretorio"
+          element={
+            <PrivateRoute>
+              <DirectoryScreen />
             </PrivateRoute>
           }
         />

@@ -24,12 +24,50 @@ import { runMigrations } from "./migrationRunner.js";
 
 dotenv.config();
 
+function parseAllowedOrigins() {
+  const raw = process.env.CORS_ORIGINS || process.env.CLIENT_ORIGIN || "";
+  const configured = raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (configured.length > 0) {
+    return configured;
+  }
+
+  return [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+  ];
+}
+
+const allowedOrigins = parseAllowedOrigins();
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origem nao permitida por CORS."));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-/* ROTAS */
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "bedrock-backend",
+    allowed_origins: allowedOrigins,
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/disciplines", disciplinesRoutes);
@@ -43,16 +81,15 @@ app.use("/api/livros", livroRoutes);
 app.use("/api/emprestimos", emprestimoRoutes);
 app.use("/api/estatisticas", estatisticaRoutes);
 app.use("/uploads", express.static("uploads"));
-/* SERVER HTTP */
+
 const PORT = process.env.PORT || 4000;
 const server = http.createServer(app);
 
-/* 🔥 TOP-LEVEL AWAIT (sem função startServer) */
 await ensureAppSchema();
 await runMigrations(pool);
 
 initChatSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });

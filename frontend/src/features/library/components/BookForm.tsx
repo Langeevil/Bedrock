@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { Livro, CreateLivroInput } from '../types/libraryTypes';
+import React, { useEffect, useState } from "react";
+import type { CreateLivroInput, Livro } from "../types/libraryTypes";
 
 interface BookFormProps {
   book?: Livro;
@@ -15,12 +15,11 @@ export const BookForm: React.FC<BookFormProps> = ({
   loading = false,
 }) => {
   const [formData, setFormData] = useState<CreateLivroInput>({
-    nome: '',
-    autor: '',
-    editora: '',
-    datapubli: '',
+    nome: "",
+    autor: "",
+    editora: "",
+    datapubli: "",
   });
-
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,15 +48,15 @@ export const BookForm: React.FC<BookFormProps> = ({
     try {
       await onSubmit(formData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar livro');
+      setError(err instanceof Error ? err.message : "Erro ao salvar livro");
     }
   };
 
   return (
     <div className="modal modal-open">
       <div className="modal-box w-full max-w-md">
-        <h3 className="font-bold text-lg mb-4">
-          {book ? 'Editar Livro' : 'Novo Livro'}
+        <h3 className="mb-4 text-lg font-bold">
+          {book ? "Editar Livro" : "Novo Livro"}
         </h3>
 
         {error && (
@@ -72,7 +71,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Título</span>
             </label>
             <input
-              aria-label="Titulo do livro"
+              aria-label="Título do livro"
               type="text"
               name="nome"
               value={formData.nome}
@@ -120,7 +119,7 @@ export const BookForm: React.FC<BookFormProps> = ({
               <span className="label-text">Data de Publicação</span>
             </label>
             <input
-              aria-label="Data de publicacao do livro"
+              aria-label="Data de publicação do livro"
               type="date"
               name="datapubli"
               value={formData.datapubli}
@@ -144,12 +143,17 @@ export const BookForm: React.FC<BookFormProps> = ({
               className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? "Salvando..." : "Salvar"}
             </button>
           </div>
         </form>
       </div>
-      <button type="button" className="modal-backdrop" aria-label="Fechar formulario de livro" onClick={onCancel} />
+      <button
+        type="button"
+        className="modal-backdrop"
+        aria-label="Fechar formulário de livro"
+        onClick={onCancel}
+      />
     </div>
   );
 };
