@@ -1,4 +1,3 @@
-// src/features/auth/pages/RegisterNameScreen.tsx
 import React, { useEffect, useState } from "react";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -35,23 +34,23 @@ export default function RegisterNameScreen() {
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center bg-center bg-cover relative px-4"
+      className="relative flex min-h-dvh items-center justify-center bg-cover bg-center px-4 py-8 sm:px-6 lg:px-8"
       style={{ backgroundImage: `url(${fundo})` }}
       aria-labelledby="titulo-criar-conta"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/20" />
 
-      <section className="relative z-10 w-full max-w-sm">
-        <div className="card bg-white/95 shadow-2xl rounded-none overflow-hidden">
+      <section className="relative z-10 w-full max-w-md">
+        <div className="card overflow-hidden bg-white/95 shadow-2xl">
           <div className="card-body p-6 sm:p-8">
             <h1
               id="titulo-criar-conta"
-              className="text-2xl sm:text-3xl font-semibold text-gray-900 text-center"
+              className="text-center text-2xl font-semibold text-gray-900 sm:text-3xl"
             >
               Crie uma conta
             </h1>
 
-            <p className="text-sm text-gray-600 text-center mt-1">
+            <p className="mt-1 text-center text-sm text-gray-600">
               Digite seu nome para começar rápido e fácil.
             </p>
 
@@ -63,14 +62,14 @@ export default function RegisterNameScreen() {
                   placeholder="Digite seu nome"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered min-h-[44px] w-full text-base"
                   required
                 />
               </label>
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-sm bg-[#1877F2] text-white font-bold"
+                className="btn btn-primary btn-block min-h-[44px] border-0 bg-[#1877F2] text-base font-bold text-white"
                 aria-label="Avançar"
               >
                 Avançar
@@ -82,7 +81,7 @@ export default function RegisterNameScreen() {
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={handleGoogle}
-                className="btn btn-outline bg-white border border-gray-200 btn-circle w-12 h-12 flex items-center justify-center"
+                className="btn btn-circle btn-outline h-12 w-12 border border-gray-200 bg-white"
                 aria-label="Continuar com Google"
               >
                 <FcGoogle size={24} />
@@ -90,14 +89,14 @@ export default function RegisterNameScreen() {
 
               <button
                 onClick={handleFacebook}
-                className="btn btn-circle w-12 h-12 flex items-center justify-center bg-[#1877F2] text-white border-0"
+                className="btn btn-circle h-12 w-12 border-0 bg-[#1877F2] text-white"
                 aria-label="Continuar com Facebook"
               >
                 <FaFacebook size={20} className="text-white" />
               </button>
             </div>
 
-            <p className="text-center text-sm text-gray-600 mt-4">
+            <p className="mt-4 text-center text-sm text-gray-600">
               Já tem conta?{" "}
               <Link to="/login" className="link link-primary">
                 Entrar

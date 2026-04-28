@@ -1,19 +1,14 @@
-// ...existing code...
 import Collapse from "../Collapse";
 
 export default function ContainerCollapse() {
   return (
-    <section id="faq" className="w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-12 lg:px-24 py-16">
-      <h2 className="text-3xl md:text-4xl font-semibold text-neutral-content mb-8 text-center">
+    <section id="faq" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 md:px-12 lg:px-24">
+      <h2 className="mb-8 text-center text-3xl font-semibold text-slate-950 md:text-4xl">
         Perguntas Frequentes
       </h2>
 
-      <div className="w-full">
-        <div className="mx-auto w-full">
-          <div className="space-y-6 md:space-y-8">
-            <Collapse />
-          </div>
-        </div>
+      <div className="mx-auto w-full space-y-6 md:space-y-8">
+        <Collapse />
       </div>
     </section>
   );

@@ -34,13 +34,13 @@ export default function RegisterPasswordScreen() {
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center bg-center bg-cover relative px-4"
+      className="relative flex min-h-dvh items-center justify-center bg-cover bg-center px-4 py-8 sm:px-6 lg:px-8"
       style={{ backgroundImage: `url(${fundo})` }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/20" />
 
-      <section className="relative z-10 w-full max-w-sm">
-        <div className="card bg-white/95 shadow-2xl overflow-hidden">
+      <section className="relative z-10 w-full max-w-md">
+        <div className="card overflow-hidden bg-white/95 shadow-2xl">
           <div className="card-body p-6 sm:p-8">
             <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 text-center">
               Crie uma senha
@@ -54,7 +54,7 @@ export default function RegisterPasswordScreen() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="Digite sua senha"
-                  className="input input-bordered w-full"
+                  className="input input-bordered min-h-[44px] w-full text-base"
                   required
                 />
               </label>
@@ -63,7 +63,7 @@ export default function RegisterPasswordScreen() {
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-sm bg-[#1877F2] text-white font-bold"
+                className="btn btn-primary btn-block min-h-[44px] border-0 bg-[#1877F2] text-base font-bold text-white"
                 disabled={loading}
               >
                 {loading ? "Enviando..." : "Concluir cadastro"}

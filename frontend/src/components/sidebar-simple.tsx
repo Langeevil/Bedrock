@@ -105,7 +105,7 @@ function NavItem({
       <Link
         to={to}
         title={collapsed ? label : undefined}
-        className={`group flex items-center rounded-md px-3 py-2 transition-all ${
+        className={`group flex min-h-[44px] items-center rounded-xl px-3 py-2.5 text-sm transition-all ${
           active
             ? "bg-[var(--app-sidebar-hover)] text-[var(--app-sidebar-hover-text)]"
             : "text-[color:var(--app-sidebar-contrast)]/95 hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
@@ -189,13 +189,13 @@ export function SidebarSimple({ children }: Props) {
 
   return (
     <aside
-      className={`z-20 flex h-screen shrink-0 flex-col gap-4 bg-[var(--app-sidebar)] p-3 text-[var(--app-sidebar-contrast)] shadow-2xl transition-all duration-300 ease-out sm:p-4 ${
-        collapsed ? "w-20 min-w-20 sm:w-24 sm:min-w-[6rem]" : "w-72 min-w-72 xl:w-80 xl:min-w-[20rem]"
+      className={`z-20 flex h-dvh shrink-0 flex-col gap-4 overflow-hidden bg-[var(--app-sidebar)] p-2 text-[var(--app-sidebar-contrast)] shadow-2xl transition-all duration-300 ease-out sm:p-3 ${
+        collapsed ? "w-16 min-w-16 sm:w-20 sm:min-w-20" : "w-[min(20rem,85vw)] min-w-[min(20rem,85vw)] lg:w-72 lg:min-w-72 xl:w-80 xl:min-w-[20rem]"
       }`}
     >
       {children}
 
-      <div className={`mb-2 flex items-center ${collapsed ? "flex-col justify-center gap-3" : "gap-4"} p-2`}>
+      <div className={`mb-1 flex items-center ${collapsed ? "flex-col justify-center gap-3" : "gap-3"} p-2`}>
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-4"} min-w-0`}>
           {collapsed ? (
             <button
@@ -203,7 +203,7 @@ export function SidebarSimple({ children }: Props) {
               aria-label="Expandir menu lateral"
               title="Expandir menu lateral"
               onClick={() => setCollapsed(false)}
-              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)] transition hover:bg-[var(--app-sidebar-surface)]"
+              className="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--app-sidebar-hover)] text-base font-semibold text-[var(--app-sidebar-hover-text)] transition hover:bg-[var(--app-sidebar-surface)]"
             >
               <span className="transition group-hover:hidden group-focus-visible:hidden">B</span>
               <svg
@@ -218,11 +218,11 @@ export function SidebarSimple({ children }: Props) {
               </svg>
             </button>
           ) : (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-sidebar-hover)] text-sm font-semibold text-[var(--app-sidebar-hover-text)]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-sidebar-hover)] text-base font-semibold text-[var(--app-sidebar-hover-text)]">
               B
             </div>
           )}
-          {!collapsed && <h3 className="truncate text-lg font-semibold text-[var(--app-sidebar-contrast)]">Menu Lateral</h3>}
+          {!collapsed && <h3 className="truncate text-base font-semibold text-[var(--app-sidebar-contrast)] sm:text-lg">Menu Lateral</h3>}
         </div>
 
         {!collapsed && (
@@ -231,7 +231,7 @@ export function SidebarSimple({ children }: Props) {
               type="button"
               onClick={() => setCollapsed(true)}
               aria-label="Recolher menu lateral"
-              className="rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
+              className="min-h-[44px] rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] p-2 text-[color:var(--app-sidebar-contrast)]/90 transition hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
             >
               <svg className="h-4 w-4 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M15 18l-6-6 6-6" />
@@ -265,7 +265,7 @@ export function SidebarSimple({ children }: Props) {
                 placeholder="Buscar"
                 value={searchValue}
                 onChange={(event) => setSearchValue(event.target.value)}
-                className="w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] px-3 py-2 pr-10 text-sm text-[var(--app-sidebar-contrast)] placeholder:text-[color:var(--app-sidebar-contrast)]/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="min-h-[44px] w-full rounded-xl border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-surface)] px-3 py-2.5 pr-10 text-base text-[var(--app-sidebar-contrast)] placeholder:text-[color:var(--app-sidebar-contrast)]/70 focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
               <button
                 type="submit"
@@ -302,7 +302,7 @@ export function SidebarSimple({ children }: Props) {
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-1">
+      <nav className="flex-1 overflow-y-auto px-1 pb-2">
         <ul className="flex flex-col gap-1">
           {navItems.map((item) => (
             <NavItem

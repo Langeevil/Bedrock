@@ -228,7 +228,65 @@ html {
 .landing-page .bg-gradient-to-t,
 .landing-page .hero.bg-white,
 .landing-page .hero.bg-zinc-50 {
-  color: #0f172a;
+  background-color: inherit;
+  color: #0f172a !important;
+}
+
+.landing-page .bg-white,
+.landing-page .hero.bg-white,
+.landing-page .card.bg-white,
+.landing-page .collapse.bg-white {
+  background-color: #ffffff !important;
+}
+
+.landing-page .bg-zinc-50,
+.landing-page .hero.bg-zinc-50 {
+  background-color: #f8fafc !important;
+}
+
+.landing-page .text-black,
+.landing-page .text-slate-950,
+.landing-page .text-slate-900,
+.landing-page .text-slate-800,
+.landing-page .text-slate-700 {
+  color: #0f172a !important;
+}
+
+.landing-page .text-slate-600,
+.landing-page .text-slate-500,
+.landing-page .text-gray-500,
+.landing-page .text-neutral-content {
+  color: #475569 !important;
+}
+
+.landing-page .text-blue-700,
+.landing-page .text-primary {
+  color: #1d4ed8 !important;
+}
+
+.landing-page .border-slate-300,
+.landing-page .border-gray-200,
+.landing-page .border-blue-200,
+.landing-page .border-white\/30 {
+  border-color: rgba(148, 163, 184, 0.35) !important;
+}
+
+.landing-page .bg-indigo-700,
+.landing-page .bg-blue-600,
+.landing-page .bg-black {
+  color: #ffffff !important;
+}
+
+.landing-page .bg-indigo-700 {
+  background-color: #4338ca !important;
+}
+
+.landing-page .bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.landing-page .bg-black {
+  background-color: #111827 !important;
 }
 
 .landing-page-dark {
@@ -250,12 +308,38 @@ html {
 }
 
 .landing-page-dark .text-black,
+.landing-page-dark .text-slate-950,
+.landing-page-dark .text-slate-800,
 .landing-page-dark .text-slate-900,
 .landing-page-dark .text-gray-500,
 .landing-page-dark .text-slate-600,
 .landing-page-dark .text-slate-700,
 .landing-page-dark .text-neutral-content {
   color: #e5eefc !important;
+}
+
+.landing-page-dark .text-blue-700,
+.landing-page-dark .text-primary {
+  color: #93c5fd !important;
+}
+
+.landing-page-dark .border-slate-300,
+.landing-page-dark .border-gray-200,
+.landing-page-dark .border-white\/30,
+.landing-page-dark .border-blue-200 {
+  border-color: rgba(191, 219, 254, 0.24) !important;
+}
+
+.landing-page-dark .bg-indigo-700,
+.landing-page-dark .bg-blue-600,
+.landing-page-dark .bg-black {
+  background-color: #2563eb !important;
+}
+
+.landing-page-dark .hover\:bg-blue-50:hover,
+.landing-page-dark .hover\:bg-blue-100:hover,
+.landing-page-dark .hover\:bg-black\/90:hover {
+  background-color: #1d4ed8 !important;
 }
 
 .landing-page-dark .card.bg-white {

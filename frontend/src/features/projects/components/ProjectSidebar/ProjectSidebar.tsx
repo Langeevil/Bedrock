@@ -2,7 +2,6 @@ import type { Task, Tag, ProjectStats } from "../../types/projectTypes";
 import { TagSection } from "../TagSection";
 import { TaskMiniList } from "../TaskMiniList";
 
-// ── Types ────────────────────────────────────────────────────────────────────
 interface ProjectSidebarProps {
   tasks: Task[];
   tags: Tag[];
@@ -12,56 +11,44 @@ interface ProjectSidebarProps {
   onTaskClick: (id: string) => void;
 }
 
-interface StatCardProps {
+function StatCard({
+  label,
+  value,
+  last = false,
+}: {
   label: string;
   value: number;
   last?: boolean;
-}
-
-// ── Sub-components ───────────────────────────────────────────────────────────
-function StatCard({ label, value, last = false }: StatCardProps) {
+}) {
   return (
-    <div style={{
-      padding: "12px 14px",
-      borderRight: last ? "none" : "0.5px solid #e2e0d8",
-    }}>
-      <div style={{
-        fontFamily: "monospace", fontSize: 20, fontWeight: 600,
-        color: "#1a1a18", lineHeight: 1,
-      }}>
+    <div className={`p-4 ${last ? "" : "border-r border-[var(--app-border)]"}`}>
+      <div className="font-mono text-2xl font-semibold leading-none text-[var(--app-text)]">
         {value}
       </div>
-      <div style={{
-        fontSize: 10, color: "#9c9a8e",
-        textTransform: "uppercase", letterSpacing: "0.07em", marginTop: 3,
-      }}>
+      <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[var(--app-text-muted)]">
         {label}
       </div>
     </div>
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
 export function ProjectSidebar({
-  tasks, tags, stats, onAddTag, onDeleteTag, onTaskClick,
+  tasks,
+  tags,
+  stats,
+  onAddTag,
+  onDeleteTag,
+  onTaskClick,
 }: ProjectSidebarProps) {
   return (
-    <aside style={{
-      width: 264, flexShrink: 0,
-      background: "#ffffff", borderRight: "0.5px solid #e2e0d8",
-      display: "flex", flexDirection: "column", overflowY: "auto",
-    }}>
-      {/* Stats */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-        borderBottom: "0.5px solid #e2e0d8",
-      }}>
-        <StatCard label="tarefas"    value={stats.total}    />
-        <StatCard label="tags"       value={stats.tagCount} />
-        <StatCard label="concluídas" value={stats.done} last />
+    <aside className="flex w-full shrink-0 flex-col overflow-y-auto border-b border-[var(--app-border)] bg-[var(--app-bg-elevated)] lg:w-[17rem] lg:border-b-0 lg:border-r">
+      <div className="grid grid-cols-3 border-b border-[var(--app-border)]">
+        <StatCard label="tarefas" value={stats.total} />
+        <StatCard label="tags" value={stats.tagCount} />
+        <StatCard label="concluidas" value={stats.done} last />
       </div>
 
-      <TagSection  tags={tags} tasks={tasks} onAddTag={onAddTag} onDeleteTag={onDeleteTag} />
+      <TagSection tags={tags} tasks={tasks} onAddTag={onAddTag} onDeleteTag={onDeleteTag} />
       <TaskMiniList tasks={tasks} tags={tags} onTaskClick={onTaskClick} />
     </aside>
   );

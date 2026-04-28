@@ -30,6 +30,7 @@ function ChatContent() {
   } = useChat();
 
   const [messageText, setMessageText] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -48,10 +49,20 @@ function ChatContent() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <SidebarSimple />
+    <div className="flex h-dvh overflow-hidden">
+      <div className="hidden lg:block">
+        <SidebarSimple />
+      </div>
+
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" onClick={() => setSidebarOpen(false)}>
+          <div className="h-full max-w-[85vw]" onClick={(event) => event.stopPropagation()}>
+            <SidebarSimple />
+          </div>
+        </div>
+      )}
       
-      <div className="min-w-0 flex-1 overflow-hidden bg-[#f4f7fc] p-2 sm:p-4">
+      <div className="app-page min-w-0 flex-1 overflow-hidden p-2 sm:p-4">
         <div className="h-full">
           <ChatLayout
             rail={null}
@@ -60,6 +71,19 @@ function ChatContent() {
             }
             main={
               <div className="flex h-full min-h-0 flex-col">
+                <div className="flex items-center border-b border-[var(--app-border)] px-3 py-3 lg:hidden">
+                  <button
+                    type="button"
+                    aria-label="Abrir menu lateral"
+                    onClick={() => setSidebarOpen(true)}
+                    className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] text-[var(--app-text)]"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                  </button>
+                  <span className="ml-3 text-sm font-semibold text-[var(--app-text)]">Menu</span>
+                </div>
                 <ChatHeader
                   conversation={activeConversation}
                   onOpenDetails={() => setDetailsOpen(true)}

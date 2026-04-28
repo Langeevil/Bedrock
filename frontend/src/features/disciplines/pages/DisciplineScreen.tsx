@@ -170,7 +170,7 @@ export default function DisciplineScreen() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f7fc] font-sans">
+    <div className="app-page flex h-dvh overflow-hidden font-sans">
       <Toaster position="top-right" richColors closeButton />
 
       <AnimatePresence>
@@ -201,7 +201,7 @@ export default function DisciplineScreen() {
       </div>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200/60 bg-[#f4f7fc]/90 px-4 py-3 backdrop-blur-sm lg:hidden">
+        <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-[var(--app-border)] bg-[color:var(--app-bg)]/90 px-4 py-3 backdrop-blur-sm lg:hidden">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
@@ -229,7 +229,7 @@ export default function DisciplineScreen() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Buscar disciplina..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 sm:w-64"
+                  className="app-input w-full rounded-xl border py-2.5 pl-9 pr-4 text-base shadow-sm transition placeholder:text-[var(--app-text-muted)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 sm:w-64"
                 />
               </div>
               <button

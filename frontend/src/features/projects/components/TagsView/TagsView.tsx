@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Tag, Task } from "../../types/projectTypes";
 import { TAG_COLORS } from "../../constants/projectConstants";
 
-// ── Types ────────────────────────────────────────────────────────────────────
 interface TagsViewProps {
   tags: Tag[];
   tasks: Task[];
@@ -10,56 +9,46 @@ interface TagsViewProps {
   onDeleteTag: (id: string) => Promise<void>;
 }
 
-interface TagCardProps {
+function TagCard({
+  tag,
+  relatedTasks,
+  onDelete,
+}: {
   tag: Tag;
   relatedTasks: Task[];
   onDelete: (id: string) => void;
-}
-
-interface CreateTagFormProps {
-  onAdd: (payload: Omit<Tag, "id" | "project_id">) => Promise<void>;
-}
-
-// ── Sub-components ───────────────────────────────────────────────────────────
-function TagCard({ tag, relatedTasks, onDelete }: TagCardProps) {
+}) {
   return (
-    <div style={{
-      background: "#fff", border: "0.5px solid #e2e0d8",
-      borderRadius: 10, padding: "14px 15px",
-      borderTop: `3px solid ${tag.color}`,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ fontSize: 14, fontWeight: 500, color: "#1a1a18" }}>{tag.name}</span>
+    <div
+      className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-4 shadow-sm"
+      style={{ borderTopWidth: "3px", borderTopColor: tag.color }}
+    >
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="truncate text-sm font-semibold text-[var(--app-text)]">{tag.name}</span>
         <button
+          type="button"
           onClick={() => onDelete(tag.id)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            color: "#9c9a8e", fontSize: 16, lineHeight: 1, padding: "0 2px",
-          }}
+          className="inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-lg leading-none text-[var(--app-text-muted)] transition hover:bg-[var(--app-bg-muted)] hover:text-[var(--app-text)]"
         >
           ×
         </button>
       </div>
 
-      <div style={{ fontSize: 12, color: "#9c9a8e", marginBottom: 6 }}>
+      <div className="mb-3 text-xs text-[var(--app-text-muted)]">
         {relatedTasks.length} {relatedTasks.length === 1 ? "tarefa" : "tarefas"}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {relatedTasks.slice(0, 3).map(t => (
+      <div className="flex flex-col gap-2">
+        {relatedTasks.slice(0, 3).map((task) => (
           <div
-            key={t.id}
-            style={{
-              fontSize: 11, color: "#6b6960", background: "#f4f3ef",
-              padding: "3px 7px", borderRadius: 5,
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-            }}
+            key={task.id}
+            className="truncate rounded-lg bg-[var(--app-bg-muted)] px-3 py-2 text-xs text-[var(--app-text-muted)]"
           >
-            {t.title}
+            {task.title}
           </div>
         ))}
         {relatedTasks.length > 3 && (
-          <div style={{ fontSize: 11, color: "#9c9a8e", padding: "3px 7px" }}>
+          <div className="px-1 text-xs text-[var(--app-text-muted)]">
             +{relatedTasks.length - 3} mais
           </div>
         )}
@@ -68,8 +57,12 @@ function TagCard({ tag, relatedTasks, onDelete }: TagCardProps) {
   );
 }
 
-function CreateTagForm({ onAdd }: CreateTagFormProps) {
-  const [name,  setName]  = useState("");
+function CreateTagForm({
+  onAdd,
+}: {
+  onAdd: (payload: Omit<Tag, "id" | "project_id">) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
   const [color, setColor] = useState<string>(TAG_COLORS[0]);
 
   const handleAdd = async () => {
@@ -78,78 +71,58 @@ function CreateTagForm({ onAdd }: CreateTagFormProps) {
     setName("");
   };
 
-  const labelStyle: React.CSSProperties = {
-    display: "block", fontSize: 10, color: "#9c9a8e",
-    textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6,
-  };
-
   return (
-    <div style={{
-      background: "#fff", border: "0.5px solid #e2e0d8",
-      borderRadius: 10, padding: 18, maxWidth: 380,
-    }}>
-      <div style={{ fontSize: 13, fontWeight: 500, color: "#1a1a18", marginBottom: 14 }}>
-        Criar nova tag
-      </div>
+    <div className="w-full max-w-xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-4 shadow-sm sm:p-5">
+      <div className="mb-4 text-sm font-semibold text-[var(--app-text)]">Criar nova tag</div>
 
-      <span style={labelStyle}>Nome</span>
-      <input
-        aria-label="Nome da nova tag"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        onKeyDown={e => e.key === "Enter" && handleAdd()}
-        placeholder="Nome da tag..."
-        maxLength={20}
-        style={{
-          width: "100%", padding: "7px 10px",
-          border: "0.5px solid #e2e0d8", borderRadius: 6,
-          fontSize: 13, fontFamily: "inherit", color: "#1a1a18",
-          background: "#f4f3ef", outline: "none", boxSizing: "border-box",
-        }}
-      />
+      <label className="mb-3 block">
+        <span className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-[var(--app-text-muted)]">
+          Nome
+        </span>
+        <input
+          aria-label="Nome da nova tag"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => event.key === "Enter" && handleAdd()}
+          placeholder="Nome da tag..."
+          maxLength={20}
+          className="input input-bordered app-input min-h-[44px] w-full text-base"
+        />
+      </label>
 
-      <span style={{ ...labelStyle, marginTop: 12 }}>Cor</span>
-      <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 14 }}>
-        {TAG_COLORS.map(c => (
-          <div
-            key={c}
-            onClick={() => setColor(c)}
-            style={{
-              width: 22, height: 22, borderRadius: "50%", background: c,
-              cursor: "pointer", flexShrink: 0, transition: "all .12s",
-              border: c === color ? "2.5px solid #1a1a18" : "2.5px solid transparent",
-            }}
+      <span className="mb-2 block text-[10px] uppercase tracking-[0.14em] text-[var(--app-text-muted)]">
+        Cor
+      </span>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {TAG_COLORS.map((item) => (
+          <button
+            key={item}
+            type="button"
+            onClick={() => setColor(item)}
+            className={`h-8 w-8 rounded-full border-2 transition ${
+              item === color ? "border-[var(--app-text)]" : "border-transparent"
+            }`}
+            style={{ backgroundColor: item }}
+            aria-label={`Selecionar cor ${item}`}
           />
         ))}
       </div>
 
-      <button
-        onClick={handleAdd}
-        style={{
-          padding: "7px 18px", borderRadius: 6, fontSize: 13,
-          cursor: "pointer", border: "0.5px solid #1a1a18",
-          background: "#1a1a18", color: "#f4f3ef", fontFamily: "inherit",
-        }}
-      >
-        Criar Tag
+      <button type="button" onClick={handleAdd} className="btn btn-primary min-h-[44px] border-0">
+        Criar tag
       </button>
     </div>
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
 export function TagsView({ tags, tasks, onAddTag, onDeleteTag }: TagsViewProps) {
-  const relatedTasks = (tagId: string) => tasks.filter(t => t.tags.includes(tagId));
+  const relatedTasks = (tagId: string) => tasks.filter((task) => task.tags.includes(tagId));
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#f4f3ef" }}>
+    <div className="flex-1 overflow-y-auto bg-[var(--app-bg)] p-4 sm:p-6">
       {tags.length > 0 && (
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: 10, marginBottom: 24,
-        }}>
-          {tags.map(tag => (
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {tags.map((tag) => (
             <TagCard
               key={tag.id}
               tag={tag}

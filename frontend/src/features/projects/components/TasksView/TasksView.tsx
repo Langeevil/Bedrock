@@ -8,69 +8,69 @@ interface Props {
   onTaskClick: (id: string) => void;
 }
 
-interface TaskCardProps {
+function TaskCard({
+  task,
+  tags,
+  onClick,
+}: {
   task: Task;
   tags: Tag[];
   onClick: (id: string) => void;
-}
-
-function TaskCard({ task, tags, onClick }: TaskCardProps) {
+}) {
   const [hovered, setHovered] = useState(false);
   const taskTags = task.tags
-    .map(id => tags.find(t => t.id === id))
-    .filter((t): t is Tag => Boolean(t));
+    .map((id) => tags.find((tag) => tag.id === id))
+    .filter((tag): tag is Tag => Boolean(tag));
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onClick(task.id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "#fff",
-        border: `0.5px solid ${hovered ? "#ccc9bf" : "#e2e0d8"}`,
-        borderRadius: 10, padding: "13px 15px", cursor: "pointer",
-        transition: "all .15s",
-        boxShadow: hovered ? "0 2px 12px rgba(0,0,0,.06)" : "none",
-      }}
+      className={`w-full rounded-2xl border bg-[var(--app-bg-elevated)] p-4 text-left transition ${
+        hovered
+          ? "border-[color:color-mix(in_srgb,var(--app-text)_20%,var(--app-border))] shadow-lg"
+          : "border-[var(--app-border)] shadow-sm"
+      }`}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: taskTags.length > 0 ? 8 : 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: "#1a1a18", lineHeight: 1.4, flex: 1, marginRight: 8 }}>
+      <div className={`flex items-start justify-between gap-3 ${taskTags.length > 0 ? "mb-3" : ""}`}>
+        <div className="flex-1 text-sm font-medium leading-6 text-[var(--app-text)]">
           {task.title}
         </div>
-        <span style={{
-          padding: "3px 8px", borderRadius: 5, fontSize: 11, fontWeight: 500, flexShrink: 0,
-          background: STATUS_META[task.status].bg,
-          color:      STATUS_META[task.status].color,
-        }}>
+        <span
+          className="shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold"
+          style={{
+            background: STATUS_META[task.status].bg,
+            color: STATUS_META[task.status].color,
+          }}
+        >
           {STATUS_META[task.status].label}
         </span>
       </div>
 
       {taskTags.length > 0 && (
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-          {taskTags.map(tg => (
+        <div className="flex flex-wrap gap-2">
+          {taskTags.map((tag) => (
             <span
-              key={tg.id}
-              style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 500, background: tg.color + "22", color: tg.color }}
+              key={tag.id}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              style={{ background: `${tag.color}22`, color: tag.color }}
             >
-              {tg.name}
+              {tag.name}
             </span>
           ))}
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
 export function TasksView({ tasks, tags, onTaskClick }: Props) {
   if (tasks.length === 0) {
     return (
-      <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#f4f3ef" }}>
-        <div style={{
-          textAlign: "center", padding: "60px 0",
-          borderRadius: 12, border: "2px dashed #e2e0d8",
-          color: "#9c9a8e", fontSize: 13,
-        }}>
+      <div className="flex-1 overflow-y-auto bg-[var(--app-bg)] p-4 sm:p-6">
+        <div className="rounded-2xl border-2 border-dashed border-[var(--app-border)] px-4 py-16 text-center text-sm text-[var(--app-text-muted)]">
           Nenhuma tarefa ainda. Use <strong>+ tarefa</strong> para começar.
         </div>
       </div>
@@ -78,9 +78,9 @@ export function TasksView({ tasks, tags, onTaskClick }: Props) {
   }
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#f4f3ef" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
-        {tasks.map(task => (
+    <div className="flex-1 overflow-y-auto bg-[var(--app-bg)] p-4 sm:p-6">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {tasks.map((task) => (
           <TaskCard key={task.id} task={task} tags={tags} onClick={onTaskClick} />
         ))}
       </div>

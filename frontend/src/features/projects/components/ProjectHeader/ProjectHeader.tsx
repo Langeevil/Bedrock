@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Project, TabKey } from "../../types/projectTypes";
 import { TABS } from "../../constants/projectConstants";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface ProjectHeaderProps {
   activeTab: TabKey;
   onTabChange: (tab: TabKey) => void;
@@ -13,26 +12,35 @@ interface ProjectHeaderProps {
   onCreateProject: () => void;
 }
 
-// ── Tab button ────────────────────────────────────────────────────────────────
-function TabButton({ label, active, onClick }: {
-  label: string; active: boolean; onClick: () => void;
+function TabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} style={{
-      padding: "5px 14px", borderRadius: 6, fontSize: 13,
-      cursor: "pointer", border: "none", fontFamily: "inherit",
-      background: active ? "#fff" : "transparent",
-      color:      active ? "#1a1a18" : "#6b6960",
-      boxShadow:  active ? "0 0 0 0.5px #e2e0d8" : "none",
-      transition: "all .15s",
-    }}>
+    <button
+      onClick={onClick}
+      className={`min-h-[44px] rounded-lg px-3 py-2 text-sm transition ${
+        active
+          ? "bg-[var(--app-bg-elevated)] text-[var(--app-text)] shadow-sm"
+          : "text-[var(--app-text-muted)] hover:bg-[var(--app-bg-elevated)] hover:text-[var(--app-text)]"
+      }`}
+    >
       {label}
     </button>
   );
 }
 
-// ── Project dropdown ──────────────────────────────────────────────────────────
-function ProjectDropdown({ active, projects, onSelect, onCreate }: {
+function ProjectDropdown({
+  active,
+  projects,
+  onSelect,
+  onCreate,
+}: {
   active: Project | null;
   projects: Project[];
   onSelect: (p: Project) => void;
@@ -41,88 +49,59 @@ function ProjectDropdown({ active, projects, onSelect, onCreate }: {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Trigger */}
-      {active ? (
-        <button onClick={() => setOpen(o => !o)} style={{
-          display: "flex", alignItems: "center", gap: 7,
-          padding: "5px 11px", border: "0.5px solid #e2e0d8",
-          borderRadius: 6, fontSize: 13, cursor: "pointer",
-          background: "#fff", fontFamily: "inherit",
-        }}>
-          <span style={{
-            width: 8, height: 8, borderRadius: "50%",
-            background: "#4a6fa5", display: "inline-block", flexShrink: 0,
-          }} />
-          <span style={{ color: "#1a1a18", fontWeight: 500, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {active.name}
-          </span>
-          <span style={{ color: "#ccc9bf", fontSize: 11 }}>▾</span>
-        </button>
-      ) : (
-        <button onClick={() => setOpen(o => !o)} style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "5px 11px", border: "0.5px dashed #ccc9bf",
-          borderRadius: 6, fontSize: 13, color: "#9c9a8e",
-          background: "transparent", cursor: "pointer", fontFamily: "inherit",
-        }}>
-          Selecionar projeto
-          <span style={{ fontSize: 11 }}>▾</span>
-        </button>
-      )}
+    <div className="relative">
+      <button
+        onClick={() => setOpen((current) => !current)}
+        className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2 text-sm transition ${
+          active
+            ? "border-[var(--app-border)] bg-[var(--app-bg-elevated)] text-[var(--app-text)]"
+            : "border-dashed border-[var(--app-border)] bg-transparent text-[var(--app-text-muted)]"
+        }`}
+      >
+        {active && <span className="h-2 w-2 rounded-full bg-blue-500" />}
+        <span className="max-w-[10rem] truncate font-medium sm:max-w-[12rem]">
+          {active ? active.name : "Selecionar projeto"}
+        </span>
+        <span className="text-xs text-[var(--app-text-muted)]">▾</span>
+      </button>
 
-      {/* Dropdown panel */}
       {open && (
         <>
-          {/* Click-away backdrop */}
-          <div
-            style={{ position: "fixed", inset: 0, zIndex: 99 }}
-            onClick={() => setOpen(false)}
-          />
-          <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0,
-            background: "#fff", border: "0.5px solid #e2e0d8",
-            borderRadius: 8, padding: 6, minWidth: 220, zIndex: 100,
-            boxShadow: "0 4px 20px rgba(0,0,0,.1)",
-            fontFamily: "'DM Sans', system-ui, sans-serif",
-          }}>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 min-w-[16rem] max-w-[85vw] rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-2 shadow-2xl">
             {projects.length === 0 && (
-              <div style={{ fontSize: 12, color: "#9c9a8e", padding: "6px 8px" }}>
+              <div className="px-3 py-2 text-sm text-[var(--app-text-muted)]">
                 Nenhum projeto criado
               </div>
             )}
-            {projects.map(p => (
+
+            {projects.map((project) => (
               <button
-                key={p.id}
-                onClick={() => { onSelect(p); setOpen(false); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  width: "100%", padding: "7px 10px", borderRadius: 6,
-                  border: "none", background: p.id === active?.id ? "#f4f3ef" : "transparent",
-                  cursor: "pointer", fontFamily: "inherit", fontSize: 13,
-                  color: "#1a1a18", textAlign: "left",
+                key={project.id}
+                onClick={() => {
+                  onSelect(project);
+                  setOpen(false);
                 }}
+                className={`flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition ${
+                  project.id === active?.id
+                    ? "bg-[var(--app-bg-muted)] text-[var(--app-text)]"
+                    : "text-[var(--app-text)] hover:bg-[var(--app-bg-muted)]"
+                }`}
               >
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4a6fa5", flexShrink: 0 }} />
-                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {p.name}
-                </span>
-                {p.id === active?.id && (
-                  <span style={{ fontSize: 11, color: "#4a6fa5" }}>✓</span>
-                )}
+                <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                <span className="flex-1 truncate">{project.name}</span>
+                {project.id === active?.id && <span className="text-xs text-blue-500">✓</span>}
               </button>
             ))}
 
-            <div style={{ borderTop: "0.5px solid #f0efe9", margin: "4px 0" }} />
+            <div className="my-1 border-t border-[var(--app-border)]" />
 
             <button
-              onClick={() => { onCreate(); setOpen(false); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                width: "100%", padding: "7px 10px", borderRadius: 6,
-                border: "none", background: "transparent", cursor: "pointer",
-                fontFamily: "inherit", fontSize: 13, color: "#4a6fa5", textAlign: "left",
+              onClick={() => {
+                onCreate();
+                setOpen(false);
               }}
+              className="flex min-h-[44px] w-full items-center rounded-xl px-3 py-2 text-left text-sm font-medium text-blue-500 transition hover:bg-[var(--app-bg-muted)]"
             >
               + Novo projeto
             </button>
@@ -133,59 +112,53 @@ function ProjectDropdown({ active, projects, onSelect, onCreate }: {
   );
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export function ProjectHeader({
-  activeTab, onTabChange, onNewTask,
-  activeProject, projects, onSelectProject, onCreateProject,
+  activeTab,
+  onTabChange,
+  onNewTask,
+  activeProject,
+  projects,
+  onSelectProject,
+  onCreateProject,
 }: ProjectHeaderProps) {
   return (
-    <header style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0 20px", height: 52, background: "#ffffff",
-      borderBottom: "0.5px solid #e2e0d8", gap: 12, flexShrink: 0,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* Logo */}
-        <div style={{
-          fontFamily: "monospace", fontSize: 12, fontWeight: 600,
-          letterSpacing: "0.06em", color: "#1a1a18",
-          padding: "5px 9px", border: "0.5px solid #ccc9bf",
-          borderRadius: 6, background: "#f4f3ef", userSelect: "none",
-        }}>
-          proj
+    <header className="border-b border-[var(--app-border)] bg-[var(--app-bg-elevated)] px-4 py-3 sm:px-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--app-border)] bg-[var(--app-bg-muted)] font-mono text-xs font-semibold uppercase tracking-[0.12em] text-[var(--app-text)]">
+            proj
+          </div>
+
+          <ProjectDropdown
+            active={activeProject}
+            projects={projects}
+            onSelect={onSelectProject}
+            onCreate={onCreateProject}
+          />
+
+          {activeProject && (
+            <nav className="scrollbar-thin flex gap-2 overflow-x-auto rounded-xl bg-[var(--app-bg-muted)] p-1">
+              {TABS.map((tab) => (
+                <TabButton
+                  key={tab.key}
+                  label={tab.label}
+                  active={activeTab === tab.key}
+                  onClick={() => onTabChange(tab.key)}
+                />
+              ))}
+            </nav>
+          )}
         </div>
 
-        <ProjectDropdown
-          active={activeProject}
-          projects={projects}
-          onSelect={onSelectProject}
-          onCreate={onCreateProject}
-        />
-
-        {/* Tabs — only when project is active */}
         {activeProject && (
-          <nav style={{ display: "flex", gap: 2, background: "#f0efe9", borderRadius: 8, padding: 3 }}>
-            {TABS.map(tab => (
-              <TabButton
-                key={tab.key}
-                label={tab.label}
-                active={activeTab === tab.key}
-                onClick={() => onTabChange(tab.key)}
-              />
-            ))}
-          </nav>
+          <button
+            onClick={onNewTask}
+            className="btn btn-primary min-h-[44px] w-full border-0 sm:w-auto"
+          >
+            + tarefa
+          </button>
         )}
       </div>
-
-      {activeProject && (
-        <button onClick={onNewTask} style={{
-          padding: "6px 14px", borderRadius: 6, fontSize: 13, cursor: "pointer",
-          border: "0.5px solid #1a1a18", background: "#1a1a18", color: "#f4f3ef",
-          fontFamily: "inherit",
-        }}>
-          + tarefa
-        </button>
-      )}
     </header>
   );
 }

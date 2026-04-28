@@ -108,14 +108,14 @@ export default function LibraryScreen() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-dvh overflow-hidden">
       <SidebarSimple />
 
       <div className="app-page min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <h1 className="mb-6 text-3xl font-semibold text-[var(--app-text)]">📚 Biblioteca</h1>
 
         {/* Tabs */}
-        <div role="tablist" className="tabs tabs-boxed mb-6 app-panel p-1">
+        <div role="tablist" className="tabs tabs-boxed mb-6 flex-wrap app-panel p-1">
           <button
             role="tab"
             className={`tab ${activeTab === 'books' ? 'tab-active' : ''}`}
@@ -139,7 +139,7 @@ export default function LibraryScreen() {
             <div className="card app-panel mb-6 flex flex-col gap-3 p-4 shadow md:flex-row md:items-center md:justify-between">
               <input
                 aria-label="Buscar livro por titulo, autor ou editora"
-                className="input input-bordered app-input flex-1"
+                className="input input-bordered app-input min-h-[44px] flex-1 text-base"
                 placeholder="Buscar livro por título, autor ou editora"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -149,7 +149,7 @@ export default function LibraryScreen() {
                   setEditingBook(null);
                   setShowBookForm(true);
                 }}
-                className="btn btn-primary"
+                className="btn btn-primary min-h-[44px] w-full md:w-auto"
               >
                 + Novo Livro
               </button>

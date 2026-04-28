@@ -51,13 +51,13 @@ export default function DashboardScreen() {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-dvh overflow-hidden">
       <SidebarSimple />
 
       {showModal && <ProfileModal onClose={() => setShowModal(false)} />}
 
       <div className="app-page min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-8 text-3xl font-semibold text-[var(--app-text)]">Dashboard Overview</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-[var(--app-text)] sm:text-3xl">Dashboard Overview</h1>
 
         {error && (
           <div className="alert alert-warning mb-6 border-amber-300 bg-amber-100 text-amber-900">
@@ -65,7 +65,7 @@ export default function DashboardScreen() {
           </div>
         )}
 
-        <div className="stats app-panel mb-8 shadow stats-vertical lg:stats-horizontal">
+        <div className="stats stats-vertical app-panel mb-8 w-full shadow lg:stats-horizontal">
           <div className="stat">
             <div className="stat-title app-text-muted">Total Students</div>
             <div className="stat-value text-primary">{stats.totalStudents}</div>
