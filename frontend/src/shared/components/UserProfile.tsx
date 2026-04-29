@@ -1,6 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Palette, User } from "lucide-react";
+import {
+  canAccessAdminArea,
+  clearSessionUser,
+  setManagementNavigationVisibility,
+  shouldShowManagementNavigation,
+} from "../authSession";
 import {
   getStoredThemePreference,
   setThemePreference,
@@ -11,17 +17,30 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showManagementNavigation, setShowManagementNavigation] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return shouldShowManagementNavigation();
+  });
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>(() => {
     if (typeof window === "undefined") return "system";
     return getStoredThemePreference();
   });
   const navigate = useNavigate();
+  const canManageNavigation = canAccessAdminArea();
 
   useEffect(() => {
-    const nome = localStorage.getItem("user_nome");
-    const email = localStorage.getItem("user_email");
-    setUserName(nome);
-    setUserEmail(email);
+    const syncUserState = () => {
+      setUserName(localStorage.getItem("user_nome"));
+      setUserEmail(localStorage.getItem("user_email"));
+      setShowManagementNavigation(shouldShowManagementNavigation());
+    };
+
+    syncUserState();
+    window.addEventListener("bedrock-auth-session-change", syncUserState);
+
+    return () => {
+      window.removeEventListener("bedrock-auth-session-change", syncUserState);
+    };
   }, []);
 
   useEffect(() => {
@@ -34,10 +53,7 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_nome");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_role");
+    clearSessionUser();
     navigate("/login", { replace: true });
   };
 
@@ -67,12 +83,18 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
     setShowMenu((current) => !current);
   }
 
+  function handleManagementToggle() {
+    const nextValue = !showManagementNavigation;
+    setShowManagementNavigation(nextValue);
+    setManagementNavigationVisibility(nextValue);
+  }
+
   return (
     <div className="mt-auto border-t border-[var(--app-sidebar-surface-border)] pt-4">
       <div className={`relative ${collapsed ? "flex justify-center" : ""}`}>
         <button
           type="button"
-          aria-label={collapsed ? "Abrir menu do usuario" : "Abrir menu do usuario e tema"}
+          aria-label={collapsed ? "Abrir menu do usuário" : "Abrir menu do usuário e tema"}
           aria-haspopup="menu"
           aria-expanded={!collapsed && showMenu}
           onClick={handleMenuToggle}
@@ -96,7 +118,10 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
         </button>
 
         {showMenu && !collapsed && (
-          <div role="menu" className="absolute bottom-full left-0 z-50 mb-2 w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-popup)] shadow-xl">
+          <div
+            role="menu"
+            className="absolute bottom-full left-0 z-50 mb-2 w-full rounded-md border border-[var(--app-sidebar-surface-border)] bg-[var(--app-sidebar-popup)] shadow-xl"
+          >
             <button
               type="button"
               role="menuitem"
@@ -118,6 +143,27 @@ export default function UserProfile({ collapsed }: { readonly collapsed: boolean
               <Palette size={16} />
               {themeLabel()}
             </button>
+            {canManageNavigation && (
+              <div className="border-t border-[var(--app-sidebar-surface-border)] px-3 py-3">
+                <div className="flex items-center justify-between gap-3 rounded-md bg-[var(--app-sidebar-surface)] px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[var(--app-sidebar-contrast)]">
+                      Exibir áreas administrativas
+                    </p>
+                    <p className="text-xs text-[color:var(--app-sidebar-contrast)]/70">
+                      Controla Diretório e Administração no menu e na home.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    aria-label="Exibir áreas administrativas"
+                    checked={showManagementNavigation}
+                    onChange={handleManagementToggle}
+                    className="app-toggle toggle toggle-sm shrink-0"
+                  />
+                </div>
+              </div>
+            )}
             <button
               type="button"
               role="menuitem"

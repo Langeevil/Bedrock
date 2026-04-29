@@ -1,55 +1,140 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { SidebarSimple } from "../../../components/sidebar-simple";
-import { subscribeAuthSession } from "../../../shared/authSession";
+import {
+  canAccessAdminAreaForUser,
+  canAccessDirectoryForUser,
+  canAccessElevatedWorkspace,
+  canAccessElevatedWorkspaceForUser,
+  canAccessStatisticsForUser,
+  shouldShowManagementNavigation,
+  subscribeAuthSession,
+} from "../../../shared/authSession";
 import ProfileModal from "../../auth/components/ProfileModal";
 import { getMe } from "../../auth/services/authService";
+import type { User } from "../../auth/types/authTypes";
 import { getDashboardStats } from "../services/dashboardService";
 import type { DashboardStats } from "../types/dashboardTypes";
 
-const quickActions = [
-  {
-    title: "Chat",
-    description: "Mensagens, grupos e canais institucionais.",
-    href: "/chat",
-  },
-  {
-    title: "Disciplinas",
-    description: "Turmas, materiais e reuniões acadêmicas.",
-    href: "/disciplinas",
-  },
-  {
-    title: "Projetos",
-    description: "Planejamento, tarefas e colaboração.",
-    href: "/projetos",
-  },
-  {
-    title: "Diretório",
-    description: "Pessoas, papéis e vínculos institucionais.",
-    href: "/diretorio",
-  },
-];
+type ActionCard = {
+  title: string;
+  description: string;
+  href: string;
+  label?: string;
+};
 
-const workspaceCards = [
-  {
-    title: "Biblioteca",
-    description: "Consulte livros e empréstimos cadastrados.",
-    href: "/biblioteca",
-    label: "Disponível",
-  },
-  {
-    title: "Estatísticas",
-    description: "Acompanhe os indicadores principais da base.",
-    href: "/estatistica",
-    label: "Em desenvolvimento",
-  },
-  {
-    title: "Administração",
-    description: "Usuários, instituições e governança.",
-    href: "/admin",
-    label: "Restrito",
-  },
-];
+function buildQuickActions(options: {
+  showDirectory: boolean;
+  showAdmin: boolean;
+}): ActionCard[] {
+  return [
+    {
+      title: "Chat",
+      description: "Mensagens, grupos e canais institucionais.",
+      href: "/chat",
+    },
+    {
+      title: "Disciplinas",
+      description: "Turmas, materiais e atividades acadêmicas.",
+      href: "/disciplinas",
+    },
+    {
+      title: "Projetos",
+      description: "Planejamento, tarefas e colaboração.",
+      href: "/projetos",
+    },
+    ...(options.showDirectory
+      ? [
+          {
+            title: "Diretório",
+            description: "Pessoas, papéis e vínculos institucionais.",
+            href: "/diretorio",
+          },
+        ]
+      : []),
+    ...(options.showAdmin
+      ? [
+          {
+            title: "Administração",
+            description: "Usuários, instituições e governança.",
+            href: "/admin",
+          },
+        ]
+      : []),
+  ];
+}
+
+function buildWorkspaceCards(options: {
+  elevated: boolean;
+  showStatistics: boolean;
+  showAdmin: boolean;
+}): ActionCard[] {
+  return [
+    {
+      title: "Biblioteca",
+      description: options.elevated
+        ? "Consulte livros e acompanhe o acervo institucional."
+        : "Consulte livros e acompanhe seus empréstimos.",
+      href: "/biblioteca",
+      label: "Disponível",
+    },
+    {
+      title: "Configurações",
+      description: "Atualize perfil, papel atual e preferências da conta.",
+      href: "/settings",
+      label: "Conta",
+    },
+    ...(options.showStatistics
+      ? [
+          {
+            title: "Estatísticas",
+            description: "Acompanhe os indicadores principais da base.",
+            href: "/estatistica",
+            label: "Restrito",
+          },
+        ]
+      : []),
+    ...(options.showAdmin
+      ? [
+          {
+            title: "Administração",
+            description: "Usuários, instituições e governança.",
+            href: "/admin",
+            label: "Restrito",
+          },
+        ]
+      : []),
+  ];
+}
+
+function buildCommonCards(): ActionCard[] {
+  return [
+    {
+      title: "Chat",
+      description: "Abra conversas, grupos e canais do ambiente.",
+      href: "/chat",
+      label: "Mensagens",
+    },
+    {
+      title: "Disciplinas",
+      description: "Acompanhe turmas, materiais e atividades.",
+      href: "/disciplinas",
+      label: "Acadêmico",
+    },
+    {
+      title: "Projetos",
+      description: "Organize tarefas, entregas e colaboração.",
+      href: "/projetos",
+      label: "Workspace",
+    },
+    {
+      title: "Biblioteca",
+      description: "Consulte o acervo e seus empréstimos.",
+      href: "/biblioteca",
+      label: "Acervo",
+    },
+  ];
+}
 
 function StatCard({
   title,
@@ -75,25 +160,29 @@ function StatCard({
 
 export default function DashboardScreen() {
   const [showModal, setShowModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     activeCourses: 0,
     graduationRate: 0,
   });
+  const [showManagementNavigation, setShowManagementNavigation] = useState(() =>
+    shouldShowManagementNavigation()
+  );
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState("Workspace");
 
   const checkUserRole = async () => {
     try {
       const user = await getMe();
+      setCurrentUser(user);
       setUserName(user.nome || "Workspace");
-      if (!user.role) {
-        setShowModal(true);
-      } else {
-        setShowModal(false);
-      }
+      setShowModal(!user.role);
+      setShowManagementNavigation(shouldShowManagementNavigation());
     } catch {
+      setCurrentUser(null);
       setShowModal(true);
+      setShowManagementNavigation(shouldShowManagementNavigation());
     }
   };
 
@@ -103,8 +192,39 @@ export default function DashboardScreen() {
     return () => unsubscribe();
   }, []);
 
+  const showInstitutionalMetrics = currentUser
+    ? canAccessElevatedWorkspaceForUser(currentUser)
+    : canAccessElevatedWorkspace();
+  const showDirectory =
+    (currentUser ? canAccessDirectoryForUser(currentUser) : false) &&
+    showManagementNavigation;
+  const showStatistics = currentUser ? canAccessStatisticsForUser(currentUser) : false;
+  const showAdmin =
+    (currentUser ? canAccessAdminAreaForUser(currentUser) : false) &&
+    showManagementNavigation;
+
+  const quickActions = useMemo(
+    () => buildQuickActions({ showDirectory, showAdmin }),
+    [showDirectory, showAdmin],
+  );
+  const workspaceCards = useMemo(
+    () =>
+      buildWorkspaceCards({
+        elevated: showInstitutionalMetrics,
+        showStatistics,
+        showAdmin,
+      }),
+    [showInstitutionalMetrics, showStatistics, showAdmin],
+  );
+  const commonCards = useMemo(() => buildCommonCards(), []);
+
   useEffect(() => {
     async function loadStats() {
+      if (!showInstitutionalMetrics) {
+        setError(null);
+        return;
+      }
+
       try {
         const data = await getDashboardStats();
         setStats(data);
@@ -119,7 +239,7 @@ export default function DashboardScreen() {
     }
 
     loadStats();
-  }, []);
+  }, [showInstitutionalMetrics]);
 
   return (
     <div className="flex h-dvh overflow-hidden">
@@ -139,7 +259,9 @@ export default function DashboardScreen() {
                   Olá, {userName}
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-[var(--app-text-muted)] sm:text-base">
-                  Visão geral do seu ambiente institucional.
+                  {showInstitutionalMetrics
+                    ? "Visão geral do seu ambiente institucional."
+                    : "Acesse rapidamente os módulos principais do seu workspace."}
                 </p>
               </div>
 
@@ -160,38 +282,62 @@ export default function DashboardScreen() {
             </div>
           </section>
 
-          {error && (
+          {error && showInstitutionalMetrics && (
             <div role="alert" className="app-feedback app-feedback-warning">
               <span>{error}</span>
             </div>
           )}
 
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              title="Alunos"
-              value={stats.totalStudents}
-              description="Usuários acadêmicos cadastrados no ambiente atual."
-              accent="text-primary"
-            />
-            <StatCard
-              title="Disciplinas"
-              value={stats.activeCourses}
-              description="Disciplinas ativas disponíveis no workspace."
-              accent="text-secondary"
-            />
-            <StatCard
-              title="Perfis completos"
-              value={`${stats.graduationRate}%`}
-              description="Percentual atual de perfis preenchidos."
-              accent="text-accent"
-            />
-            <StatCard
-              title="Biblioteca"
-              value="Ativa"
-              description="Módulo disponível para livros e empréstimos."
-              accent="text-[var(--app-text)]"
-            />
-          </section>
+          {showInstitutionalMetrics ? (
+            <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                title="Alunos"
+                value={stats.totalStudents}
+                description="Usuários acadêmicos cadastrados no ambiente atual."
+                accent="text-primary"
+              />
+              <StatCard
+                title="Disciplinas"
+                value={stats.activeCourses}
+                description="Disciplinas ativas disponíveis no workspace."
+                accent="text-secondary"
+              />
+              <StatCard
+                title="Perfis completos"
+                value={`${stats.graduationRate}%`}
+                description="Percentual atual de perfis preenchidos."
+                accent="text-accent"
+              />
+              <StatCard
+                title="Biblioteca"
+                value="Ativa"
+                description="Módulo disponível para livros e empréstimos."
+                accent="text-[var(--app-text)]"
+              />
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {commonCards.map((card) => (
+                <Link
+                  key={card.href}
+                  to={card.href}
+                  className="rounded-[1.75rem] border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-5 shadow-sm transition hover:border-[var(--app-accent)]/40 hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-lg font-semibold text-[var(--app-text)]">{card.title}</p>
+                    {card.label && (
+                      <span className="rounded-full bg-[var(--app-bg)] px-3 py-1 text-xs font-medium text-[var(--app-text-muted)]">
+                        {card.label}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-4 text-sm leading-6 text-[var(--app-text-muted)]">
+                    {card.description}
+                  </p>
+                </Link>
+              ))}
+            </section>
+          )}
 
           <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-[1.75rem] border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-6 shadow-sm">
@@ -243,9 +389,11 @@ export default function DashboardScreen() {
                         {item.description}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[var(--app-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--app-text-muted)]">
-                      {item.label}
-                    </span>
+                    {item.label && (
+                      <span className="rounded-full bg-[var(--app-bg-elevated)] px-3 py-1 text-xs font-medium text-[var(--app-text-muted)]">
+                        {item.label}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

@@ -23,7 +23,13 @@ export default function Navbar({
   return (
     <nav className="fixed left-0 top-0 z-50 w-full bg-[#18396F]">
       <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <div className="text-xl font-bold text-white sm:text-2xl">Logo</div>
+        <Link to="/" aria-label="Bedrock" className="inline-flex items-center">
+          <img
+            src="/images/logo.png"
+            alt="Bedrock"
+            className="h-10 w-auto object-contain sm:h-12"
+          />
+        </Link>
 
         <div className="hidden items-center space-x-8 md:flex">
           {navLinks.map((link) => (

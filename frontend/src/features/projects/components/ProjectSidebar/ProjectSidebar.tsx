@@ -21,11 +21,11 @@ function StatCard({
   last?: boolean;
 }) {
   return (
-    <div className={`p-4 ${last ? "" : "border-r border-[var(--app-border)]"}`}>
+    <div className={`px-5 py-4 ${last ? "" : "border-r border-[var(--app-border)]"}`}>
       <div className="font-mono text-2xl font-semibold leading-none text-[var(--app-text)]">
         {value}
       </div>
-      <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[var(--app-text-muted)]">
+      <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[var(--app-text-muted)]">
         {label}
       </div>
     </div>

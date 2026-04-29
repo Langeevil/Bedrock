@@ -1,7 +1,13 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserProfile from "../shared/components/UserProfile";
-import { canAccessAdminArea, subscribeAuthSession } from "../shared/authSession";
+import {
+  canAccessAdminArea,
+  canAccessDirectory,
+  canAccessStatistics,
+  shouldShowManagementNavigation,
+  subscribeAuthSession,
+} from "../shared/authSession";
 import Home from "../assets/icons/DashBoardIcons/Home.png";
 import Projects from "../assets/icons/DashBoardIcons/Projects.png";
 import Disciplinas from "../assets/icons/DashBoardIcons/Disciplinas.png";
@@ -24,7 +30,7 @@ type SidebarNavItem = {
   topGap?: boolean;
 };
 
-const navItems: SidebarNavItem[] = [
+const baseNavItems: SidebarNavItem[] = [
   {
     to: "/dashboard",
     label: "Home",
@@ -61,35 +67,51 @@ const navItems: SidebarNavItem[] = [
     alt: "Icone de Biblioteca",
     keywords: ["biblioteca", "livros", "emprestimos", "acervo", "leitura"],
   },
-  {
-    to: "/diretorio",
-    label: "Diretorio",
-    iconNode: (
-      <svg
-        className="h-6 w-6 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="10" cy="7" r="4" />
-        <path d="M20 8v6" />
-        <path d="M23 11h-6" />
-      </svg>
-    ),
-    keywords: ["diretorio", "usuarios", "pessoas", "instituicao", "organizacao"],
-  },
-  {
-    to: "/estatistica",
-    label: "Estatisticas",
-    icon: Estatica,
-    alt: "Icone de Estatisticas",
-    keywords: ["estatisticas", "relatorios", "graficos", "indicadores", "metricas"],
-  },
 ];
+
+const directoryNavItem: SidebarNavItem = {
+  to: "/diretorio",
+  label: "Diretorio",
+  iconNode: (
+    <svg
+      className="h-6 w-6 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="10" cy="7" r="4" />
+      <path d="M20 8v6" />
+      <path d="M23 11h-6" />
+    </svg>
+  ),
+  keywords: ["diretorio", "usuarios", "pessoas", "instituicao", "organizacao"],
+};
+
+const statisticsNavItem: SidebarNavItem = {
+  to: "/estatistica",
+  label: "Estatisticas",
+  icon: Estatica,
+  alt: "Icone de Estatisticas",
+  keywords: ["estatisticas", "relatorios", "graficos", "indicadores", "metricas"],
+};
+
+function buildNavItems({
+  showDirectory,
+  showStatistics,
+}: {
+  showDirectory: boolean;
+  showStatistics: boolean;
+}) {
+  return [
+    ...baseNavItems,
+    ...(showDirectory ? [directoryNavItem] : []),
+    ...(showStatistics ? [statisticsNavItem] : []),
+  ];
+}
 
 const adminItem = {
   to: "/admin",
@@ -148,7 +170,14 @@ function NavItem({
 export function SidebarSimple({ children }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showManagementNavigation, setShowManagementNavigation] = React.useState(() =>
+    shouldShowManagementNavigation()
+  );
   const [hasAdminAccess, setHasAdminAccess] = React.useState(() => canAccessAdminArea());
+  const [hasDirectoryAccess, setHasDirectoryAccess] = React.useState(() => canAccessDirectory());
+  const [hasStatisticsAccess, setHasStatisticsAccess] = React.useState(() =>
+    canAccessStatistics()
+  );
   const [collapsed, setCollapsed] = React.useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(SIDEBAR_KEY) === "true";
@@ -176,16 +205,28 @@ export function SidebarSimple({ children }: Props) {
 
   React.useEffect(() => {
     return subscribeAuthSession(() => {
+      setShowManagementNavigation(shouldShowManagementNavigation());
       setHasAdminAccess(canAccessAdminArea());
+      setHasDirectoryAccess(canAccessDirectory());
+      setHasStatisticsAccess(canAccessStatistics());
     });
   }, []);
 
+  const navItems = React.useMemo(
+    () =>
+      buildNavItems({
+        showDirectory: hasDirectoryAccess && showManagementNavigation,
+        showStatistics: hasStatisticsAccess,
+      }),
+    [hasDirectoryAccess, hasStatisticsAccess, showManagementNavigation]
+  );
+
   const searchableItems = React.useMemo(
     () =>
-      hasAdminAccess
+      hasAdminAccess && showManagementNavigation
         ? [...navItems, { ...adminItem, icon: "", alt: "" }]
         : navItems,
-    [hasAdminAccess]
+    [hasAdminAccess, navItems, showManagementNavigation]
   );
 
   const searchResults = React.useMemo(() => {
@@ -227,7 +268,11 @@ export function SidebarSimple({ children }: Props) {
               onClick={() => setCollapsed(false)}
               className="group flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--app-sidebar-hover)] text-base font-semibold text-[var(--app-sidebar-hover-text)] transition hover:bg-[var(--app-sidebar-surface)]"
             >
-              <span className="transition group-hover:hidden group-focus-visible:hidden">B</span>
+              <img
+                src="/images/logo.png"
+                alt="Bedrock"
+                className="h-14 w-14 object-contain transition group-hover:hidden group-focus-visible:hidden"
+              />
               <svg
                 aria-hidden="true"
                 className="hidden h-5 w-5 transition group-hover:block group-focus-visible:block"
@@ -240,8 +285,12 @@ export function SidebarSimple({ children }: Props) {
               </svg>
             </button>
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-sidebar-hover)] text-base font-semibold text-[var(--app-sidebar-hover-text)]">
-              B
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--app-sidebar-hover)]">
+              <img
+                src="/images/logo.png"
+                alt="Bedrock"
+                className="h-13 w-13 object-contain"
+              />
             </div>
           )}
           {!collapsed && <h3 className="truncate text-base font-semibold text-[var(--app-sidebar-contrast)] sm:text-lg">Menu Lateral</h3>}
@@ -346,7 +395,7 @@ export function SidebarSimple({ children }: Props) {
             </NavItem>
           ))}
 
-          {hasAdminAccess && (
+          {hasAdminAccess && showManagementNavigation && (
             <NavItem
               to={adminItem.to}
               label={adminItem.label}

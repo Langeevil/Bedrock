@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Tag, Task } from "../../types/projectTypes";
 import { TAG_COLORS } from "../../constants/projectConstants";
 
-// ── Types ────────────────────────────────────────────────────────────────────
 interface TagSectionProps {
   tags: Tag[];
   tasks: Task[];
@@ -16,39 +15,24 @@ interface TagRowProps {
   onDelete: (id: string) => void;
 }
 
-// ── Sub-components ───────────────────────────────────────────────────────────
 function TagRow({ tag, taskCount, onDelete }: TagRowProps) {
-  const [hovered, setHovered] = useState(false);
-
   return (
-    <div
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "4px 6px", borderRadius: 6, marginBottom: 3,
-        background: hovered ? "#f4f3ef" : "transparent",
-        transition: "background .12s",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <span style={{
-        display: "inline-flex", alignItems: "center", gap: 5,
-        padding: "3px 9px", borderRadius: 20,
-        fontSize: 12, fontWeight: 500,
-        background: tag.color + "22", color: tag.color,
-      }}>
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: tag.color, flexShrink: 0 }} />
+    <div className="mb-2 flex items-center justify-between rounded-xl px-3 py-2 transition hover:bg-[var(--app-bg-muted)]">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+        style={{ background: `${tag.color}22`, color: tag.color }}
+      >
+        <span className="h-2 w-2 rounded-full" style={{ background: tag.color }} />
         {tag.name}
       </span>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 11, color: "#9c9a8e", fontFamily: "monospace" }}>{taskCount}</span>
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-[11px] text-[var(--app-text-muted)]">{taskCount}</span>
         <button
+          type="button"
           onClick={() => onDelete(tag.id)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            color: "#9c9a8e", fontSize: 16, lineHeight: 1, padding: "0 2px",
-          }}
+          className="app-icon-button inline-flex min-h-[30px] min-w-[30px] items-center justify-center rounded-lg text-sm transition"
+          aria-label={`Excluir tag ${tag.name}`}
         >
           ×
         </button>
@@ -57,9 +41,8 @@ function TagRow({ tag, taskCount, onDelete }: TagRowProps) {
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
 export function TagSection({ tags, tasks, onAddTag, onDeleteTag }: TagSectionProps) {
-  const [name,  setName]  = useState("");
+  const [name, setName] = useState("");
   const [color, setColor] = useState<string>(TAG_COLORS[0]);
 
   const handleAdd = async () => {
@@ -68,76 +51,59 @@ export function TagSection({ tags, tasks, onAddTag, onDeleteTag }: TagSectionPro
     setName("");
   };
 
-  const countFor = (id: string) => tasks.filter(t => t.tags.includes(id)).length;
+  const countFor = (id: string) => tasks.filter((task) => task.tags.includes(id)).length;
 
   return (
     <>
-      {/* List */}
-      <div style={{ padding: 14, borderBottom: "0.5px solid #e2e0d8" }}>
-        <div style={{
-          fontSize: 10, fontWeight: 500, color: "#9c9a8e",
-          textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10,
-        }}>
-          Tags do Projeto
+      <div className="border-b border-[var(--app-border)] px-4 py-5">
+        <div className="mb-4 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--app-text-muted)]">
+          Tags do projeto
         </div>
 
         {tags.length === 0 && (
-          <span style={{ fontSize: 12, color: "#9c9a8e" }}>Nenhuma tag ainda</span>
+          <span className="text-xs text-[var(--app-text-muted)]">Nenhuma tag ainda</span>
         )}
-        {tags.map(tag => (
+        {tags.map((tag) => (
           <TagRow key={tag.id} tag={tag} taskCount={countFor(tag.id)} onDelete={onDeleteTag} />
         ))}
       </div>
 
-      {/* Create */}
-      <div style={{ padding: 14, borderBottom: "0.5px solid #e2e0d8" }}>
-        <div style={{
-          fontSize: 10, fontWeight: 500, color: "#9c9a8e",
-          textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10,
-        }}>
-          Nova Tag
+      <div className="border-b border-[var(--app-border)] px-4 py-4">
+        <div className="mb-4 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--app-text-muted)]">
+          Nova tag
         </div>
 
         <input
           aria-label="Nome da nova tag"
           value={name}
-          onChange={e => setName(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleAdd()}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => event.key === "Enter" && handleAdd()}
           placeholder="Nome da tag..."
           maxLength={20}
-          style={{
-            width: "100%", padding: "6px 9px",
-            border: "0.5px solid #e2e0d8", borderRadius: 6,
-            fontSize: 12, fontFamily: "inherit", color: "#1a1a18",
-            background: "#f4f3ef", outline: "none",
-            marginBottom: 7, boxSizing: "border-box",
-          }}
+          className="input input-bordered app-field !rounded-lg mb-3 w-full text-xs"
         />
 
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
-          {TAG_COLORS.map(c => (
-            <div
-              key={c}
-              onClick={() => setColor(c)}
-              style={{
-                width: 18, height: 18, borderRadius: "50%",
-                background: c, cursor: "pointer", flexShrink: 0,
-                transition: "all .12s",
-                border: c === color ? "2.5px solid #1a1a18" : "2.5px solid transparent",
-              }}
+        <div className="mb-3 flex flex-wrap gap-2">
+          {TAG_COLORS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setColor(item)}
+              aria-label={`Selecionar cor ${item}`}
+              className={`h-6 w-6 rounded-full border-2 transition ${
+                item === color ? "border-[var(--app-text)]" : "border-transparent"
+              }`}
+              style={{ backgroundColor: item }}
             />
           ))}
         </div>
 
         <button
+          type="button"
           onClick={handleAdd}
-          style={{
-            width: "100%", padding: "6px 0", borderRadius: 6, fontSize: 12,
-            cursor: "pointer", border: "0.5px solid #1a1a18",
-            background: "#1a1a18", color: "#f4f3ef", fontFamily: "inherit",
-          }}
+          className="btn btn-primary app-btn-primary min-h-[40px] !rounded-lg w-full border-0 px-4 text-sm"
         >
-          Criar Tag
+          Criar tag
         </button>
       </div>
     </>

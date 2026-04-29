@@ -46,16 +46,20 @@ function CreateProjectModal({ onConfirm, onCancel }: CreateProjectModalProps) {
             onChange={(event) => setName(event.target.value)}
             placeholder="Ex: TCC, App Mobile, Site..."
             maxLength={60}
-            className="input input-bordered app-input mb-5 min-h-[44px] w-full text-base"
+            className="input input-bordered app-field mb-5 min-h-[44px] w-full text-base"
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button type="button" onClick={onCancel} className="btn btn-outline min-h-[44px]">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn btn-outline app-btn-outline min-h-[44px]"
+            >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!name.trim()}
-              className="btn btn-primary min-h-[44px] border-0 disabled:bg-[var(--app-bg-muted)] disabled:text-[var(--app-text-muted)]"
+              className="btn btn-primary app-btn-primary min-h-[44px] border-0 disabled:bg-[var(--app-bg-muted)] disabled:text-[var(--app-text-muted)]"
             >
               Criar
             </button>
@@ -83,7 +87,7 @@ function EmptyProjects({ onCreate }: { onCreate: () => void }) {
         </div>
       </div>
 
-      <button onClick={onCreate} className="btn btn-primary min-h-[44px] border-0">
+      <button onClick={onCreate} className="btn btn-primary app-btn-primary min-h-[44px] border-0">
         + Criar primeiro projeto
       </button>
     </div>

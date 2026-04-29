@@ -28,7 +28,8 @@ function TagCard({
         <button
           type="button"
           onClick={() => onDelete(tag.id)}
-          className="inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-lg leading-none text-[var(--app-text-muted)] transition hover:bg-[var(--app-bg-muted)] hover:text-[var(--app-text)]"
+          className="app-icon-button inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg text-lg leading-none transition"
+          aria-label={`Excluir tag ${tag.name}`}
         >
           ×
         </button>
@@ -86,7 +87,7 @@ function CreateTagForm({
           onKeyDown={(event) => event.key === "Enter" && handleAdd()}
           placeholder="Nome da tag..."
           maxLength={20}
-          className="input input-bordered app-input min-h-[44px] w-full text-base"
+          className="input input-bordered app-field min-h-[44px] w-full text-base"
         />
       </label>
 
@@ -108,7 +109,11 @@ function CreateTagForm({
         ))}
       </div>
 
-      <button type="button" onClick={handleAdd} className="btn btn-primary min-h-[44px] border-0">
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="btn btn-primary app-btn-primary min-h-[44px] border-0"
+      >
         Criar tag
       </button>
     </div>

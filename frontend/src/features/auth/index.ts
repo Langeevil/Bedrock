@@ -5,6 +5,8 @@ export { default as RegisterEmailScreen } from './pages/RegisterEmailScreen';
 export { default as RegisterPasswordScreen } from './pages/RegisterPasswordScreen';
 export { default as PrivateRoute } from './components/PrivateRoute';
 export { AdminOnlyRoute } from './components/PrivateRoute';
+export { DirectoryOnlyRoute } from './components/PrivateRoute';
+export { StatisticsOnlyRoute } from './components/PrivateRoute';
 export { default as UserProfile } from './components/UserProfile';
 export * from './services/authService';
 export * from './types/authTypes';

@@ -38,6 +38,11 @@ export default function AuthShell({
 
             <div className="relative flex items-start justify-between gap-4">
               <div>
+                <img
+                  src="/images/logo.png"
+                  alt="Bedrock"
+                  className="mb-4 h-10 w-auto object-contain sm:h-11"
+                />
                 <p className="text-xs uppercase tracking-[0.24em] text-[var(--app-text-muted)]">
                   {eyebrow}
                 </p>

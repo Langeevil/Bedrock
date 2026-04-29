@@ -20,6 +20,8 @@ import {
   RegisterPasswordScreen, 
   PrivateRoute,
   AdminOnlyRoute,
+  DirectoryOnlyRoute,
+  StatisticsOnlyRoute,
 } from "./features/auth";
 import { DashboardScreen } from "./features/dashboard";
 import { ProjectsScreen } from "./features/projects";
@@ -115,9 +117,9 @@ function App() {
         <Route
           path="/diretorio"
           element={
-            <PrivateRoute>
+            <DirectoryOnlyRoute>
               <DirectoryScreen />
-            </PrivateRoute>
+            </DirectoryOnlyRoute>
           }
         />
         <Route
@@ -131,9 +133,9 @@ function App() {
         <Route
           path="/estatistica"
           element={
-            <PrivateRoute>
+            <StatisticsOnlyRoute>
               <StatisticsScreen />
-            </PrivateRoute>
+            </StatisticsOnlyRoute>
           }
         />
         <Route
