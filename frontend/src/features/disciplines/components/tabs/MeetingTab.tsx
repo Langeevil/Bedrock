@@ -1,4 +1,4 @@
-import FeatureInDevelopmentPage from "../../../../shared/components/FeatureInDevelopmentPage";
+import FeatureInDevelopmentProgress from "../../../../shared/components/FeatureInDevelopmentProgress";
 import type { Discipline } from "../../services/disciplinesService";
 
 interface Props {
@@ -13,10 +13,13 @@ export function MeetingTab({
   currentUserName: _currentUserName,
 }: Readonly<Props>) {
   return (
-    <FeatureInDevelopmentPage
+    <FeatureInDevelopmentProgress
       title="Reuniões acadêmicas"
-      category="Placeholder"
+      category="Em construção"
       compact
+      progressValue={52}
+      statusLabel="Colaboração síncrona"
+      progressLabel="Planejamento ativo"
       notes={[
         "Reuniões em tempo real, áudio e vídeo continuarão no roadmap.",
         "Nesta etapa o Bedrock mantém foco em comunicação textual, diretório e governança institucional.",

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { useParams } from "react-router-dom";
 import { SidebarSimple } from "../../../components/sidebar-simple";
-import type { Discipline } from "../services/disciplinesService";
-import { getDiscipline } from "../services/disciplinesService";
-import type { TabKey } from "../types/disciplineTypes";
 import { DisciplineHeader } from "../components/DisciplineHeader";
-import { OverviewTab } from "../components/tabs/OverviewTab";
-import { MaterialsTab } from "../components/tabs/MaterialsTab";
-import { ChatTab } from "../components/tabs/ChatTab";
-import { MembersTab } from "../components/tabs/MembersTab";
-import { SettingsTab } from "../components/tabs/SettingsTab";
-import { MeetingTab } from "../components/tabs/MeetingTab";
 import { TaskTab } from "../components/tasks/TaskTab";
+import { ChatTab } from "../components/tabs/ChatTab";
+import { MaterialsTab } from "../components/tabs/MaterialsTab";
+import { MeetingTab } from "../components/tabs/MeetingTab";
+import { MembersTab } from "../components/tabs/MembersTab";
+import { OverviewTab } from "../components/tabs/OverviewTab";
+import { SettingsTab } from "../components/tabs/SettingsTab";
+import { getDiscipline } from "../services/disciplinesService";
+import type { Discipline } from "../services/disciplinesService";
+import type { TabKey } from "../types/disciplineTypes";
 
 function getLoggedUserName(): string {
   return localStorage.getItem("user_nome") ?? "";
@@ -30,7 +30,8 @@ export default function DisciplineDetailScreen() {
   const currentUserName = getLoggedUserName();
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("overview");
-  const userRole = (localStorage.getItem("user_role") as "professor" | "student") || "student";
+  const userRole =
+    (localStorage.getItem("user_role") as "professor" | "student") || "student";
 
   useEffect(() => {
     if (!id) return;
@@ -45,21 +46,21 @@ export default function DisciplineDetailScreen() {
   }, [id]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F5F5F5] font-sans">
+    <div className="app-page flex h-dvh overflow-hidden font-sans">
       <SidebarSimple />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {loading && (
-          <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
+          <div className="flex flex-1 items-center justify-center text-sm text-[var(--app-text-muted)]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--app-accent)] border-t-transparent" />
               <span>Carregando disciplina...</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="m-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="m-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
             <div className="h-2 w-2 rounded-full bg-red-500" />
             {error}
           </div>
@@ -87,13 +88,13 @@ export default function DisciplineDetailScreen() {
                     {tab === "posts" && <OverviewTab discipline={discipline} />}
                     {tab === "materials" && <MaterialsTab disciplineId={discipline.id} />}
                     {tab === "chat" && (
-                      <ChatTab disciplineId={discipline.id} currentUserName={currentUserName} />
+                      <ChatTab
+                        disciplineId={discipline.id}
+                        currentUserName={currentUserName}
+                      />
                     )}
                     {tab === "tasks" && (
-                      <TaskTab
-                        discipline={discipline}
-                        userRole={userRole}
-                      />
+                      <TaskTab discipline={discipline} userRole={userRole} />
                     )}
                     {tab === "meeting" && (
                       <MeetingTab

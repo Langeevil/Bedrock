@@ -11,22 +11,21 @@ import {
 } from "lucide-react";
 import type { Discipline } from "../services/disciplinesService";
 import type { TabKey } from "../types/disciplineTypes";
-import { TEAMS } from "../constants/teamsTheme";
 
 const TABS: { id: TabKey; label: string }[] = [
-  { id: "overview", label: "Visao Geral" },
+  { id: "overview", label: "Visão Geral" },
   { id: "materials", label: "Arquivos" },
-  { id: "chat", label: "Publicacoes" },
+  { id: "chat", label: "Publicações" },
   { id: "members", label: "Membros" },
-  { id: "meeting", label: "Reuniao" },
-  { id: "settings", label: "Configuracoes" },
+  { id: "meeting", label: "Reunião" },
+  { id: "settings", label: "Configurações" },
 ];
 
 const ACTION_BTNS = [
-  { id: "meeting", label: "Reuniao", Icon: Video },
+  { id: "meeting", label: "Reunião", Icon: Video },
   { id: "call", label: "Ligar", Icon: Phone },
   { id: "search", label: "Buscar", Icon: Search },
-  { id: "notifications", label: "Notificacoes", Icon: Bell },
+  { id: "notifications", label: "Notificações", Icon: Bell },
   { id: "favorite", label: "Favoritar", Icon: Star },
   { id: "more", label: "Mais", Icon: MoreHorizontal },
 ];
@@ -37,135 +36,92 @@ interface Props {
   onTabChange: (tab: TabKey) => void;
 }
 
-export function DisciplineHeader({ discipline, activeTab, onTabChange }: Readonly<Props>) {
+export function DisciplineHeader({
+  discipline,
+  activeTab,
+  onTabChange,
+}: Readonly<Props>) {
   const navigate = useNavigate();
 
   return (
-    <div
-      style={{
-        background: TEAMS.white,
-        borderBottom: `1px solid ${TEAMS.border}`,
-        padding: "0 24px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 0 0", fontSize: 12 }}>
-        <button
-          onClick={() => navigate("/disciplinas")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: TEAMS.purple,
-            fontSize: 12,
-            fontFamily: "'Segoe UI', sans-serif",
-            padding: 0,
-          }}
-        >
-          <ChevronLeft size={14} /> Disciplinas
-        </button>
-        <span style={{ color: TEAMS.border }}>/</span>
-        <span style={{ color: TEAMS.textSecondary }}>{discipline.name}</span>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #6264A7, #8764B8)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#fff",
-            }}
-          >
-            <BookOpen size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: TEAMS.textPrimary, lineHeight: 1.2 }}>
-              {discipline.name}
-            </div>
-            <div style={{ fontSize: 12, color: TEAMS.textSecondary, marginTop: 2 }}>
-              {discipline.code} · {discipline.professor}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {ACTION_BTNS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              title={label}
-              onClick={() => {
-                if (id === "meeting") {
-                  onTabChange("meeting");
-                }
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "transparent",
-                border: "none",
-                cursor: id === "meeting" ? "pointer" : "default",
-                color: TEAMS.textSecondary,
-                padding: "6px 10px",
-                borderRadius: 4,
-                transition: "background 0.15s",
-                opacity: id === "meeting" ? 1 : 0.5,
-              }}
-              onMouseEnter={(e) => {
-                if (id === "meeting") {
-                  (e.currentTarget as HTMLElement).style.background = "#F3F2F1";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (id === "meeting") {
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                }
-              }}
-            >
-              <Icon size={16} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", marginTop: 8 }}>
-        {TABS.map((t) => (
+    <header className="border-b border-[var(--app-border)] bg-[var(--app-bg-elevated)] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-wrap items-center gap-2 py-3 text-xs text-[var(--app-text-muted)]">
           <button
-            key={t.id}
-            onClick={() => onTabChange(t.id)}
-            style={{
-              padding: "10px 14px",
-              background: "transparent",
-              border: "none",
-              borderBottom: activeTab === t.id ? `2px solid ${TEAMS.purple}` : "2px solid transparent",
-              color: activeTab === t.id ? TEAMS.purple : TEAMS.textSecondary,
-              fontSize: 13,
-              fontWeight: activeTab === t.id ? 600 : 400,
-              cursor: "pointer",
-              fontFamily: "'Segoe UI', sans-serif",
-              transition: "all 0.15s",
-              marginBottom: -1,
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textPrimary;
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== t.id) (e.currentTarget as HTMLElement).style.color = TEAMS.textSecondary;
-            }}
+            type="button"
+            onClick={() => navigate("/disciplinas")}
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-xl px-2 text-[var(--app-accent)] transition hover:bg-[var(--app-bg-muted)]"
           >
-            {t.label}
+            <ChevronLeft size={14} />
+            Disciplinas
           </button>
-        ))}
+          <span>/</span>
+          <span className="truncate">{discipline.name}</span>
+        </div>
+
+        <div className="flex flex-col gap-4 py-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--app-accent)] text-[var(--app-accent-contrast)] shadow-sm">
+              <BookOpen size={20} />
+            </div>
+
+            <div className="min-w-0">
+              <div className="truncate text-lg font-semibold text-[var(--app-text)] sm:text-xl">
+                {discipline.name}
+              </div>
+              <div className="mt-1 truncate text-sm text-[var(--app-text-muted)]">
+                {discipline.code} · {discipline.professor}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {ACTION_BTNS.map(({ id, label, Icon }) => {
+              const isEnabled = id === "meeting";
+
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  title={label}
+                  aria-label={label}
+                  onClick={() => {
+                    if (isEnabled) onTabChange("meeting");
+                  }}
+                  disabled={!isEnabled}
+                  className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-[var(--app-border)] px-3 transition ${
+                    isEnabled
+                      ? "bg-[var(--app-bg)] text-[var(--app-text-muted)] hover:bg-[var(--app-bg-muted)] hover:text-[var(--app-text)]"
+                      : "cursor-default bg-[var(--app-bg)] text-[var(--app-text-muted)] opacity-50"
+                  }`}
+                >
+                  <Icon size={16} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {TABS.map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onTabChange(tab.id)}
+                className={`min-h-[44px] whitespace-nowrap border-b-2 px-3 py-2 text-sm transition ${
+                  active
+                    ? "border-[var(--app-accent)] font-semibold text-[var(--app-accent)]"
+                    : "border-transparent text-[var(--app-text-muted)] hover:text-[var(--app-text)]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </header>
   );
 }

@@ -101,6 +101,39 @@ body {
   color: var(--app-accent);
 }
 
+.app-placeholder-badge {
+  background-color: color-mix(in srgb, var(--app-accent) 14%, var(--app-bg-elevated));
+  color: color-mix(in srgb, var(--app-accent) 72%, var(--app-text) 28%);
+}
+
+.app-placeholder-ring {
+  border-color: color-mix(in srgb, var(--app-accent) 18%, var(--app-border));
+  border-top-color: var(--app-accent);
+}
+
+.app-placeholder-inner {
+  background-color: var(--app-bg);
+  border-color: var(--app-border);
+  color: var(--app-accent);
+}
+
+.app-placeholder-progress-track {
+  background-color: color-mix(in srgb, var(--app-accent) 12%, var(--app-border));
+}
+
+.app-placeholder-progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--app-accent) 0%,
+    color-mix(in srgb, var(--app-accent) 74%, #ffffff 26%) 100%
+  );
+}
+
+.app-placeholder-panel {
+  background-color: var(--app-bg);
+  border-color: var(--app-border);
+}
+
 .input,
 .select,
 .textarea {

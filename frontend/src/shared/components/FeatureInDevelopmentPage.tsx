@@ -24,10 +24,18 @@ export default function FeatureInDevelopmentPage({
         <p className="text-xs uppercase tracking-[0.24em] text-[var(--app-text-muted)]">
           {category}
         </p>
-        <h1 className={`mt-3 font-semibold text-[var(--app-text)] ${compact ? "text-xl" : "text-2xl sm:text-3xl"}`}>
+        <h1
+          className={`mt-3 font-semibold text-[var(--app-text)] ${
+            compact ? "text-xl" : "text-2xl sm:text-3xl"
+          }`}
+        >
           {title}
         </h1>
-        <p className={`mt-3 leading-7 text-[var(--app-text-muted)] ${compact ? "text-sm" : "text-base"}`}>
+        <p
+          className={`mt-3 leading-7 text-[var(--app-text-muted)] ${
+            compact ? "text-sm" : "text-base"
+          }`}
+        >
           {DEFAULT_MESSAGE}
         </p>
 

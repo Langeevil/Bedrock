@@ -16,8 +16,9 @@ const SIDEBAR_KEY = "bedrock_sidebar_collapsed";
 type SidebarNavItem = {
   to: string;
   label: string;
-  icon: string;
-  alt: string;
+  icon?: string;
+  alt?: string;
+  iconNode?: React.ReactNode;
   keywords: string[];
   badge?: string;
   topGap?: boolean;
@@ -63,9 +64,30 @@ const navItems: SidebarNavItem[] = [
   {
     to: "/diretorio",
     label: "Diretorio",
-    icon: Estatica,
-    alt: "Icone de Diretorio",
+    iconNode: (
+      <svg
+        className="h-6 w-6 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="10" cy="7" r="4" />
+        <path d="M20 8v6" />
+        <path d="M23 11h-6" />
+      </svg>
+    ),
     keywords: ["diretorio", "usuarios", "pessoas", "instituicao", "organizacao"],
+  },
+  {
+    to: "/estatistica",
+    label: "Estatisticas",
+    icon: Estatica,
+    alt: "Icone de Estatisticas",
+    keywords: ["estatisticas", "relatorios", "graficos", "indicadores", "metricas"],
   },
 ];
 
@@ -314,7 +336,13 @@ export function SidebarSimple({ children }: Props) {
               topGap={item.topGap}
               active={location.pathname === item.to}
             >
-              <img src={item.icon} alt={item.alt} className="h-6 w-6 shrink-0 object-contain" />
+              {item.iconNode ?? (
+                <img
+                  src={item.icon}
+                  alt={item.alt}
+                  className="h-6 w-6 shrink-0 object-contain"
+                />
+              )}
             </NavItem>
           ))}
 
