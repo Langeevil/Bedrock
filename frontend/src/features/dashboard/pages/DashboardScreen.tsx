@@ -161,7 +161,7 @@ export default function DashboardScreen() {
           </section>
 
           {error && (
-            <div className="alert alert-warning border-amber-300 bg-amber-100 text-amber-900">
+            <div role="alert" className="app-feedback app-feedback-warning">
               <span>{error}</span>
             </div>
           )}

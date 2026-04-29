@@ -139,7 +139,7 @@ export function MembersTab({ disciplineId }: Readonly<{ disciplineId: number }>)
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+      <div role="alert" className="app-feedback app-feedback-error">
         {error}
       </div>
     );

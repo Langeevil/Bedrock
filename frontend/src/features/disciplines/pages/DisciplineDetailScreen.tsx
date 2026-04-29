@@ -60,7 +60,7 @@ export default function DisciplineDetailScreen() {
         )}
 
         {error && (
-          <div className="m-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+          <div role="alert" className="app-feedback app-feedback-error m-6 flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-red-500" />
             {error}
           </div>

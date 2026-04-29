@@ -1,80 +1,76 @@
-// src/features/auth/pages/RegisterEmailScreen.tsx
 import React, { useEffect, useState } from "react";
-import fundo from "../../../assets/degrade-fundo-azul.jpg";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AuthShell from "../components/AuthShell";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterEmailScreen() {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Crie uma conta - Bedrock";
+    document.title = "Criar conta - Bedrock";
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim() || !email.includes("@")) {
-      alert("Por favor, digite um email válido.");
+    if (!emailRegex.test(email.trim())) {
+      setError("Informe um e-mail válido para continuar.");
       return;
     }
 
-    localStorage.setItem("user_email", email);
+    localStorage.setItem("user_email", email.trim().toLowerCase());
     navigate("/register-password");
   };
 
   return (
-    <main
-      className="relative flex min-h-dvh items-center justify-center bg-cover bg-center px-4 py-8 sm:px-6 lg:px-8"
-      style={{ backgroundImage: `url(${fundo})` }}
-      aria-labelledby="titulo-criar-conta"
+    <AuthShell
+      eyebrow="Cadastro"
+      title="Seu e-mail"
+      description="Informe o e-mail que será usado no acesso."
+      step="Etapa 2 de 3"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/20" />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <label className="block" htmlFor="register-email">
+          <span className="mb-1.5 block text-sm font-medium text-[var(--app-text)]">
+            E-mail
+          </span>
+          <input
+            id="register-email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="voce@instituicao.edu"
+            className="input input-bordered app-input auth-input text-base"
+            required
+          />
+        </label>
 
-      <section className="relative z-10 w-full max-w-md">
-        <div className="card overflow-hidden bg-white/95 shadow-2xl">
-          <div className="card-body p-6 sm:p-8">
-            <h1
-              id="titulo-criar-conta"
-              className="text-2xl sm:text-3xl font-semibold text-gray-900 text-center"
-            >
-              Crie uma conta
-            </h1>
-
-            <p className="text-sm text-gray-600 text-center mt-1">
-              Digite seu email para continuar.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <label className="floating-label block w-full" htmlFor="register-email">
-                <input
-                  id="register-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Digite seu email"
-                  className="input input-bordered min-h-[44px] w-full text-base"
-                  required
-                />
-              </label>
-
-              <button
-                type="submit"
-                className="btn btn-primary btn-block min-h-[44px] border-0 bg-[#1877F2] text-base font-bold text-white"
-              >
-                Avançar
-              </button>
-            </form>
-
-            <p className="text-center text-sm text-gray-600 mt-4">
-              Já tem conta?{" "}
-              <Link to="/login" className="link link-primary">
-                Entrar
-              </Link>
-            </p>
+        {error && (
+          <div role="alert" className="app-feedback app-feedback-error">
+            {error}
           </div>
-        </div>
-      </section>
-    </main>
+        )}
+
+        <button
+          type="submit"
+          className="btn btn-primary auth-button-primary btn-block min-h-[48px] rounded-xl text-base font-semibold"
+        >
+          Avançar
+        </button>
+      </form>
+
+      <div className="text-center text-sm text-[var(--app-text-muted)]">
+        Já tem conta?{" "}
+        <Link to="/login" className="font-medium text-[var(--app-accent)]">
+          Entrar
+        </Link>
+      </div>
+    </AuthShell>
   );
 }

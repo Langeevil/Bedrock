@@ -43,7 +43,10 @@ export default function ProfileModal({ onClose }: Props) {
         aria-labelledby="profile-modal-title"
         className="w-full max-w-md rounded-xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] p-8 text-[var(--app-text)] shadow-2xl"
       >
-        <h2 id="profile-modal-title" className="mb-4 text-center text-2xl font-semibold text-[var(--app-text)]">
+        <h2
+          id="profile-modal-title"
+          className="mb-4 text-center text-2xl font-semibold text-[var(--app-text)]"
+        >
           Complete seu perfil
         </h2>
 
@@ -55,8 +58,8 @@ export default function ProfileModal({ onClose }: Props) {
               aria-pressed={role === item.value}
               className={`btn w-full ${
                 role === item.value
-                  ? "btn-primary text-white"
-                  : "btn-outline border-[var(--app-border)] text-[var(--app-text)] hover:bg-[var(--app-bg-muted)]"
+                  ? "btn-primary auth-button-primary"
+                  : "btn-outline auth-button-outline"
               }`}
             >
               {item.label}
@@ -66,7 +69,7 @@ export default function ProfileModal({ onClose }: Props) {
 
         <button
           onClick={handleSave}
-          className="btn btn-primary mt-6 w-full"
+          className="btn btn-primary auth-button-primary mt-6 w-full"
           disabled={loading}
         >
           {loading ? "Salvando..." : "Confirmar"}

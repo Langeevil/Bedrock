@@ -12,6 +12,30 @@ import { resolveAuthContext, toPublicUser } from "../auth/authContext.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "segredo_super_forte";
 
+function getPasswordValidationError(password) {
+  if (password.length < 8) {
+    return "A senha deve ter pelo menos 8 caracteres.";
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return "A senha deve conter ao menos uma letra minúscula.";
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return "A senha deve conter ao menos uma letra maiúscula.";
+  }
+
+  if (!/\d/.test(password)) {
+    return "A senha deve conter ao menos um número.";
+  }
+
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    return "A senha deve conter ao menos um caractere especial.";
+  }
+
+  return null;
+}
+
 function buildTokenPayload(auth) {
   return {
     sub: auth.userId,
@@ -51,8 +75,10 @@ export async function cadastrar(req, res) {
     return res.status(400).json({ error: "Preencha todos os campos." });
   }
 
-  if (senha.length < 8) {
-    return res.status(400).json({ error: "A senha deve ter pelo menos 8 caracteres." });
+  const passwordValidationError = getPasswordValidationError(senha);
+
+  if (passwordValidationError) {
+    return res.status(400).json({ error: passwordValidationError });
   }
 
   if (requestedRole && !SELF_SERVICE_ORGANIZATION_ROLES.has(requestedRole)) {

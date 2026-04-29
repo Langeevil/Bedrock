@@ -22,7 +22,7 @@ export function SettingsTab({ discipline }: Readonly<Props>) {
     <div className="flex flex-col gap-4">
       <section className="overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg-elevated)] shadow-sm">
         <div className="border-b border-[var(--app-border)] bg-[var(--app-bg-muted)] px-5 py-4 text-sm font-semibold text-[var(--app-text)]">
-          Informações da Disciplina
+          Informações da disciplina
         </div>
 
         <div className="divide-y divide-[var(--app-border)]">
@@ -46,15 +46,13 @@ export function SettingsTab({ discipline }: Readonly<Props>) {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
-        <div className="text-sm font-semibold text-red-700 dark:text-red-300">
-          Zona de Perigo
-        </div>
-        <p className="mt-2 text-sm leading-6 text-red-600 dark:text-red-200">
+      <section className="app-feedback app-feedback-error p-5 shadow-sm">
+        <div className="text-sm font-semibold">Zona de perigo</div>
+        <p className="mt-2 text-sm leading-6">
           A exclusão da disciplina é permanente e não pode ser desfeita.
         </p>
         <button type="button" className="btn btn-error btn-sm mt-4 min-h-[44px] rounded-xl">
-          Excluir Disciplina
+          Excluir disciplina
         </button>
       </section>
     </div>
