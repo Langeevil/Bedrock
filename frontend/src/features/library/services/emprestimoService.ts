@@ -11,7 +11,7 @@ export const emprestimoService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -33,7 +33,7 @@ export const emprestimoService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -55,7 +55,7 @@ export const emprestimoService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify(emprestimo),
       });
@@ -78,7 +78,7 @@ export const emprestimoService = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({ dataPrevistaDevolucao: novaDevolucao }),
       });
@@ -101,7 +101,7 @@ export const emprestimoService = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({
           dataDevolucao: new Date().toISOString().split('T')[0],
@@ -127,7 +127,7 @@ export const emprestimoService = {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 

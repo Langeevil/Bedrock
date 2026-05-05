@@ -11,7 +11,7 @@ export const livroService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -33,7 +33,7 @@ export const livroService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -55,7 +55,7 @@ export const livroService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify(livro),
       });
@@ -78,7 +78,7 @@ export const livroService = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify(livro),
       });
@@ -101,7 +101,7 @@ export const livroService = {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
