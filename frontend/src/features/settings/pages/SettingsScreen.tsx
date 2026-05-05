@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarSimple } from "../../../components/sidebar-simple";
 import { completeProfile, getMe } from "../../auth/services/authService";
-import { storeSessionUser } from "../../../shared/authSession";
+import { storeSessionUser, getStoredSystemRole } from "../../../shared/authSession";
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
@@ -109,12 +109,17 @@ export default function SettingsScreen() {
             </div>
           </form>
 
-          <div className="card app-panel p-6 shadow sm:p-8">
+          <div className={`card app-panel p-6 shadow sm:p-8 ${getStoredSystemRole() !== "system_admin" ? "opacity-50 pointer-events-none bg-slate-100" : ""}`}>
             <div className="flex flex-col gap-6">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold text-[var(--app-text)]">Tipo de perfil</h2>
                 <p className="text-sm text-[var(--app-text-muted)]">
                   Defina como você quer aparecer no sistema.
+                  {getStoredSystemRole() !== "system_admin" && (
+                    <span className="block mt-1 text-xs text-slate-500">
+                      Esta seção está bloqueada para usuários não administradores.
+                    </span>
+                  )}
                 </p>
               </div>
 
@@ -124,6 +129,7 @@ export default function SettingsScreen() {
                   className="select select-bordered app-input min-h-12"
                   value={role}
                   onChange={(event) => setRole(event.target.value)}
+                  disabled={getStoredSystemRole() !== "system_admin"}
                 >
                   <option value="">Selecione...</option>
                   <option value="student">Aluno</option>
@@ -136,7 +142,7 @@ export default function SettingsScreen() {
                 <button
                   className="btn min-h-12 w-full border-0 bg-cyan-600 px-5 text-white hover:bg-cyan-500 disabled:border-0 disabled:bg-slate-600 disabled:text-slate-200 sm:w-auto"
                   onClick={saveRole}
-                  disabled={loading}
+                  disabled={loading || getStoredSystemRole() !== "system_admin"}
                   type="button"
                 >
                   {loading ? "Salvando..." : "Atualizar perfil"}
