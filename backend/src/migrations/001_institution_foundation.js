@@ -19,6 +19,12 @@ function slugify(value) {
 }
 
 export async function up(client) {
+  // Remove restrições legadas que podem bloquear os novos cargos
+  await client.query(`
+    ALTER TABLE users 
+    DROP CONSTRAINT IF EXISTS users_role_check
+  `);
+
   await client.query(`
     ALTER TABLE users
     ADD COLUMN IF NOT EXISTS system_role VARCHAR(30)
