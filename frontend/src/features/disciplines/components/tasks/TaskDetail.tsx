@@ -1,6 +1,18 @@
-import React, { useState } from "react";
-import { completeTask, uploadSubmissionFile, deleteSubmissionFile } from "../../services/taskService.ts";
-import type { DisciplineTask, SubmissionFile } from "../../types/taskTypes.ts";
+import React, { useEffect, useState } from "react";
+import {
+  completeTask,
+  submitTask,
+  uploadSubmissionFile,
+  deleteSubmissionFile,
+  uploadTaskFile,
+  deleteTaskFile,
+} from "../../services/taskService.ts";
+import type {
+  DisciplineTask,
+  SubmissionFile,
+  TaskFile,
+  TaskSubmission,
+} from "../../types/taskTypes.ts";
 import { Download, Trash2, Check, FileText, Loader } from "lucide-react";
 
 interface TaskDetailProps {
@@ -14,6 +26,10 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
   disciplineId,
   userRole,
 }) => {
+  const [taskFiles, setTaskFiles] = useState<TaskFile[]>(task.files || []);
+  const [userSubmission, setUserSubmission] = useState<TaskSubmission | null>(
+    task.userSubmission || null
+  );
   const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>(
     task.userSubmission?.files || []
   );
@@ -21,6 +37,12 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
   const [completing, setCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTaskFiles(task.files || []);
+    setUserSubmission(task.userSubmission || null);
+    setSubmissionFiles(task.userSubmission?.files || []);
+  }, [task]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Sem prazo";
@@ -35,26 +57,33 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubmissionFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !task.userSubmission) return;
+    if (!file) return;
 
     try {
       setUploading(true);
       setError(null);
       setSuccess(null);
 
+      const submission =
+        userSubmission || (await submitTask(disciplineId, task.id));
+
+      if (!userSubmission) {
+        setUserSubmission(submission);
+        setSubmissionFiles(submission.files || []);
+      }
+
       const uploadedFile = await uploadSubmissionFile(
         disciplineId,
         task.id,
-        task.userSubmission.id,
+        submission.id,
         file
       );
 
-      setSubmissionFiles([...submissionFiles, uploadedFile]);
+      setSubmissionFiles((current) => [...current, uploadedFile]);
       setSuccess("Arquivo enviado com sucesso!");
 
-      // Reset input
       if (e.target) e.target.value = "";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer upload");
@@ -63,26 +92,58 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
     }
   };
 
-  const handleDeleteFile = async (fileId: number) => {
-    if (!task.userSubmission) return;
+  const handleDeleteSubmissionFile = async (fileId: number) => {
+    if (!userSubmission) return;
 
     try {
       setError(null);
-      await deleteSubmissionFile(disciplineId, task.id, task.userSubmission.id, fileId);
-      setSubmissionFiles(submissionFiles.filter((f) => f.id !== fileId));
+      await deleteSubmissionFile(disciplineId, task.id, userSubmission.id, fileId);
+      setSubmissionFiles((current) => current.filter((f) => f.id !== fileId));
       setSuccess("Arquivo deletado com sucesso!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao deletar arquivo");
     }
   };
 
-  const handleCompleteTask = async () => {
-    if (!task.userSubmission) return;
+  const handleTaskFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    try {
+      setUploading(true);
+      setError(null);
+      setSuccess(null);
+
+      const uploadedFile = await uploadTaskFile(disciplineId, task.id, file);
+      setTaskFiles((current) => [...current, uploadedFile]);
+      setSuccess("Arquivo da tarefa enviado com sucesso!");
+
+      if (e.target) e.target.value = "";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar arquivo da tarefa");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteTaskFile = async (fileId: number) => {
+    try {
+      setError(null);
+      await deleteTaskFile(disciplineId, task.id, fileId);
+      setTaskFiles((current) => current.filter((file) => file.id !== fileId));
+      setSuccess("Arquivo deletado com sucesso!");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao deletar arquivo da tarefa");
+    }
+  };
+
+  const handleCompleteTask = async () => {
     try {
       setCompleting(true);
       setError(null);
-      await completeTask(disciplineId, task.id);
+      const updated = await completeTask(disciplineId, task.id);
+      setUserSubmission(updated);
+      setSubmissionFiles((current) => updated.files || current);
       setSuccess("Tarefa concluída com sucesso!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao concluir tarefa");
@@ -132,11 +193,11 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
       )}
 
       {/* Arquivos da Tarefa */}
-      {task.files && task.files.length > 0 && (
-        <div>
-          <h3 className="font-semibold text-base-content mb-3">Arquivos da Tarefa</h3>
+      <div>
+        <h3 className="font-semibold text-base-content mb-3">Arquivos da Tarefa</h3>
+        {taskFiles.length > 0 ? (
           <div className="space-y-2">
-            {task.files.map((file) => (
+            {taskFiles.map((file) => (
               <div key={file.id} className="flex items-center justify-between p-3 bg-base-200 rounded-none">
                 <div className="flex items-center gap-3 flex-1">
                   <FileText size={20} />
@@ -147,58 +208,92 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() =>
-                    downloadFile(`/uploads/${file.file_path.split("/").pop()}`, file.file_name)
-                  }
-                  className="btn btn-sm btn-ghost btn-square"
-                >
-                  <Download size={18} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      downloadFile(`/uploads/${file.file_path.split("/").pop()}`, file.file_name)
+                    }
+                    className="btn btn-sm btn-ghost btn-square"
+                  >
+                    <Download size={18} />
+                  </button>
+                  {userRole === "professor" && (
+                    <button
+                      onClick={() => handleDeleteTaskFile(file.id)}
+                      className="btn btn-sm btn-ghost btn-square text-error"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-base-content/60">Nenhum arquivo disponível para esta tarefa.</p>
+        )}
+
+        {userRole === "professor" && (
+          <div className="mt-4">
+            <label className="form-control">
+              <div className="label">
+                <span className="label-text">Adicionar arquivo à tarefa</span>
+              </div>
+              <input
+                aria-label="Enviar arquivo para a tarefa"
+                type="file"
+                onChange={handleTaskFileUpload}
+                disabled={uploading}
+                className="file-input file-input-bordered rounded-none w-full"
+              />
+            </label>
+            <p className="text-sm text-base-content/60 mt-2">
+              Apenas o professor que criou a tarefa pode adicionar ou remover arquivos.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Submissão do Aluno */}
       {userRole === "student" && (
         <div className="space-y-4">
           <div className="divider divider-horizontal">Sua Submissão</div>
 
-          {task.userSubmission ? (
+          {userSubmission ? (
             <div className="space-y-4">
               <div className="p-4 bg-base-200 rounded-none">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold">Status da Submissão</h3>
                   <span
                     className={`px-3 py-1 rounded-none text-sm font-medium ${
-                      task.userSubmission.status === "completed"
+                      userSubmission.status === "completed"
                         ? "bg-success text-success-content"
-                        : task.userSubmission.status === "submitted"
+                        : userSubmission.status === "submitted"
                           ? "bg-info text-info-content"
                           : "bg-warning text-warning-content"
                     }`}
                   >
-                    {task.userSubmission.status === "completed"
+                    {userSubmission.status === "completed"
                       ? "Concluída"
-                      : task.userSubmission.status === "submitted"
+                      : userSubmission.status === "submitted"
                         ? "Enviada"
                         : "Pendente"}
                   </span>
                 </div>
 
-                {task.userSubmission.grade !== null && (
+                {userSubmission.grade !== null && (
                   <div className="mt-3">
                     <span className="text-sm font-medium">Nota</span>
-                    <p className="text-2xl font-bold text-success">{task.userSubmission.grade.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-success">
+                      {userSubmission.grade.toFixed(2)}
+                    </p>
                   </div>
                 )}
 
-                {task.userSubmission.feedback && (
+                {userSubmission.feedback && (
                   <div className="mt-3">
                     <span className="text-sm font-medium">Feedback do Professor</span>
-                    <p className="text-base-content mt-1">{task.userSubmission.feedback}</p>
+                    <p className="text-base-content mt-1">{userSubmission.feedback}</p>
                   </div>
                 )}
               </div>
@@ -222,23 +317,25 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                             </p>
                           </div>
                         </div>
-                        <button
-                          onClick={() =>
-                            downloadFile(
-                              `/uploads/${file.file_path.split("/").pop()}`,
-                              file.file_name
-                            )
-                          }
-                          className="btn btn-sm btn-ghost btn-square"
-                        >
-                          <Download size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteFile(file.id)}
-                          className="btn btn-sm btn-ghost btn-square text-error"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              downloadFile(
+                                `/uploads/${file.file_path.split("/").pop()}`,
+                                file.file_name
+                              )
+                            }
+                            className="btn btn-sm btn-ghost btn-square"
+                          >
+                            <Download size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSubmissionFile(file.id)}
+                            className="btn btn-sm btn-ghost btn-square text-error"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -254,7 +351,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                   <input
                     aria-label="Enviar arquivo da tarefa"
                     type="file"
-                    onChange={handleFileUpload}
+                    onChange={handleSubmissionFileUpload}
                     disabled={uploading}
                     className="file-input file-input-bordered rounded-none w-full"
                   />
@@ -262,7 +359,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
               </div>
 
               {/* Botões de Ação */}
-              {task.userSubmission.status !== "completed" && (
+              {userSubmission.status !== "completed" && (
                 <button
                   onClick={handleCompleteTask}
                   disabled={completing}
@@ -274,7 +371,36 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-center text-base-content/60">Carregando informações de submissão...</p>
+            <div className="space-y-4">
+              <div className="p-4 bg-base-200 rounded-none">
+                <p className="text-base-content/70">
+                  Você ainda não iniciou a submissão desta tarefa. Envie um arquivo ou finalize a
+                  tarefa para criar sua entrega.
+                </p>
+              </div>
+
+              <label className="form-control">
+                <div className="label">
+                  <span className="label-text">Enviar arquivo</span>
+                </div>
+                <input
+                  aria-label="Enviar arquivo da tarefa"
+                  type="file"
+                  onChange={handleSubmissionFileUpload}
+                  disabled={uploading}
+                  className="file-input file-input-bordered rounded-none w-full"
+                />
+              </label>
+
+              <button
+                onClick={handleCompleteTask}
+                disabled={completing}
+                className="btn btn-primary btn-block rounded-none"
+              >
+                {completing ? <Loader className="animate-spin" size={18} /> : <Check size={18} />}
+                Finalizar Tarefa
+              </button>
+            </div>
           )}
         </div>
       )}

@@ -15,6 +15,7 @@ import type { TabKey } from "../types/disciplineTypes";
 const TABS: { id: TabKey; label: string }[] = [
   { id: "overview", label: "Visão Geral" },
   { id: "materials", label: "Arquivos" },
+  { id: "tasks", label: "Tarefas" },
   { id: "chat", label: "Publicações" },
   { id: "members", label: "Membros" },
   { id: "meeting", label: "Reunião" },

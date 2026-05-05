@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { TaskFile } from "../../types/taskTypes.ts";
+import { createTask, uploadTaskFile } from "../../services/taskService.ts";
 import { Trash2, Loader, Plus, X } from "lucide-react";
 
 interface TaskFormProps {
@@ -8,49 +8,27 @@ interface TaskFormProps {
   onCancel: () => void;
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId: _disciplineId, onTaskCreated, onCancel }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId, onTaskCreated, onCancel }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [files, setFiles] = useState<TaskFile[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
 
-    // Validar tamanho (100MB max)
-    if (file.size > 100 * 1024 * 1024) {
+    const oversized = selectedFiles.find((file) => file.size > 100 * 1024 * 1024);
+    if (oversized) {
       setError("Arquivo muito grande (máximo 100MB)");
       return;
     }
 
-    setUploading(true);
-    setError(null);
-
-    try {
-      // Criar a tarefa primeiro se não tiver ID
-      // Aqui precisamos de uma abordagem diferente - vamos permitir upload de arquivos após criar
-      // Por enquanto vamos usar um estado local
-      const localFile: TaskFile = {
-        id: Date.now(),
-        task_id: 0,
-        file_name: file.name,
-        file_path: "",
-        file_size: file.size,
-        uploaded_by: 0,
-        uploaded_by_name: "Você",
-        uploaded_at: new Date().toISOString(),
-      };
-      setFiles([...files, localFile]);
-      if (e.target) e.target.value = "";
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao processar arquivo");
-    } finally {
-      setUploading(false);
-    }
+    setFiles((current) => [...current, ...selectedFiles]);
+    if (e.target) e.target.value = "";
   };
 
   const handleRemoveFile = (index: number) => {
@@ -69,27 +47,37 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId: _disciplineId,
       setLoading(true);
       setError(null);
 
-      const taskData = {
+      const task = await createTask(disciplineId, {
         title: title.trim(),
-        description: description.trim() || null,
-        dueDate: dueDate || null,
-      };
+        description: description.trim() || undefined,
+        dueDate: dueDate || undefined,
+      });
 
-      // Criar a tarefa
-      // Note: O upload de arquivos será feito após a criação
-      // For now, we'll just notify the user to upload after creation
-      console.log("Task data:", taskData);
-      
-      // Reset form
+      if (files.length > 0) {
+        setUploading(true);
+        for (const file of files) {
+          try {
+            await uploadTaskFile(disciplineId, task.id, file);
+          } catch (uploadError) {
+            throw new Error(
+              uploadError instanceof Error
+                ? uploadError.message
+                : "Erro ao enviar arquivos"
+            );
+          }
+        }
+      }
+
       setTitle("");
       setDescription("");
       setDueDate("");
       setFiles([]);
-      
+
       onTaskCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar tarefa");
     } finally {
+      setUploading(false);
       setLoading(false);
     }
   };
@@ -193,9 +181,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ disciplineId: _disciplineId,
                   className="flex items-center justify-between p-3 bg-base-200 rounded-none"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-base-content truncate">{file.file_name}</p>
+                    <p className="font-medium text-base-content truncate">{file.name}</p>
                     <p className="text-sm text-base-content/60">
-                      {(file.file_size / 1024).toFixed(2)} KB
+                      {(file.size / 1024).toFixed(2)} KB
                     </p>
                   </div>
                   <button

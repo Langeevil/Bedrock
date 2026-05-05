@@ -1,4 +1,4 @@
-import type { DisciplineTask, CreateTaskRequest, GradeSubmissionRequest } from "../types/taskTypes.ts";
+import type { DisciplineTask, CreateTaskRequest, GradeSubmissionRequest, TaskFile } from "../types/taskTypes.ts";
 import { apiUrl } from "../../../shared/services/config";
 
 const API_URL = apiUrl("/disciplines");
@@ -85,7 +85,7 @@ export async function uploadTaskFile(
   disciplineId: number,
   taskId: number,
   file: File
-): Promise<any> {
+): Promise<TaskFile> {
   const formData = new FormData();
   formData.append("file", file);
 
